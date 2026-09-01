@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Subtitle Generator - Multi Format</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        body {
+            background: #0b0e14;
+            color: #eef2f5;
+            display: flex;
+            justify-content: center;
+            padding: 16px 12px;
+            min-height: 100vh;
+            align-items: flex-start;
+        }
+        .app {
+            max-width: 520px;
+            width: 100%;
+            background: #1a1f27;
+            border-radius: 28px;
+            padding: 20px 16px 28px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+            backdrop-filter: blur(2px);
+            border: 1px solid #2e3742;
+        }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            opacity: 0.7;
+            margin-left: auto;
+        }
+        .card {
+            background: #252d38;
+            border-radius: 20px;
+            padding: 16px 14px;
+            margin-top: 14px;
+            border: 1px solid #303a48;
+        }
+        label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 6px;
+            color: #b6c8e0;
+        }
+        input[type="file"], textarea, select {
+            width: 100%;
+            background: #141a22;
+            border: 1px solid #384452;
+            border-radius: 14px;
+            padding: 12px 14px;
+            color: #eef2f5;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+        input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-top: 4px;
+        }
+        textarea:focus, select:focus {
+            border-color: #f7c948;
+            outline: none;
+            background: #0e141c;
+        }
+        select optgroup {
+            background: #1a1f27;
+            color: #b6c8e0;
+            font-weight: 600;
+        }
+        select option {
+            background: #141a22;
+            color: #eef2f5;
+            padding: 8px 12px;
+        }
+        .preview-box {
+            margin-top: 16px;
+            background: #0f141c;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid #2f3a48;
+            position: relative;
+        }
+        video {
+            width: 100%;
+            display: block;
+            background: #000;
+            max-height: 300px;
+            object-fit: contain;
+        }
+        .action-btn {
+            width: 100%;
+            background: #f7c948;
+            border: none;
+            border-radius: 60px;
+            padding: 16px 12px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #0b0e14;
+            margin-top: 20px;
+            box-shadow: 0 6px 0 #a0812b;
+            transition: all 0.08s linear;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
+        }
+        .action-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #a0812b;
+        }
+        .action-btn:disabled {
+            opacity: 0.5;
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #5f4b1d;
+            pointer-events: none;
+        }
+        .download-section {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .download-link {
+            background: #2b3543;
+            padding: 14px 18px;
+            border-radius: 60px;
+            text-align: center;
+            color: #b6d0f0;
+            text-decoration: none;
+            font-weight: 500;
+            border: 1px solid #42505e;
+            transition: 0.15s;
+            word-break: break-all;
+        }
+        .download-link.active {
+            background: #2f8e4b;
+            border-color: #3fb86a;
+            color: white;
+            font-weight: 600;
+        }
+        .status-badge {
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 30px;
+            background: #1b232e;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #b0c8e0;
+            border-left: 4px solid #f7c948;
+            transition: all 0.3s ease;
+        }
+        .status-badge.warning {
+            background: rgba(255, 215, 0, 0.95);
+            color: #000000;
+            text-transform: uppercase;
+            font-weight: 700;
+            border-left-color: #d4a800;
+        }
+        .status-badge.success {
+            background: rgba(46, 160, 67, 0.2);
+            border-left-color: #2ea043;
+            color: #8cd9a0;
+        }
+        .status-badge.error {
+            background: rgba(255, 59, 48, 0.2);
+            border-left-color: #ff3b30;
+            color: #ff6b63;
+        }
+        .hint {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-top: 6px;
+        }
+        .hint strong {
+            color: #f7c948;
+            opacity: 1;
+        }
+        #canvas-preview {
+            display: none;
+        }
+
+        .format-support {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        .format-support.supported {
+            background: rgba(46, 160, 67, 0.3);
+            color: #8cd9a0;
+        }
+        .format-support.unsupported {
+            background: rgba(255, 59, 48, 0.3);
+            color: #ff6b63;
+        }
+        
+        /* Layout Preview */
+        #layoutPreview {
+            margin-top: 12px;
+            background: #0f141c;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #2f3a48;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        #layoutPreview:hover {
+            border-color: #f7c948;
+            transform: scale(1.01);
+        }
+        .layout-preview-video {
+            background: #1a1f27;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        .layout-preview-subtitle {
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .layout-preview-label {
+            text-align: center;
+            margin-top: 6px;
+            font-size: 11px;
+            color: #666;
+        }
+        .layout-preview-overlay {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #FFD966;
+            font-size: 11px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 12px;
+            border-radius: 4px;
+        }
+
+        .row-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .row-2col select {
+            padding: 10px 12px;
+        }
+
+        @media (max-width: 480px) {
+            .app { padding: 16px 12px; }
+            .action-btn { font-size: 1rem; padding: 14px; }
+            .row-2col { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <h1>📹 Subtitle <small>Multi Format</small></h1>
+
+    <!-- Upload Video -->
+    <div class="card">
+        <label for="videoInput">📁 Pilih video (.mp4, .webm)</label>
+        <input type="file" id="videoInput" accept="video/mp4,video/webm">
+    </div>
+
+    <!-- Data Subtitle -->
+    <div class="card">
+        <label for="subtitleData">✏️ Data subtitle (JSON)</label>
+        <textarea id="subtitleData" placeholder='Contoh:
+[
+  { "start": 0, "end": 2.5, "text": "Halo, selamat datang" },
+  { "start": 2.8, "end": 5.0, "text": "Ini subtitle ringan" }
+]'>[
+  { "start": 0, "end": 2.5, "text": "Halo selamat datang di acara kita" },
+  { "start": 2.8, "end": 5.0, "text": "Kami akan membahas teknologi terbaru" },
+  { "start": 5.5, "end": 8.0, "text": "Ini adalah subtitle yang sangat panjang dan akan di-wrap otomatis" }
+]</textarea>
+        <div class="hint">Format: array objek dengan properti start, end, text</div>
+    </div>
+
+    <!-- Pilihan Resolusi & Format -->
+    <div class="card">
+        <label>📐 Pengaturan Output</label>
+        <div class="row-2col">
+            <div>
+                <label style="font-size:0.75rem;margin-bottom:4px;">Resolusi</label>
+                <select id="resolutionSelect">
+                    <optgroup label="📱 TikTok / Shorts (9:16)">
+                        <option value="720x1280">HD (720×1280)</option>
+                        <option value="1080x1920" selected>Full HD (1080×1920)</option>
+                    </optgroup>
+                    <optgroup label="📺 YouTube (16:9)">
+                        <option value="854x480">480p (854×480)</option>
+                        <option value="1280x720">720p (1280×720)</option>
+                        <option value="1920x1080">1080p (1920×1080)</option>
+                    </optgroup>
+                    <optgroup label="📷 Instagram (1:1)">
+                        <option value="1080x1080">1080×1080</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <label style="font-size:0.75rem;margin-bottom:4px;">Format Output</label>
+                <select id="formatSelect">
+                    <option value="webm">WebM (Universal)</option>
+                    <option value="mp4">MP4 (H.264) *</option>
+                </select>
+                <div class="hint" id="formatHint">* MP4 hanya didukung di Chrome/Edge</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pilihan Layout -->
+    <div class="card">
+        <label for="layoutSelect">🎨 Layout Subtitle</label>
+        <select id="layoutSelect">
+            <option value="separate" selected>📝 Terpisah (video di atas, subtitle di bawah)</option>
+            <option value="overlay">📺 Overlay (subtitle di atas video)</option>
+            <option value="bottom">⬇️ Bottom (subtitle di bawah tanpa background)</option>
+        </select>
+        <div class="hint">Pilih posisi subtitle pada video</div>
+        
+        <!-- Preview Layout -->
+        <div id="layoutPreview">
+            <div class="layout-preview-video" style="height:60px;">🎬 VIDEO</div>
+            <div class="layout-preview-subtitle" style="height:30px;background:#1a1f27;color:#FFD966;">📝 SUBTITLE</div>
+            <div class="layout-preview-label">Preview: Video di atas, subtitle di bawah (terpisah)</div>
+        </div>
+    </div>
+
+    <!-- Preview Video -->
+    <div class="preview-box">
+        <video id="sourceVideo" muted playsinline></video>
+    </div>
+
+    <!-- Tombol Render -->
+    <button class="action-btn" id="renderBtn">▶ Mulai Render</button>
+
+    <!-- Status -->
+    <div id="statusMessage" class="status-badge">📹 Pilih video & atur subtitle, lalu klik Render</div>
+
+    <!-- Download -->
+    <div class="download-section" id="downloadSection">
+        <a href="#" id="downloadLink" class="download-link" download="subtitle_video.webm">⬇️ Hasil rekaman akan muncul di sini</a>
+    </div>
+
+    <!-- Canvas tersembunyi -->
+    <canvas id="canvas-preview"></canvas>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    // ==================== DOM ELEMENTS ====================
+    const videoInput = document.getElementById('videoInput');
+    const subtitleTextarea = document.getElementById('subtitleData');
+    const sourceVideo = document.getElementById('sourceVideo');
+    const renderBtn = document.getElementById('renderBtn');
+    const statusMsg = document.getElementById('statusMessage');
+    const downloadLink = document.getElementById('downloadLink');
+    const resolutionSelect = document.getElementById('resolutionSelect');
+    const layoutSelect = document.getElementById('layoutSelect');
+    const formatSelect = document.getElementById('formatSelect');
+    const formatHint = document.getElementById('formatHint');
+    const canvas = document.getElementById('canvas-preview');
+    const ctx = canvas.getContext('2d');
+    const layoutPreview = document.getElementById('layoutPreview');
+
+    // ==================== KONFIGURASI RESOLUSI ====================
+    const RESOLUTIONS = {
+        '720x1280': { width: 720, height: 1280, label: 'HD (720×1280)', ratio: '9:16', platform: 'TikTok' },
+        '1080x1920': { width: 1080, height: 1920, label: 'Full HD (1080×1920)', ratio: '9:16', platform: 'TikTok' },
+        '854x480': { width: 854, height: 480, label: '480p (854×480)', ratio: '16:9', platform: 'YouTube' },
+        '1280x720': { width: 1280, height: 720, label: '720p (1280×720)', ratio: '16:9', platform: 'YouTube' },
+        '1920x1080': { width: 1920, height: 1080, label: '1080p (1920×1080)', ratio: '16:9', platform: 'YouTube' },
+        '1080x1080': { width: 1080, height: 1080, label: '1080×1080', ratio: '1:1', platform: 'Instagram' }
+    };
+
+    // ==================== FORMAT SUPPORT ====================
+    function getSupportedMimeType(format) {
+        const mimeTypes = {
+            'webm': [
+                'video/webm;codecs=vp9',
+                'video/webm;codecs=vp8',
+                'video/webm'
+            ],
+            'mp4': [
+                'video/mp4;codecs=avc1.42E01E',
+                'video/mp4;codecs=avc1',
+                'video/mp4'
+            ]
+        };
+
+        const types = mimeTypes[format] || mimeTypes['webm'];
+        for (let mime of types) {
+            if (MediaRecorder.isTypeSupported(mime)) {
+                return mime;
+            }
+        }
+        return null;
+    }
+
+    function getFormatExtension(format) {
+        return format === 'mp4' ? 'mp4' : 'webm';
+    }
+
+    function getFormatLabel(format) {
+        return format === 'mp4' ? 'MP4 (H.264)' : 'WebM';
+    }
+
+    function updateFormatHint() {
+        const format = formatSelect.value;
+        const mime = getSupportedMimeType(format);
+        
+        if (mime) {
+            formatHint.innerHTML = `✅ ${getFormatLabel(format)} didukung di browser ini`;
+            formatHint.style.color = '#8cd9a0';
+        } else {
+            formatHint.innerHTML = `⚠️ ${getFormatLabel(format)} TIDAK didukung, akan fallback ke WebM`;
+            formatHint.style.color = '#ff6b63';
+        }
+    }
+
+    // ==================== GET SUBTITLES ====================
+    function getSubtitles() {
+        try {
+            const raw = subtitleTextarea.value.trim();
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed)) return [];
+            return parsed.filter(item => 
+                item && typeof item === 'object' &&
+                typeof item.start === 'number' &&
+                typeof item.end === 'number' &&
+                typeof item.text === 'string'
+            );
+        } catch (e) {
+            return [];
+        }
+    }
+
+    // ==================== TEXT WRAPPING ====================
+    function wrapText(text, context, maxWidth, maxLines = 2) {
+        if (!text || text.trim() === '') return [];
+        
+        const words = text.trim().split(' ');
+        const lines = [];
+        let currentLine = '';
+        
+        for (let i = 0; i < words.length; i++) {
+            const word = words[i];
+            const testLine = currentLine ? currentLine + ' ' + word : word;
+            const metrics = context.measureText(testLine);
+            
+            if (metrics.width > maxWidth && currentLine !== '') {
+                lines.push(currentLine);
+                currentLine = word;
+                
+                if (lines.length >= maxLines) {
+                    const lastLine = lines[lines.length - 1];
+                    let truncated = lastLine;
+                    while (context.measureText(truncated + '…').width > maxWidth && truncated.length > 1) {
+                        truncated = truncated.slice(0, -1);
+                    }
+                    lines[lines.length - 1] = truncated + '…';
+                    return lines;
+                }
+            } else {
+                currentLine = testLine;
+            }
+        }
+        
+        if (currentLine) {
+            lines.push(currentLine);
+        }
+        
+        while (lines.length > maxLines) {
+            const lastLine = lines[lines.length - 1];
+            let truncated = lines[lines.length - 2] + ' ' + lastLine;
+            while (context.measureText(truncated + '…').width > maxWidth && truncated.length > 1) {
+                truncated = truncated.slice(0, -1);
+            }
+            lines[lines.length - 2] = truncated + '…';
+            lines.pop();
+        }
+        
+        return lines;
+    }
+
+    // ==================== RENDER FRAME ====================
+    function renderFrame(videoElement, subtitles, currentTime, config, layout) {
+        const CANVAS_WIDTH = config.width;
+        const CANVAS_HEIGHT = config.height;
+        // canvas.width/height hanya di-set SEKALI di startRender(), tidak di sini
+        // agar captureStream() tidak putus setiap frame
+        
+        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        
+        // Cari subtitle aktif
+        let activeText = '';
+        for (let sub of subtitles) {
+            if (currentTime >= sub.start && currentTime <= sub.end) {
+                activeText = sub.text;
+                break;
+            }
+        }
+
+        // ==================== LAYOUT: TERPISAH ====================
+        if (layout === 'separate') {
+            const videoRatio = videoElement.videoWidth / videoElement.videoHeight;
+            const canvasRatio = CANVAS_WIDTH / CANVAS_HEIGHT;
+            
+            let videoWidth, videoHeight, videoX, videoY;
+            let subtitleHeight, subtitleY;
+            
+            if (canvasRatio < 1) {
+                const videoAreaHeight = CANVAS_HEIGHT * 0.60;
+                subtitleHeight = CANVAS_HEIGHT * 0.40;
+                
+                if (videoRatio > canvasRatio) {
+                    videoWidth = CANVAS_WIDTH;
+                    videoHeight = CANVAS_WIDTH / videoRatio;
+                    videoX = 0;
+                    videoY = (videoAreaHeight - videoHeight) / 2;
+                } else {
+                    videoHeight = videoAreaHeight;
+                    videoWidth = videoAreaHeight * videoRatio;
+                    videoX = (CANVAS_WIDTH - videoWidth) / 2;
+                    videoY = 0;
+                }
+                subtitleY = videoAreaHeight;
+            } else {
+                const videoAreaHeight = CANVAS_HEIGHT * 0.75;
+                subtitleHeight = CANVAS_HEIGHT * 0.25;
+                
+                videoWidth = CANVAS_WIDTH;
+                videoHeight = CANVAS_WIDTH / videoRatio;
+                videoX = 0;
+                videoY = (videoAreaHeight - videoHeight) / 2;
+                subtitleY = videoAreaHeight;
+            }
+            
+            ctx.drawImage(videoElement, videoX, videoY, videoWidth, videoHeight);
+            
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, subtitleY, CANVAS_WIDTH, subtitleHeight);
+            
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, subtitleY);
+            ctx.lineTo(CANVAS_WIDTH, subtitleY);
+            ctx.stroke();
+            
+            if (activeText) {
+                const fontSize = Math.min(
+                    CANVAS_WIDTH * 0.055,
+                    subtitleHeight * 0.50
+                );
+                const finalFontSize = Math.max(20, Math.min(60, fontSize));
+                
+                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                const margin = CANVAS_WIDTH * 0.05;
+                const maxWidth = CANVAS_WIDTH - (margin * 2);
+                const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
+                
+                const lineHeight = finalFontSize * 1.4;
+                const totalHeight = wrappedLines.length * lineHeight;
+                const centerY = subtitleY + (subtitleHeight / 2);
+                const startY = centerY - (totalHeight / 2) + (lineHeight / 2);
+                
+                wrappedLines.forEach((line, index) => {
+                    const x = CANVAS_WIDTH / 2;
+                    const y = startY + (index * lineHeight);
+                    
+                    if (wrappedLines.length > 1 || line.length > 30) {
+                        const metrics = ctx.measureText(line);
+                        const textWidth = metrics.width;
+                        const padding = finalFontSize * 0.4;
+                        const bgX = x - textWidth/2 - padding;
+                        const bgY = y - finalFontSize/2 - 6;
+                        const bgWidth = textWidth + padding * 2;
+                        const bgHeight = finalFontSize + 12;
+                        
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                        ctx.shadowBlur = 8;
+                        ctx.beginPath();
+                        if (ctx.roundRect) {
+                            ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 6);
+                        } else {
+                            ctx.rect(bgX, bgY, bgWidth, bgHeight);
+                        }
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    }
+                    
+                    ctx.lineWidth = Math.max(3, finalFontSize * 0.12);
+                    ctx.strokeStyle = '#000000';
+                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                    ctx.shadowBlur = 8;
+                    ctx.strokeText(line, x, y);
+                    
+                    ctx.fillStyle = '#FFD966';
+                    ctx.shadowBlur = 10;
+                    ctx.fillText(line, x, y);
+                });
+            }
+        }
+
+        // ==================== LAYOUT: OVERLAY ====================
+        else if (layout === 'overlay') {
+            ctx.drawImage(videoElement, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            if (activeText) {
+                const fontSize = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) * 0.045;
+                const finalFontSize = Math.max(18, Math.min(48, fontSize));
+                
+                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                
+                const margin = CANVAS_WIDTH * 0.05;
+                const maxWidth = CANVAS_WIDTH - (margin * 2);
+                const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
+                
+                const lineHeight = finalFontSize * 1.4;
+                const totalHeight = wrappedLines.length * lineHeight;
+                const bottomPadding = CANVAS_HEIGHT * 0.08;
+                const startY = CANVAS_HEIGHT - bottomPadding;
+                
+                wrappedLines.forEach((line, index) => {
+                    const x = CANVAS_WIDTH / 2;
+                    const y = startY - (totalHeight - (index + 1) * lineHeight);
+                    
+                    if (wrappedLines.length > 1 || line.length > 30) {
+                        const metrics = ctx.measureText(line);
+                        const textWidth = metrics.width;
+                        const padding = finalFontSize * 0.4;
+                        const bgX = x - textWidth/2 - padding;
+                        const bgY = y - finalFontSize - 6;
+                        const bgWidth = textWidth + padding * 2;
+                        const bgHeight = finalFontSize + 12;
+                        
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                        ctx.shadowBlur = 0;
+                        ctx.beginPath();
+                        if (ctx.roundRect) {
+                            ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 6);
+                        } else {
+                            ctx.rect(bgX, bgY, bgWidth, bgHeight);
+                        }
+                        ctx.fill();
+                    }
+                    
+                    ctx.lineWidth = Math.max(3, finalFontSize * 0.15);
+                    ctx.strokeStyle = '#000000';
+                    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                    ctx.shadowBlur = 10;
+                    ctx.strokeText(line, x, y);
+                    
+                    ctx.fillStyle = '#FFD966';
+                    ctx.shadowBlur = 12;
+                    ctx.fillText(line, x, y);
+                });
+            }
+        }
+
+        // ==================== LAYOUT: BOTTOM ====================
+        else if (layout === 'bottom') {
+            ctx.drawImage(videoElement, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            if (activeText) {
+                const fontSize = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) * 0.04;
+                const finalFontSize = Math.max(16, Math.min(42, fontSize));
+                
+                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                
+                const margin = CANVAS_WIDTH * 0.05;
+                const maxWidth = CANVAS_WIDTH - (margin * 2);
+                const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
+                
+                const lineHeight = finalFontSize * 1.4;
+                const totalHeight = wrappedLines.length * lineHeight;
+                const bottomPadding = CANVAS_HEIGHT * 0.05;
+                const startY = CANVAS_HEIGHT - bottomPadding;
+                
+                wrappedLines.forEach((line, index) => {
+                    const x = CANVAS_WIDTH / 2;
+                    const y = startY - (totalHeight - (index + 1) * lineHeight);
+                    
+                    const metrics = ctx.measureText(line);
+                    const textWidth = metrics.width;
+                    const padding = finalFontSize * 0.4;
+                    const bgX = x - textWidth/2 - padding;
+                    const bgY = y - finalFontSize - 6;
+                    const bgWidth = textWidth + padding * 2;
+                    const bgHeight = finalFontSize + 12;
+                    
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                    ctx.shadowBlur = 0;
+                    ctx.beginPath();
+                    if (ctx.roundRect) {
+                        ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 6);
+                    } else {
+                        ctx.rect(bgX, bgY, bgWidth, bgHeight);
+                    }
+                    ctx.fill();
+                    
+                    ctx.lineWidth = Math.max(3, finalFontSize * 0.12);
+                    ctx.strokeStyle = '#000000';
+                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                    ctx.shadowBlur = 8;
+                    ctx.strokeText(line, x, y);
+                    
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.shadowBlur = 10;
+                    ctx.fillText(line, x, y);
+                });
+            }
+        }
+
+        // Watermark
+        ctx.font = `${Math.max(12, CANVAS_WIDTH * 0.012)}px monospace`;
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(
+            `${config.width}×${config.height} | ${config.platform}`, 
+            CANVAS_WIDTH - 12, 
+            CANVAS_HEIGHT - 8
+        );
+    }
+
+    // ==================== VALIDASI SUBTITLE ====================
+    function validateSubtitles(subtitles) {
+        const config = getResolutionConfig();
+        const canvas = document.createElement('canvas');
+        const ctxTest = canvas.getContext('2d');
+        
+        const testFontSize = Math.min(config.width, config.height) * 0.045;
+        ctxTest.font = `bold ${testFontSize}px Arial`;
+        const maxWidth = config.width - (config.width * 0.05 * 2);
+        
+        const warnings = [];
+        subtitles.forEach((sub, index) => {
+            const metrics = ctxTest.measureText(sub.text);
+            if (metrics.width > maxWidth) {
+                warnings.push({
+                    index: index,
+                    text: sub.text,
+                    length: sub.text.length,
+                    estimatedLines: Math.ceil(metrics.width / maxWidth)
+                });
+            }
+        });
+        
+        return { warnings, total: warnings.length };
+    }
+
+    // ==================== UPDATE STATUS ====================
+    function updateStatus(message, type = 'info') {
+        statusMsg.textContent = message;
+        statusMsg.className = 'status-badge';
+        if (type === 'warning') statusMsg.classList.add('warning');
+        else if (type === 'success') statusMsg.classList.add('success');
+        else if (type === 'error') statusMsg.classList.add('error');
+    }
+
+    // ==================== VALIDASI REAL-TIME ====================
+    function validateSubtitleRealTime() {
+        const subtitles = getSubtitles();
+        if (subtitles.length === 0) {
+            updateStatus('📝 Masukkan data subtitle JSON', 'info');
+            return;
+        }
+        
+        const result = validateSubtitles(subtitles);
+        if (result.total > 0) {
+            const maxLines = Math.max(...result.warnings.map(w => w.estimatedLines));
+            updateStatus(
+                `⚠️ ${result.total} SUBTITLE TERLALU PANJANG (AKAN DI-WRAP ${maxLines} BARIS)`, 
+                'warning'
+            );
+        } else {
+            updateStatus('✅ Semua subtitle dalam batas normal', 'success');
+        }
+    }
+
+    // ==================== UPDATE LAYOUT PREVIEW ====================
+    function updateLayoutPreview() {
+        const layout = layoutSelect.value;
+        const videoEl = layoutPreview.querySelector('.layout-preview-video');
+        const subtitleEl = layoutPreview.querySelector('.layout-preview-subtitle');
+        const labelEl = layoutPreview.querySelector('.layout-preview-label');
+        
+        const existingOverlay = layoutPreview.querySelector('.layout-preview-overlay');
+        if (existingOverlay) existingOverlay.remove();
+        
+        if (layout === 'separate') {
+            videoEl.style.height = '60px';
+            videoEl.textContent = '🎬 VIDEO (60%)';
+            subtitleEl.style.display = 'flex';
+            subtitleEl.style.height = '35px';
+            subtitleEl.style.background = '#1a1f27';
+            subtitleEl.style.color = '#FFD966';
+            subtitleEl.textContent = '📝 SUBTITLE (40%)';
+            labelEl.textContent = 'Preview: Video di atas, subtitle di bawah (terpisah)';
+        } else if (layout === 'overlay') {
+            videoEl.style.height = '85px';
+            videoEl.textContent = '🎬 VIDEO (full)';
+            subtitleEl.style.display = 'none';
+            labelEl.textContent = 'Preview: Subtitle di atas video (overlay)';
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'layout-preview-overlay';
+            overlay.textContent = '📝 SUBTITLE OVERLAY';
+            layoutPreview.appendChild(overlay);
+        } else if (layout === 'bottom') {
+            videoEl.style.height = '70px';
+            videoEl.textContent = '🎬 VIDEO';
+            subtitleEl.style.display = 'flex';
+            subtitleEl.style.height = '20px';
+            subtitleEl.style.background = 'transparent';
+            subtitleEl.style.color = '#FFFFFF';
+            subtitleEl.textContent = '📝 SUBTITLE (bottom)';
+            labelEl.textContent = 'Preview: Subtitle di bawah video (tanpa background)';
+        }
+    }
+
+    // ==================== GET RESOLUTION CONFIG ====================
+    function getResolutionConfig() {
+        const value = resolutionSelect.value;
+        return RESOLUTIONS[value] || RESOLUTIONS['1080x1920'];
+    }
+
+    // ==================== RENDER UTAMA ====================
+    let isRendering = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recordingStream = null;
+    let animationFrameId = null;
+
+    // ==================== MP4 FASTSTART — PURE JS ====================
+    // Memindahkan atom 'moov' ke awal file MP4 (setara ffmpeg -movflags faststart)
+    // Tanpa library eksternal, murni manipulasi byte ArrayBuffer
+    async function remuxMp4(blob) {
+        updateStatus('⏳ Memproses metadata MP4 (faststart)...', 'info');
+        const buffer = await blob.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+
+        // Helper: baca 4 byte big-endian uint32 di offset tertentu
+        function readUint32(buf, offset) {
+            return ((buf[offset] << 24) | (buf[offset+1] << 16) |
+                    (buf[offset+2] << 8)  |  buf[offset+3]) >>> 0;
+        }
+
+        // Helper: tulis 4 byte big-endian uint32
+        function writeUint32(buf, offset, val) {
+            buf[offset]   = (val >>> 24) & 0xff;
+            buf[offset+1] = (val >>> 16) & 0xff;
+            buf[offset+2] = (val >>>  8) & 0xff;
+            buf[offset+3] =  val         & 0xff;
+        }
+
+        // Scan top-level atoms: ftyp, free, mdat, moov
+        const atoms = [];
+        let pos = 0;
+        while (pos < bytes.length - 8) {
+            const size = readUint32(bytes, pos);
+            const type = String.fromCharCode(bytes[pos+4], bytes[pos+5], bytes[pos+6], bytes[pos+7]);
+            if (size < 8) break; // atom tidak valid
+            atoms.push({ type, offset: pos, size });
+            pos += size;
+        }
+
+        const ftyp = atoms.find(a => a.type === 'ftyp');
+        const moov = atoms.find(a => a.type === 'moov');
+        const mdat = atoms.find(a => a.type === 'mdat');
+
+        // Kalau tidak ada moov atau sudah di depan mdat, kembalikan blob asli
+        if (!moov || !mdat) return blob;
+        if (moov.offset < mdat.offset) return blob; // sudah faststart
+
+        // Hitung offset shift: moov akan dipindah ke setelah ftyp
+        // Semua offset chunk di dalam moov (stco/co64) harus dikoreksi
+        const insertPos = ftyp ? ftyp.offset + ftyp.size : 0;
+        const shift = moov.size; // moov disisipkan sebelum mdat, jadi offset mdat bergeser
+
+        // Koreksi offset chunk di dalam moov (stco dan co64 atoms)
+        const moovBytes = new Uint8Array(bytes.buffer, moov.offset, moov.size).slice();
+
+        function fixOffsets(buf, atomType, bytesPerEntry) {
+            // Cari semua kemunculan atomType di dalam moovBytes secara rekursif
+            let i = 0;
+            while (i < buf.length - 8) {
+                const sz = readUint32(buf, i);
+                const tp = String.fromCharCode(buf[i+4], buf[i+5], buf[i+6], buf[i+7]);
+                if (sz < 8 || sz > buf.length - i) break;
+                if (tp === atomType) {
+                    // version(1) + flags(3) + entry_count(4) = 8 bytes header setelah box header
+                    const entryCount = readUint32(buf, i + 12);
+                    for (let e = 0; e < entryCount; e++) {
+                        const eOffset = i + 16 + e * bytesPerEntry;
+                        if (bytesPerEntry === 4) {
+                            const old = readUint32(buf, eOffset);
+                            writeUint32(buf, eOffset, old + shift);
+                        } else {
+                            // co64: 8 byte, hanya koreksi 4 byte bawah (asumsi offset < 4GB)
+                            const old = readUint32(buf, eOffset + 4);
+                            writeUint32(buf, eOffset + 4, old + shift);
+                        }
+                    }
+                } else {
+                    // Rekursi ke dalam container atom
+                    fixOffsets(buf.subarray(i + 8, i + sz), atomType, bytesPerEntry);
+                }
+                i += sz;
+            }
+        }
+
+        fixOffsets(moovBytes, 'stco', 4);
+        fixOffsets(moovBytes, 'co64', 8);
+
+        // Susun ulang: ftyp + moov(terkoreksi) + atom lain (mdat, free, dll) tanpa moov lama
+        const parts = [];
+
+        // 1. ftyp (jika ada)
+        if (ftyp) parts.push(bytes.subarray(ftyp.offset, ftyp.offset + ftyp.size));
+
+        // 2. moov yang sudah dikoreksi
+        parts.push(moovBytes);
+
+        // 3. semua atom lain kecuali ftyp dan moov, urut sesuai posisi asli
+        const others = atoms
+            .filter(a => a.type !== 'ftyp' && a.type !== 'moov')
+            .sort((a, b) => a.offset - b.offset);
+        for (const a of others) {
+            parts.push(bytes.subarray(a.offset, a.offset + a.size));
+        }
+
+        const result = new Blob(parts, { type: 'video/mp4' });
+        return result.size > 1000 ? result : blob;
+    }
+
+    function startRender() {
+        if (isRendering) return;
+        
+        if (!sourceVideo.src || sourceVideo.readyState < 2) {
+            updateStatus('❌ Video belum dimuat. Pilih file video terlebih dahulu.', 'error');
+            return;
+        }
+        
+        const subtitles = getSubtitles();
+        if (subtitles.length === 0) {
+            updateStatus('⚠️ Data subtitle kosong atau format JSON tidak valid.', 'warning');
+            return;
+        }
+        
+        const config = getResolutionConfig();
+        const layout = layoutSelect.value;
+        const format = formatSelect.value;
+        const CANVAS_WIDTH = config.width;
+        const CANVAS_HEIGHT = config.height;
+        
+        // Set canvas size SEKALI di sini, tidak lagi di renderFrame()
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+        
+        if (recordingStream) {
+            recordingStream.getTracks().forEach(track => track.stop());
+            recordingStream = null;
+        }
+        recordedChunks = [];
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+        
+        sourceVideo.currentTime = 0;
+        sourceVideo.muted = false; // pastikan audio video sumber aktif
+
+        // Ambil audio dari video sumber via Web Audio API
+        // agar suara video ikut ter-rekam di output MP4/WebM
+        let audioTrack = null;
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const sourceNode = audioCtx.createMediaElementSource(sourceVideo);
+            const dest = audioCtx.createMediaStreamDestination();
+            // Sambungkan ke speaker (agar pengguna tetap dengar) DAN ke dest stream
+            sourceNode.connect(audioCtx.destination);
+            sourceNode.connect(dest);
+            audioTrack = dest.stream.getAudioTracks()[0];
+        } catch(e) {
+            // AudioContext tidak tersedia atau sudah ada node sebelumnya, lanjut tanpa audio
+        }
+
+        recordingStream = canvas.captureStream(30);
+
+        // Tambahkan audio track dari video sumber ke stream rekaman
+        if (audioTrack) {
+            recordingStream.addTrack(audioTrack);
+        }
+
+        const bitrate = CANVAS_WIDTH * CANVAS_HEIGHT * 0.002;
+        const bitsPerSecond = Math.max(800000, Math.min(5000000, bitrate));
+        
+        // Cari MIME type yang didukung
+        let mimeType = getSupportedMimeType(format);
+        let actualFormat = format;
+        
+        if (!mimeType) {
+            // Fallback ke WebM
+            mimeType = getSupportedMimeType('webm');
+            actualFormat = 'webm';
+            updateStatus(`⚠️ ${getFormatLabel(format)} tidak didukung, menggunakan WebM`, 'warning');
+        }
+        
+        try {
+            mediaRecorder = new MediaRecorder(recordingStream, {
+                mimeType: mimeType || undefined,
+                bitsPerSecond: bitsPerSecond
+            });
+        } catch (e) {
+            mediaRecorder = new MediaRecorder(recordingStream, {
+                bitsPerSecond: bitsPerSecond
+            });
+            actualFormat = 'webm';
+        }
+        
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data && event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+        
+        mediaRecorder.onstop = async () => {
+            if (recordedChunks.length === 0) {
+                updateStatus('⚠️ Tidak ada data rekaman. Coba ulangi.', 'warning');
+                isRendering = false;
+                renderBtn.disabled = false;
+                renderBtn.textContent = '▶ Mulai Render';
+                return;
+            }
+
+            if (recordingStream) {
+                recordingStream.getTracks().forEach(track => track.stop());
+                recordingStream = null;
+            }
+
+            const extension = getFormatExtension(actualFormat);
+            const mimeTypeBlob = actualFormat === 'mp4' ? 'video/mp4' : 'video/webm';
+            const rawBlob = new Blob(recordedChunks, { type: mimeTypeBlob });
+            const layoutLabel = layout === 'separate' ? 'terpisah' :
+                               layout === 'overlay' ? 'overlay' : 'bottom';
+            const filename = `subtitle_${config.width}x${config.height}_${layoutLabel}.${extension}`;
+
+            // Untuk MP4: remux pakai ffmpeg.wasm dengan -movflags faststart
+            // agar metadata durasi (moov atom) ada di awal file
+            if (actualFormat === 'mp4') {
+                try {
+                    const fixedBlob = await remuxMp4(rawBlob);
+                    const url = URL.createObjectURL(fixedBlob);
+                    downloadLink.href = url;
+                    downloadLink.download = filename;
+                    downloadLink.textContent = `⬇️ Download ${config.label} (MP4)`;
+                    downloadLink.classList.add('active');
+                    updateStatus('✅ Render selesai! Metadata MP4 sudah difix — durasi terbaca penuh di file manager.', 'success');
+                } catch(e) {
+                    // Fallback ke blob mentah kalau remux gagal
+                    const url = URL.createObjectURL(rawBlob);
+                    downloadLink.href = url;
+                    downloadLink.download = filename;
+                    downloadLink.textContent = `⬇️ Download ${config.label} (MP4)`;
+                    downloadLink.classList.add('active');
+                    updateStatus('✅ Render selesai! (metadata fix gagal, file tetap bisa diputar)', 'success');
+                }
+            } else {
+                const url = URL.createObjectURL(rawBlob);
+                downloadLink.href = url;
+                downloadLink.download = filename;
+                downloadLink.textContent = `⬇️ Download ${config.label} (${extension.toUpperCase()})`;
+                downloadLink.classList.add('active');
+                updateStatus(`✅ Render selesai! Klik link di atas untuk unduh (${extension.toUpperCase()})`, 'success');
+            }
+
+            isRendering = false;
+            renderBtn.disabled = false;
+            renderBtn.textContent = '▶ Mulai Render';
+        };
+        
+        // Timeslice 100ms (lebih kecil dari 250ms) agar chunk MP4 lebih granular
+        // dan durasi metadata ter-encode dengan benar di setiap segmen
+        mediaRecorder.start(100);
+        updateStatus(`⏳ Merender ${config.label} (${actualFormat.toUpperCase()})... 0%`, 'info');
+        renderBtn.disabled = true;
+        renderBtn.textContent = '⏳ Rendering...';
+        isRendering = true;
+
+        // Gunakan event 'ended' sebagai trigger stop yang paling reliable
+        function onVideoEnded() {
+            sourceVideo.removeEventListener('ended', onVideoEnded);
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            // Render frame terakhir sekali lagi sebelum stop
+            renderFrame(sourceVideo, subtitles, sourceVideo.duration, config, layout);
+            updateStatus('✅ Proses selesai, menyimpan...', 'success');
+            isRendering = false;
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                // requestData() memastikan chunk terakhir tidak ketinggalan
+                mediaRecorder.requestData();
+                setTimeout(() => {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                }, 200);
+            }
+        }
+        sourceVideo.addEventListener('ended', onVideoEnded);
+        
+        sourceVideo.play().catch(err => {
+            updateStatus('❌ Gagal memutar video: ' + err.message, 'error');
+            sourceVideo.removeEventListener('ended', onVideoEnded);
+            stopRenderOnError();
+            return;
+        });
+        
+        function frameLoop() {
+            if (!isRendering && !(sourceVideo.ended)) {
+                return;
+            }
+            
+            // Guard: jika video sudah ended, biarkan onVideoEnded yang handle
+            if (sourceVideo.ended) return;
+            
+            renderFrame(sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
+            
+            const progress = Math.min(99, Math.round((sourceVideo.currentTime / sourceVideo.duration) * 100));
+            if (progress % 5 === 0) {
+                const layoutLabel = layout === 'separate' ? 'terpisah' : 
+                                   layout === 'overlay' ? 'overlay' : 'bottom';
+                updateStatus(`⏳ Merender ${config.label} (${layoutLabel})... ${progress}%`, 'info');
+            }
+            
+            animationFrameId = requestAnimationFrame(frameLoop);
+        }
+        
+        animationFrameId = requestAnimationFrame(frameLoop);
+        
+        sourceVideo.onerror = function(e) {
+            updateStatus('❌ Error pada video: ' + (sourceVideo.error ? sourceVideo.error.message : ''), 'error');
+            sourceVideo.removeEventListener('ended', onVideoEnded);
+            stopRenderOnError();
+        };
+    }
+
+    function stopRenderOnError() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        }
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+        isRendering = false;
+        renderBtn.disabled = false;
+        renderBtn.textContent = '▶ Mulai Render';
+        if (sourceVideo) {
+            sourceVideo.pause();
+        }
+        if (recordingStream) {
+            recordingStream.getTracks().forEach(track => track.stop());
+            recordingStream = null;
+        }
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    
+    videoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        sourceVideo.src = url;
+        sourceVideo.load();
+        sourceVideo.onloadedmetadata = () => {
+            updateStatus(`✅ Video dimuat: ${file.name} (${sourceVideo.duration.toFixed(1)}s)`, 'success');
+        };
+        downloadLink.href = '#';
+        downloadLink.textContent = '⬇️ Hasil rekaman akan muncul di sini';
+        downloadLink.classList.remove('active');
+    });
+
+    subtitleTextarea.addEventListener('input', validateSubtitleRealTime);
+
+    resolutionSelect.addEventListener('change', () => {
+        validateSubtitleRealTime();
+        updateLayoutPreview();
+    });
+
+    layoutSelect.addEventListener('change', updateLayoutPreview);
+    
+    formatSelect.addEventListener('change', updateFormatHint);
+
+    renderBtn.addEventListener('click', startRender);
+
+    // ==================== INITIALIZATION ====================
+    updateFormatHint();
+    updateLayoutPreview();
+    validateSubtitleRealTime();
+    updateStatus('📹 Pilih video & atur subtitle, lalu klik Render', 'info');
+
+    window.addEventListener('beforeunload', () => {
+        if (recordingStream) {
+            recordingStream.getTracks().forEach(track => track.stop());
+        }
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        }
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+        }
+    });
+
+})();
+</script>
+</body>
+</html>
