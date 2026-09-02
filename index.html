@@ -285,10 +285,75 @@
             padding: 10px 12px;
         }
 
+        /* ===== NEW: Subtitle Toolbar ===== */
+        .subtitle-toolbar {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .subtitle-toolbar .tool-btn {
+            background: #1f2a36;
+            border: 1px solid #384452;
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #b6c8e0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            letter-spacing: 0.3px;
+        }
+        .subtitle-toolbar .tool-btn:hover {
+            background: #2a3848;
+            border-color: #f7c948;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(247, 201, 72, 0.15);
+        }
+        .subtitle-toolbar .tool-btn:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+        .subtitle-toolbar .tool-btn.clear-btn {
+            color: #ff8a80;
+            border-color: #5a2d2d;
+        }
+        .subtitle-toolbar .tool-btn.clear-btn:hover {
+            background: #3d1f1f;
+            border-color: #ff6b63;
+            color: #ff6b63;
+        }
+        .subtitle-toolbar .tool-btn.paste-btn {
+            color: #8cd9a0;
+            border-color: #2d5a3a;
+        }
+        .subtitle-toolbar .tool-btn.paste-btn:hover {
+            background: #1f3d2a;
+            border-color: #3fb86a;
+            color: #8cd9a0;
+        }
+        .subtitle-toolbar .tool-btn .icon {
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        .subtitle-toolbar .tool-btn .badge {
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 0 8px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #8899b0;
+        }
+
         @media (max-width: 480px) {
             .app { padding: 16px 12px; }
             .action-btn { font-size: 1rem; padding: 14px; }
             .row-2col { grid-template-columns: 1fr; }
+            .subtitle-toolbar .tool-btn { padding: 5px 12px; font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -314,6 +379,18 @@
   { "start": 2.8, "end": 5.0, "text": "Kami akan membahas teknologi terbaru" },
   { "start": 5.5, "end": 8.0, "text": "Ini adalah subtitle yang sangat panjang dan akan di-wrap otomatis" }
 ]</textarea>
+        <div class="subtitle-toolbar">
+            <button class="tool-btn paste-btn" id="pasteBtn" title="Tempel dari clipboard">
+                <span class="icon">📋</span> Paste
+                <span class="badge">Ctrl+V</span>
+            </button>
+            <button class="tool-btn clear-btn" id="clearBtn" title="Kosongkan textarea">
+                <span class="icon">🗑️</span> Clear
+            </button>
+            <button class="tool-btn" id="formatBtn" title="Rapikan format JSON">
+                <span class="icon">✨</span> Format
+            </button>
+        </div>
         <div class="hint">Format: array objek dengan properti start, end, text</div>
     </div>
 
@@ -405,6 +482,11 @@
     const canvas = document.getElementById('canvas-preview');
     const ctx = canvas.getContext('2d');
     const layoutPreview = document.getElementById('layoutPreview');
+
+    // ===== NEW: Toolbar buttons =====
+    const pasteBtn = document.getElementById('pasteBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const formatBtn = document.getElementById('formatBtn');
 
     // ==================== KONFIGURASI RESOLUSI ====================
     const RESOLUTIONS = {
@@ -531,12 +613,9 @@
     function renderFrame(videoElement, subtitles, currentTime, config, layout) {
         const CANVAS_WIDTH = config.width;
         const CANVAS_HEIGHT = config.height;
-        // canvas.width/height hanya di-set SEKALI di startRender(), tidak di sini
-        // agar captureStream() tidak putus setiap frame
         
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         
-        // Cari subtitle aktif
         let activeText = '';
         for (let sub of subtitles) {
             if (currentTime >= sub.start && currentTime <= sub.end) {
@@ -545,7 +624,6 @@
             }
         }
 
-        // ==================== LAYOUT: TERPISAH ====================
         if (layout === 'separate') {
             const videoRatio = videoElement.videoWidth / videoElement.videoHeight;
             const canvasRatio = CANVAS_WIDTH / CANVAS_HEIGHT;
@@ -651,7 +729,6 @@
             }
         }
 
-        // ==================== LAYOUT: OVERLAY ====================
         else if (layout === 'overlay') {
             ctx.drawImage(videoElement, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             
@@ -709,7 +786,6 @@
             }
         }
 
-        // ==================== LAYOUT: BOTTOM ====================
         else if (layout === 'bottom') {
             ctx.drawImage(videoElement, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             
@@ -765,7 +841,6 @@
             }
         }
 
-        // Watermark
         ctx.font = `${Math.max(12, CANVAS_WIDTH * 0.012)}px monospace`;
         ctx.fillStyle = 'rgba(255,255,255,0.15)';
         ctx.textAlign = 'right';
@@ -886,21 +961,16 @@
     let recordingStream = null;
     let animationFrameId = null;
 
-    // ==================== MP4 FASTSTART — PURE JS ====================
-    // Memindahkan atom 'moov' ke awal file MP4 (setara ffmpeg -movflags faststart)
-    // Tanpa library eksternal, murni manipulasi byte ArrayBuffer
     async function remuxMp4(blob) {
         updateStatus('⏳ Memproses metadata MP4 (faststart)...', 'info');
         const buffer = await blob.arrayBuffer();
         const bytes = new Uint8Array(buffer);
 
-        // Helper: baca 4 byte big-endian uint32 di offset tertentu
         function readUint32(buf, offset) {
             return ((buf[offset] << 24) | (buf[offset+1] << 16) |
                     (buf[offset+2] << 8)  |  buf[offset+3]) >>> 0;
         }
 
-        // Helper: tulis 4 byte big-endian uint32
         function writeUint32(buf, offset, val) {
             buf[offset]   = (val >>> 24) & 0xff;
             buf[offset+1] = (val >>> 16) & 0xff;
@@ -908,13 +978,12 @@
             buf[offset+3] =  val         & 0xff;
         }
 
-        // Scan top-level atoms: ftyp, free, mdat, moov
         const atoms = [];
         let pos = 0;
         while (pos < bytes.length - 8) {
             const size = readUint32(bytes, pos);
             const type = String.fromCharCode(bytes[pos+4], bytes[pos+5], bytes[pos+6], bytes[pos+7]);
-            if (size < 8) break; // atom tidak valid
+            if (size < 8) break;
             atoms.push({ type, offset: pos, size });
             pos += size;
         }
@@ -923,27 +992,21 @@
         const moov = atoms.find(a => a.type === 'moov');
         const mdat = atoms.find(a => a.type === 'mdat');
 
-        // Kalau tidak ada moov atau sudah di depan mdat, kembalikan blob asli
         if (!moov || !mdat) return blob;
-        if (moov.offset < mdat.offset) return blob; // sudah faststart
+        if (moov.offset < mdat.offset) return blob;
 
-        // Hitung offset shift: moov akan dipindah ke setelah ftyp
-        // Semua offset chunk di dalam moov (stco/co64) harus dikoreksi
         const insertPos = ftyp ? ftyp.offset + ftyp.size : 0;
-        const shift = moov.size; // moov disisipkan sebelum mdat, jadi offset mdat bergeser
+        const shift = moov.size;
 
-        // Koreksi offset chunk di dalam moov (stco dan co64 atoms)
         const moovBytes = new Uint8Array(bytes.buffer, moov.offset, moov.size).slice();
 
         function fixOffsets(buf, atomType, bytesPerEntry) {
-            // Cari semua kemunculan atomType di dalam moovBytes secara rekursif
             let i = 0;
             while (i < buf.length - 8) {
                 const sz = readUint32(buf, i);
                 const tp = String.fromCharCode(buf[i+4], buf[i+5], buf[i+6], buf[i+7]);
                 if (sz < 8 || sz > buf.length - i) break;
                 if (tp === atomType) {
-                    // version(1) + flags(3) + entry_count(4) = 8 bytes header setelah box header
                     const entryCount = readUint32(buf, i + 12);
                     for (let e = 0; e < entryCount; e++) {
                         const eOffset = i + 16 + e * bytesPerEntry;
@@ -951,13 +1014,11 @@
                             const old = readUint32(buf, eOffset);
                             writeUint32(buf, eOffset, old + shift);
                         } else {
-                            // co64: 8 byte, hanya koreksi 4 byte bawah (asumsi offset < 4GB)
                             const old = readUint32(buf, eOffset + 4);
                             writeUint32(buf, eOffset + 4, old + shift);
                         }
                     }
                 } else {
-                    // Rekursi ke dalam container atom
                     fixOffsets(buf.subarray(i + 8, i + sz), atomType, bytesPerEntry);
                 }
                 i += sz;
@@ -967,16 +1028,11 @@
         fixOffsets(moovBytes, 'stco', 4);
         fixOffsets(moovBytes, 'co64', 8);
 
-        // Susun ulang: ftyp + moov(terkoreksi) + atom lain (mdat, free, dll) tanpa moov lama
         const parts = [];
 
-        // 1. ftyp (jika ada)
         if (ftyp) parts.push(bytes.subarray(ftyp.offset, ftyp.offset + ftyp.size));
-
-        // 2. moov yang sudah dikoreksi
         parts.push(moovBytes);
 
-        // 3. semua atom lain kecuali ftyp dan moov, urut sesuai posisi asli
         const others = atoms
             .filter(a => a.type !== 'ftyp' && a.type !== 'moov')
             .sort((a, b) => a.offset - b.offset);
@@ -1008,7 +1064,6 @@
         const CANVAS_WIDTH = config.width;
         const CANVAS_HEIGHT = config.height;
         
-        // Set canvas size SEKALI di sini, tidak lagi di renderFrame()
         canvas.width = CANVAS_WIDTH;
         canvas.height = CANVAS_HEIGHT;
         
@@ -1022,26 +1077,22 @@
         }
         
         sourceVideo.currentTime = 0;
-        sourceVideo.muted = false; // pastikan audio video sumber aktif
+        sourceVideo.muted = false;
 
-        // Ambil audio dari video sumber via Web Audio API
-        // agar suara video ikut ter-rekam di output MP4/WebM
         let audioTrack = null;
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const sourceNode = audioCtx.createMediaElementSource(sourceVideo);
             const dest = audioCtx.createMediaStreamDestination();
-            // Sambungkan ke speaker (agar pengguna tetap dengar) DAN ke dest stream
             sourceNode.connect(audioCtx.destination);
             sourceNode.connect(dest);
             audioTrack = dest.stream.getAudioTracks()[0];
         } catch(e) {
-            // AudioContext tidak tersedia atau sudah ada node sebelumnya, lanjut tanpa audio
+            // fallback tanpa audio
         }
 
         recordingStream = canvas.captureStream(30);
 
-        // Tambahkan audio track dari video sumber ke stream rekaman
         if (audioTrack) {
             recordingStream.addTrack(audioTrack);
         }
@@ -1049,12 +1100,10 @@
         const bitrate = CANVAS_WIDTH * CANVAS_HEIGHT * 0.002;
         const bitsPerSecond = Math.max(800000, Math.min(5000000, bitrate));
         
-        // Cari MIME type yang didukung
         let mimeType = getSupportedMimeType(format);
         let actualFormat = format;
         
         if (!mimeType) {
-            // Fallback ke WebM
             mimeType = getSupportedMimeType('webm');
             actualFormat = 'webm';
             updateStatus(`⚠️ ${getFormatLabel(format)} tidak didukung, menggunakan WebM`, 'warning');
@@ -1099,8 +1148,6 @@
                                layout === 'overlay' ? 'overlay' : 'bottom';
             const filename = `subtitle_${config.width}x${config.height}_${layoutLabel}.${extension}`;
 
-            // Untuk MP4: remux pakai ffmpeg.wasm dengan -movflags faststart
-            // agar metadata durasi (moov atom) ada di awal file
             if (actualFormat === 'mp4') {
                 try {
                     const fixedBlob = await remuxMp4(rawBlob);
@@ -1111,7 +1158,6 @@
                     downloadLink.classList.add('active');
                     updateStatus('✅ Render selesai! Metadata MP4 sudah difix — durasi terbaca penuh di file manager.', 'success');
                 } catch(e) {
-                    // Fallback ke blob mentah kalau remux gagal
                     const url = URL.createObjectURL(rawBlob);
                     downloadLink.href = url;
                     downloadLink.download = filename;
@@ -1133,27 +1179,22 @@
             renderBtn.textContent = '▶ Mulai Render';
         };
         
-        // Timeslice 100ms (lebih kecil dari 250ms) agar chunk MP4 lebih granular
-        // dan durasi metadata ter-encode dengan benar di setiap segmen
         mediaRecorder.start(100);
         updateStatus(`⏳ Merender ${config.label} (${actualFormat.toUpperCase()})... 0%`, 'info');
         renderBtn.disabled = true;
         renderBtn.textContent = '⏳ Rendering...';
         isRendering = true;
 
-        // Gunakan event 'ended' sebagai trigger stop yang paling reliable
         function onVideoEnded() {
             sourceVideo.removeEventListener('ended', onVideoEnded);
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
                 animationFrameId = null;
             }
-            // Render frame terakhir sekali lagi sebelum stop
             renderFrame(sourceVideo, subtitles, sourceVideo.duration, config, layout);
             updateStatus('✅ Proses selesai, menyimpan...', 'success');
             isRendering = false;
             if (mediaRecorder && mediaRecorder.state === 'recording') {
-                // requestData() memastikan chunk terakhir tidak ketinggalan
                 mediaRecorder.requestData();
                 setTimeout(() => {
                     if (mediaRecorder && mediaRecorder.state === 'recording') {
@@ -1176,7 +1217,6 @@
                 return;
             }
             
-            // Guard: jika video sudah ended, biarkan onVideoEnded yang handle
             if (sourceVideo.ended) return;
             
             renderFrame(sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
@@ -1248,6 +1288,49 @@
     formatSelect.addEventListener('change', updateFormatHint);
 
     renderBtn.addEventListener('click', startRender);
+
+    // ===== NEW: Toolbar event listeners =====
+
+    // Paste: baca dari clipboard
+    pasteBtn.addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text) {
+                subtitleTextarea.value = text;
+                subtitleTextarea.dispatchEvent(new Event('input'));
+                updateStatus('📋 Data berhasil ditempel dari clipboard', 'success');
+            } else {
+                updateStatus('⚠️ Clipboard kosong', 'warning');
+            }
+        } catch (err) {
+            updateStatus('❌ Gagal mengakses clipboard: ' + err.message, 'error');
+        }
+    });
+
+    // Clear: kosongkan textarea
+    clearBtn.addEventListener('click', () => {
+        subtitleTextarea.value = '';
+        subtitleTextarea.dispatchEvent(new Event('input'));
+        updateStatus('🗑️ Data subtitle dikosongkan', 'info');
+    });
+
+    // Format: perbaiki formatting JSON (pretty print)
+    formatBtn.addEventListener('click', () => {
+        try {
+            const raw = subtitleTextarea.value.trim();
+            if (!raw) {
+                updateStatus('⚠️ Tidak ada data untuk diformat', 'warning');
+                return;
+            }
+            const parsed = JSON.parse(raw);
+            const pretty = JSON.stringify(parsed, null, 2);
+            subtitleTextarea.value = pretty;
+            subtitleTextarea.dispatchEvent(new Event('input'));
+            updateStatus('✨ JSON diformat ulang (pretty print)', 'success');
+        } catch (e) {
+            updateStatus('❌ Format JSON tidak valid: ' + e.message, 'error');
+        }
+    });
 
     // ==================== INITIALIZATION ====================
     updateFormatHint();
