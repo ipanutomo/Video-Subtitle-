@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Subtitle Generator - Multi Format</title>
-
     <style>
         * {
             margin: 0;
@@ -285,7 +284,8 @@
             padding: 10px 12px;
         }
 
-        /* ===== NEW: Subtitle Toolbar ===== */
+
+        /* ===== Subtitle Toolbar ===== */
         .subtitle-toolbar {
             display: flex;
             gap: 8px;
@@ -312,7 +312,7 @@
             border-color: #f7c948;
             color: #fff;
             transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(247, 201, 72, 0.15);
+            box-shadow: 0 4px 10px rgba(247,201,72,0.15);
         }
         .subtitle-toolbar .tool-btn:active {
             transform: translateY(1px);
@@ -336,10 +336,7 @@
             border-color: #3fb86a;
             color: #8cd9a0;
         }
-        .subtitle-toolbar .tool-btn .icon {
-            font-size: 1.1rem;
-            line-height: 1;
-        }
+        .subtitle-toolbar .tool-btn .icon { font-size: 1.1rem; line-height: 1; }
         .subtitle-toolbar .tool-btn .badge {
             background: rgba(255,255,255,0.08);
             border-radius: 12px;
@@ -349,11 +346,32 @@
             color: #8899b0;
         }
 
-        @media (max-width: 480px) {
+        .mode-btn {
+            background: #1f2a36;
+            border: 2px solid #384452;
+            border-radius: 14px;
+            padding: 10px 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #b6c8e0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        .mode-btn.active {
+            background: #f7c948;
+            border-color: #f7c948;
+            color: #0b0e14;
+        }
+        .mode-btn:not(.active):hover {
+            border-color: #f7c948;
+            color: #fff;
+        }
+
+                @media (max-width: 480px) {
             .app { padding: 16px 12px; }
             .action-btn { font-size: 1rem; padding: 14px; }
             .row-2col { grid-template-columns: 1fr; }
-            .subtitle-toolbar .tool-btn { padding: 5px 12px; font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -361,8 +379,18 @@
 <div class="app">
     <h1>📹 Subtitle <small>Multi Format</small></h1>
 
-    <!-- Upload Video -->
-    <div class="card">
+    <!-- Mode Render -->
+    <div class="card" id="modeCard">
+        <label>🎬 Mode Render</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+            <button class="mode-btn active" id="modeVideoBtn">📹 Dengan Video</button>
+            <button class="mode-btn" id="modeTextBtn">✍️ Teks Saja</button>
+        </div>
+        <div class="hint" id="modeHint" style="margin-top:8px;">Mode video: subtitle ditampilkan di atas video sumber</div>
+    </div>
+
+        <!-- Upload Video -->
+    <div class="card" id="videoCard">
         <label for="videoInput">📁 Pilih video (.mp4, .webm)</label>
         <input type="file" id="videoInput" accept="video/mp4,video/webm">
     </div>
@@ -427,7 +455,7 @@
     </div>
 
     <!-- Pilihan Layout -->
-    <div class="card">
+    <div class="card" id="layoutCard">
         <label for="layoutSelect">🎨 Layout Subtitle</label>
         <select id="layoutSelect">
             <option value="separate" selected>📝 Terpisah (video di atas, subtitle di bawah)</option>
@@ -445,7 +473,7 @@
     </div>
 
     <!-- Preview Video -->
-    <div class="preview-box">
+    <div class="preview-box" id="previewBox">
         <video id="sourceVideo" muted playsinline></video>
     </div>
 
@@ -468,6 +496,40 @@
 (function() {
     'use strict';
 
+    // ==================== MODE RENDER ====================
+    let renderMode = 'video'; // 'video' | 'text'
+
+    const modeVideoBtn = document.getElementById('modeVideoBtn');
+    const modeTextBtn  = document.getElementById('modeTextBtn');
+    const videoCard    = document.getElementById('videoCard');
+    const layoutCard   = document.getElementById('layoutCard');
+    const previewBox   = document.getElementById('previewBox');
+    const modeHint     = document.getElementById('modeHint');
+
+    function setMode(mode) {
+        renderMode = mode;
+        if (mode === 'video') {
+            modeVideoBtn.classList.add('active');
+            modeTextBtn.classList.remove('active');
+            videoCard.style.display  = '';
+            layoutCard.style.display = '';
+            previewBox.style.display = '';
+            modeHint.textContent = 'Mode video: subtitle ditampilkan di atas video sumber';
+            updateStatus('📹 Pilih video & atur subtitle, lalu klik Render', 'info');
+        } else {
+            modeTextBtn.classList.add('active');
+            modeVideoBtn.classList.remove('active');
+            videoCard.style.display  = 'none';
+            layoutCard.style.display = 'none';
+            previewBox.style.display = 'none';
+            modeHint.textContent = 'Mode teks: background hitam, teks kuning — canvas 40% tinggi resolusi';
+            updateStatus('✍️ Atur subtitle JSON, lalu klik Render', 'info');
+        }
+    }
+
+    modeVideoBtn.addEventListener('click', () => setMode('video'));
+    modeTextBtn.addEventListener('click',  () => setMode('text'));
+
     // ==================== DOM ELEMENTS ====================
     const videoInput = document.getElementById('videoInput');
     const subtitleTextarea = document.getElementById('subtitleData');
@@ -482,10 +544,8 @@
     const canvas = document.getElementById('canvas-preview');
     const ctx = canvas.getContext('2d');
     const layoutPreview = document.getElementById('layoutPreview');
-
-    // ===== NEW: Toolbar buttons =====
-    const pasteBtn = document.getElementById('pasteBtn');
-    const clearBtn = document.getElementById('clearBtn');
+    const pasteBtn  = document.getElementById('pasteBtn');
+    const clearBtn  = document.getElementById('clearBtn');
     const formatBtn = document.getElementById('formatBtn');
 
     // ==================== KONFIGURASI RESOLUSI ====================
@@ -613,9 +673,12 @@
     function renderFrame(videoElement, subtitles, currentTime, config, layout) {
         const CANVAS_WIDTH = config.width;
         const CANVAS_HEIGHT = config.height;
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
         
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         
+        // Cari subtitle aktif
         let activeText = '';
         for (let sub of subtitles) {
             if (currentTime >= sub.start && currentTime <= sub.end) {
@@ -624,6 +687,7 @@
             }
         }
 
+        // ==================== LAYOUT: TERPISAH ====================
         if (layout === 'separate') {
             const videoRatio = videoElement.videoWidth / videoElement.videoHeight;
             const canvasRatio = CANVAS_WIDTH / CANVAS_HEIGHT;
@@ -683,7 +747,7 @@
                 
                 const margin = CANVAS_WIDTH * 0.05;
                 const maxWidth = CANVAS_WIDTH - (margin * 2);
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
+                const wrappedLines = wrapText(activeText, ctx, maxWidth, 2);
                 
                 const lineHeight = finalFontSize * 1.4;
                 const totalHeight = wrappedLines.length * lineHeight;
@@ -729,6 +793,7 @@
             }
         }
 
+        // ==================== LAYOUT: OVERLAY ====================
         else if (layout === 'overlay') {
             ctx.drawImage(videoElement, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             
@@ -742,7 +807,7 @@
                 
                 const margin = CANVAS_WIDTH * 0.05;
                 const maxWidth = CANVAS_WIDTH - (margin * 2);
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
+                const wrappedLines = wrapText(activeText, ctx, maxWidth, 2);
                 
                 const lineHeight = finalFontSize * 1.4;
                 const totalHeight = wrappedLines.length * lineHeight;
@@ -786,6 +851,7 @@
             }
         }
 
+        // ==================== LAYOUT: BOTTOM ====================
         else if (layout === 'bottom') {
             ctx.drawImage(videoElement, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             
@@ -799,7 +865,7 @@
                 
                 const margin = CANVAS_WIDTH * 0.05;
                 const maxWidth = CANVAS_WIDTH - (margin * 2);
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
+                const wrappedLines = wrapText(activeText, ctx, maxWidth, 2);
                 
                 const lineHeight = finalFontSize * 1.4;
                 const totalHeight = wrappedLines.length * lineHeight;
@@ -841,6 +907,7 @@
             }
         }
 
+        // Watermark
         ctx.font = `${Math.max(12, CANVAS_WIDTH * 0.012)}px monospace`;
         ctx.fillStyle = 'rgba(255,255,255,0.15)';
         ctx.textAlign = 'right';
@@ -961,92 +1028,14 @@
     let recordingStream = null;
     let animationFrameId = null;
 
-    async function remuxMp4(blob) {
-        updateStatus('⏳ Memproses metadata MP4 (faststart)...', 'info');
-        const buffer = await blob.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-
-        function readUint32(buf, offset) {
-            return ((buf[offset] << 24) | (buf[offset+1] << 16) |
-                    (buf[offset+2] << 8)  |  buf[offset+3]) >>> 0;
-        }
-
-        function writeUint32(buf, offset, val) {
-            buf[offset]   = (val >>> 24) & 0xff;
-            buf[offset+1] = (val >>> 16) & 0xff;
-            buf[offset+2] = (val >>>  8) & 0xff;
-            buf[offset+3] =  val         & 0xff;
-        }
-
-        const atoms = [];
-        let pos = 0;
-        while (pos < bytes.length - 8) {
-            const size = readUint32(bytes, pos);
-            const type = String.fromCharCode(bytes[pos+4], bytes[pos+5], bytes[pos+6], bytes[pos+7]);
-            if (size < 8) break;
-            atoms.push({ type, offset: pos, size });
-            pos += size;
-        }
-
-        const ftyp = atoms.find(a => a.type === 'ftyp');
-        const moov = atoms.find(a => a.type === 'moov');
-        const mdat = atoms.find(a => a.type === 'mdat');
-
-        if (!moov || !mdat) return blob;
-        if (moov.offset < mdat.offset) return blob;
-
-        const insertPos = ftyp ? ftyp.offset + ftyp.size : 0;
-        const shift = moov.size;
-
-        const moovBytes = new Uint8Array(bytes.buffer, moov.offset, moov.size).slice();
-
-        function fixOffsets(buf, atomType, bytesPerEntry) {
-            let i = 0;
-            while (i < buf.length - 8) {
-                const sz = readUint32(buf, i);
-                const tp = String.fromCharCode(buf[i+4], buf[i+5], buf[i+6], buf[i+7]);
-                if (sz < 8 || sz > buf.length - i) break;
-                if (tp === atomType) {
-                    const entryCount = readUint32(buf, i + 12);
-                    for (let e = 0; e < entryCount; e++) {
-                        const eOffset = i + 16 + e * bytesPerEntry;
-                        if (bytesPerEntry === 4) {
-                            const old = readUint32(buf, eOffset);
-                            writeUint32(buf, eOffset, old + shift);
-                        } else {
-                            const old = readUint32(buf, eOffset + 4);
-                            writeUint32(buf, eOffset + 4, old + shift);
-                        }
-                    }
-                } else {
-                    fixOffsets(buf.subarray(i + 8, i + sz), atomType, bytesPerEntry);
-                }
-                i += sz;
-            }
-        }
-
-        fixOffsets(moovBytes, 'stco', 4);
-        fixOffsets(moovBytes, 'co64', 8);
-
-        const parts = [];
-
-        if (ftyp) parts.push(bytes.subarray(ftyp.offset, ftyp.offset + ftyp.size));
-        parts.push(moovBytes);
-
-        const others = atoms
-            .filter(a => a.type !== 'ftyp' && a.type !== 'moov')
-            .sort((a, b) => a.offset - b.offset);
-        for (const a of others) {
-            parts.push(bytes.subarray(a.offset, a.offset + a.size));
-        }
-
-        const result = new Blob(parts, { type: 'video/mp4' });
-        return result.size > 1000 ? result : blob;
-    }
-
     function startRender() {
         if (isRendering) return;
-        
+
+        if (renderMode === 'text') {
+            startRenderTextOnly();
+            return;
+        }
+
         if (!sourceVideo.src || sourceVideo.readyState < 2) {
             updateStatus('❌ Video belum dimuat. Pilih file video terlebih dahulu.', 'error');
             return;
@@ -1077,33 +1066,18 @@
         }
         
         sourceVideo.currentTime = 0;
-        sourceVideo.muted = false;
-
-        let audioTrack = null;
-        try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const sourceNode = audioCtx.createMediaElementSource(sourceVideo);
-            const dest = audioCtx.createMediaStreamDestination();
-            sourceNode.connect(audioCtx.destination);
-            sourceNode.connect(dest);
-            audioTrack = dest.stream.getAudioTracks()[0];
-        } catch(e) {
-            // fallback tanpa audio
-        }
-
+        sourceVideo.muted = true;
+        
         recordingStream = canvas.captureStream(30);
-
-        if (audioTrack) {
-            recordingStream.addTrack(audioTrack);
-        }
-
         const bitrate = CANVAS_WIDTH * CANVAS_HEIGHT * 0.002;
         const bitsPerSecond = Math.max(800000, Math.min(5000000, bitrate));
         
+        // Cari MIME type yang didukung
         let mimeType = getSupportedMimeType(format);
         let actualFormat = format;
         
         if (!mimeType) {
+            // Fallback ke WebM
             mimeType = getSupportedMimeType('webm');
             actualFormat = 'webm';
             updateStatus(`⚠️ ${getFormatLabel(format)} tidak didukung, menggunakan WebM`, 'warning');
@@ -1127,7 +1101,7 @@
             }
         };
         
-        mediaRecorder.onstop = async () => {
+        mediaRecorder.onstop = () => {
             if (recordedChunks.length === 0) {
                 updateStatus('⚠️ Tidak ada data rekaman. Coba ulangi.', 'warning');
                 isRendering = false;
@@ -1135,93 +1109,62 @@
                 renderBtn.textContent = '▶ Mulai Render';
                 return;
             }
-
+            
+            const extension = getFormatExtension(actualFormat);
+            const blob = new Blob(recordedChunks, { 
+                type: actualFormat === 'mp4' ? 'video/mp4' : 'video/webm' 
+            });
+            const url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+            
+            const layoutLabel = layout === 'separate' ? 'terpisah' : 
+                               layout === 'overlay' ? 'overlay' : 'bottom';
+            downloadLink.download = `subtitle_${config.width}x${config.height}_${layoutLabel}.${extension}`;
+            downloadLink.textContent = `⬇️ Download ${config.label} (${extension.toUpperCase()})`;
+            downloadLink.classList.add('active');
+            
+            updateStatus(`✅ Render selesai! Klik link di atas untuk unduh (${extension.toUpperCase()})`, 'success');
+            isRendering = false;
+            renderBtn.disabled = false;
+            renderBtn.textContent = '▶ Mulai Render';
+            
             if (recordingStream) {
                 recordingStream.getTracks().forEach(track => track.stop());
                 recordingStream = null;
             }
-
-            const extension = getFormatExtension(actualFormat);
-            const mimeTypeBlob = actualFormat === 'mp4' ? 'video/mp4' : 'video/webm';
-            const rawBlob = new Blob(recordedChunks, { type: mimeTypeBlob });
-            const layoutLabel = layout === 'separate' ? 'terpisah' :
-                               layout === 'overlay' ? 'overlay' : 'bottom';
-            const filename = `subtitle_${config.width}x${config.height}_${layoutLabel}.${extension}`;
-
-            if (actualFormat === 'mp4') {
-                try {
-                    const fixedBlob = await remuxMp4(rawBlob);
-                    const url = URL.createObjectURL(fixedBlob);
-                    downloadLink.href = url;
-                    downloadLink.download = filename;
-                    downloadLink.textContent = `⬇️ Download ${config.label} (MP4)`;
-                    downloadLink.classList.add('active');
-                    updateStatus('✅ Render selesai! Metadata MP4 sudah difix — durasi terbaca penuh di file manager.', 'success');
-                } catch(e) {
-                    const url = URL.createObjectURL(rawBlob);
-                    downloadLink.href = url;
-                    downloadLink.download = filename;
-                    downloadLink.textContent = `⬇️ Download ${config.label} (MP4)`;
-                    downloadLink.classList.add('active');
-                    updateStatus('✅ Render selesai! (metadata fix gagal, file tetap bisa diputar)', 'success');
-                }
-            } else {
-                const url = URL.createObjectURL(rawBlob);
-                downloadLink.href = url;
-                downloadLink.download = filename;
-                downloadLink.textContent = `⬇️ Download ${config.label} (${extension.toUpperCase()})`;
-                downloadLink.classList.add('active');
-                updateStatus(`✅ Render selesai! Klik link di atas untuk unduh (${extension.toUpperCase()})`, 'success');
-            }
-
-            isRendering = false;
-            renderBtn.disabled = false;
-            renderBtn.textContent = '▶ Mulai Render';
         };
         
-        mediaRecorder.start(100);
+        mediaRecorder.start(250);
         updateStatus(`⏳ Merender ${config.label} (${actualFormat.toUpperCase()})... 0%`, 'info');
         renderBtn.disabled = true;
         renderBtn.textContent = '⏳ Rendering...';
         isRendering = true;
-
-        function onVideoEnded() {
-            sourceVideo.removeEventListener('ended', onVideoEnded);
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
-            }
-            renderFrame(sourceVideo, subtitles, sourceVideo.duration, config, layout);
-            updateStatus('✅ Proses selesai, menyimpan...', 'success');
-            isRendering = false;
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.requestData();
-                setTimeout(() => {
-                    if (mediaRecorder && mediaRecorder.state === 'recording') {
-                        mediaRecorder.stop();
-                    }
-                }, 200);
-            }
-        }
-        sourceVideo.addEventListener('ended', onVideoEnded);
         
         sourceVideo.play().catch(err => {
             updateStatus('❌ Gagal memutar video: ' + err.message, 'error');
-            sourceVideo.removeEventListener('ended', onVideoEnded);
             stopRenderOnError();
             return;
         });
         
         function frameLoop() {
-            if (!isRendering && !(sourceVideo.ended)) {
+            if (!isRendering) {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
                 return;
             }
             
-            if (sourceVideo.ended) return;
+            if (sourceVideo.ended || sourceVideo.currentTime >= sourceVideo.duration) {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                updateStatus('✅ Proses selesai, menyimpan...', 'success');
+                return;
+            }
             
             renderFrame(sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
             
-            const progress = Math.min(99, Math.round((sourceVideo.currentTime / sourceVideo.duration) * 100));
+            const progress = Math.min(100, Math.round((sourceVideo.currentTime / sourceVideo.duration) * 100));
             if (progress % 5 === 0) {
                 const layoutLabel = layout === 'separate' ? 'terpisah' : 
                                    layout === 'overlay' ? 'overlay' : 'bottom';
@@ -1235,9 +1178,187 @@
         
         sourceVideo.onerror = function(e) {
             updateStatus('❌ Error pada video: ' + (sourceVideo.error ? sourceVideo.error.message : ''), 'error');
-            sourceVideo.removeEventListener('ended', onVideoEnded);
             stopRenderOnError();
         };
+    }
+
+
+    // ==================== RENDER TEKS SAJA ====================
+    // Canvas height = 40% dari resolusi pilihan, width tetap
+    function renderFrameTextOnly(subtitles, currentTime, config) {
+        const W = config.width;
+        const H = Math.round(config.height * 0.4); // 40% tinggi
+
+        // Background hitam
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, W, H);
+
+        // Cari subtitle aktif
+        let activeText = '';
+        for (let sub of subtitles) {
+            if (currentTime >= sub.start && currentTime <= sub.end) {
+                activeText = sub.text;
+                break;
+            }
+        }
+
+        if (activeText) {
+            const fontSize = Math.min(W * 0.07, H * 0.22);
+            const finalFontSize = Math.max(20, Math.min(80, fontSize));
+
+            ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const margin = W * 0.06;
+            const maxWidth = W - margin * 2;
+            const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
+
+            const lineHeight = finalFontSize * 1.5;
+            const totalHeight = wrappedLines.length * lineHeight;
+            const startY = H / 2 - totalHeight / 2 + lineHeight / 2;
+
+            wrappedLines.forEach((line, i) => {
+                const x = W / 2;
+                const y = startY + i * lineHeight;
+
+                ctx.lineWidth = Math.max(4, finalFontSize * 0.12);
+                ctx.strokeStyle = '#000000';
+                ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                ctx.shadowBlur = 10;
+                ctx.strokeText(line, x, y);
+
+                ctx.fillStyle = '#FFD966';
+                ctx.shadowColor = 'rgba(247,201,72,0.3)';
+                ctx.shadowBlur = 16;
+                ctx.fillText(line, x, y);
+                ctx.shadowBlur = 0;
+            });
+        }
+    }
+
+    function startRenderTextOnly() {
+        const subtitles = getSubtitles();
+        if (subtitles.length === 0) {
+            updateStatus('⚠️ Data subtitle kosong atau format JSON tidak valid.', 'warning');
+            return;
+        }
+
+        const config = getResolutionConfig();
+        const format = formatSelect.value;
+        const W = config.width;
+        const H = Math.round(config.height * 0.4); // canvas 40% tinggi
+
+        const totalDuration = Math.max(...subtitles.map(s => s.end));
+        if (!totalDuration || totalDuration <= 0) {
+            updateStatus('⚠️ Tidak bisa menentukan durasi dari JSON.', 'warning');
+            return;
+        }
+
+        // Set canvas ukuran 40%
+        canvas.width  = W;
+        canvas.height = H;
+
+        if (recordingStream) {
+            recordingStream.getTracks().forEach(t => t.stop());
+            recordingStream = null;
+        }
+        recordedChunks = [];
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+
+        recordingStream = canvas.captureStream(30);
+
+        const bitsPerSecond = Math.max(400000, Math.min(2000000, W * H * 0.001));
+
+        let mimeType = getSupportedMimeType(format);
+        let actualFormat = format;
+        if (!mimeType) {
+            mimeType = getSupportedMimeType('webm');
+            actualFormat = 'webm';
+        }
+
+        try {
+            mediaRecorder = new MediaRecorder(recordingStream, { mimeType: mimeType || undefined, bitsPerSecond });
+        } catch(e) {
+            mediaRecorder = new MediaRecorder(recordingStream, { bitsPerSecond });
+            actualFormat = 'webm';
+        }
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+            if (recordedChunks.length === 0) {
+                updateStatus('⚠️ Tidak ada data rekaman.', 'warning');
+                isRendering = false;
+                renderBtn.disabled = false;
+                renderBtn.textContent = '▶ Mulai Render';
+                return;
+            }
+            if (recordingStream) {
+                recordingStream.getTracks().forEach(t => t.stop());
+                recordingStream = null;
+            }
+            const ext  = getFormatExtension(actualFormat);
+            const type = actualFormat === 'mp4' ? 'video/mp4' : 'video/webm';
+            const rawBlob = new Blob(recordedChunks, { type });
+            const filename = `teks_${W}x${H}.${ext}`;
+
+            let finalBlob = rawBlob;
+            if (actualFormat === 'mp4') {
+                try { finalBlob = await remuxMp4(rawBlob); } catch(e) {}
+            }
+
+            const url = URL.createObjectURL(finalBlob);
+            downloadLink.href = url;
+            downloadLink.download = filename;
+            downloadLink.textContent = `⬇️ Download Teks ${W}×${H} (${ext.toUpperCase()})`;
+            downloadLink.classList.add('active');
+            updateStatus(`✅ Render teks selesai! Canvas: ${W}×${H} (${ext.toUpperCase()})`, 'success');
+            isRendering = false;
+            renderBtn.disabled = false;
+            renderBtn.textContent = '▶ Mulai Render';
+        };
+
+        mediaRecorder.start(100);
+        isRendering = true;
+        renderBtn.disabled = true;
+        renderBtn.textContent = '⏳ Rendering...';
+        updateStatus(`⏳ Render teks ${W}×${H}... 0%`, 'info');
+
+        const FPS = 30;
+        const frameDur = 1 / FPS;
+        let currentTime = 0;
+
+        function textFrameLoop() {
+            if (!isRendering) return;
+
+            renderFrameTextOnly(subtitles, currentTime, config);
+            currentTime += frameDur;
+
+            const pct = Math.min(99, Math.round((currentTime / totalDuration) * 100));
+            if (Math.round(currentTime * FPS) % 30 === 0) {
+                updateStatus(`⏳ Render teks ${W}×${H}... ${pct}%`, 'info');
+            }
+
+            if (currentTime >= totalDuration) {
+                renderFrameTextOnly(subtitles, totalDuration + 1, config); // frame hitam penutup
+                updateStatus('✅ Proses selesai, menyimpan...', 'success');
+                isRendering = false;
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.requestData();
+                    setTimeout(() => {
+                        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+                    }, 200);
+                }
+                return;
+            }
+
+            animationFrameId = requestAnimationFrame(textFrameLoop);
+        }
+
+        animationFrameId = requestAnimationFrame(textFrameLoop);
     }
 
     function stopRenderOnError() {
@@ -1289,9 +1410,8 @@
 
     renderBtn.addEventListener('click', startRender);
 
-    // ===== NEW: Toolbar event listeners =====
 
-    // Paste: baca dari clipboard
+    // ===== Toolbar Subtitle =====
     pasteBtn.addEventListener('click', async () => {
         try {
             const text = await navigator.clipboard.readText();
@@ -1307,24 +1427,18 @@
         }
     });
 
-    // Clear: kosongkan textarea
     clearBtn.addEventListener('click', () => {
         subtitleTextarea.value = '';
         subtitleTextarea.dispatchEvent(new Event('input'));
         updateStatus('🗑️ Data subtitle dikosongkan', 'info');
     });
 
-    // Format: perbaiki formatting JSON (pretty print)
     formatBtn.addEventListener('click', () => {
         try {
             const raw = subtitleTextarea.value.trim();
-            if (!raw) {
-                updateStatus('⚠️ Tidak ada data untuk diformat', 'warning');
-                return;
-            }
+            if (!raw) { updateStatus('⚠️ Tidak ada data untuk diformat', 'warning'); return; }
             const parsed = JSON.parse(raw);
-            const pretty = JSON.stringify(parsed, null, 2);
-            subtitleTextarea.value = pretty;
+            subtitleTextarea.value = JSON.stringify(parsed, null, 2);
             subtitleTextarea.dispatchEvent(new Event('input'));
             updateStatus('✨ JSON diformat ulang (pretty print)', 'success');
         } catch (e) {
