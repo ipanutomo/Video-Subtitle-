@@ -429,6 +429,7 @@
             <option value="separate" selected>📝 Terpisah (video di atas, subtitle di bawah)</option>
             <option value="overlay">📺 Overlay (subtitle di atas video)</option>
             <option value="bottom">⬇️ Bottom (subtitle di bawah tanpa background)</option>
+            <option value="textonly">⬛ Teks Saja (background hitam, tanpa video)</option>
         </select>
         <div class="hint">Pilih posisi subtitle pada video</div>
         
@@ -841,6 +842,62 @@
             }
         }
 
+        // ==================== LAYOUT: TEXTONLY ====================
+        else if (layout === 'textonly') {
+            // Hanya render teks di background hitam, canvas 40% tinggi
+            const H40 = Math.round(CANVAS_HEIGHT * 0.4);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, CANVAS_WIDTH, H40);
+
+            if (activeText) {
+                const fontSize = Math.min(CANVAS_WIDTH * 0.07, H40 * 0.22);
+                const finalFontSize = Math.max(20, Math.min(80, fontSize));
+
+                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const margin = CANVAS_WIDTH * 0.06;
+                const maxWidth = CANVAS_WIDTH - margin * 2;
+                const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
+
+                const lineHeight = finalFontSize * 1.5;
+                const totalTextHeight = wrappedLines.length * lineHeight;
+                const startTextY = H40 / 2 - totalTextHeight / 2 + lineHeight / 2;
+
+                wrappedLines.forEach((line, i) => {
+                    const x = CANVAS_WIDTH / 2;
+                    const y = startTextY + i * lineHeight;
+
+                    ctx.lineJoin = 'round';
+                    ctx.miterLimit = 2;
+
+                    // Outline luar tebal
+                    ctx.lineWidth = finalFontSize * 0.22;
+                    ctx.strokeStyle = 'rgba(0,0,0,0.95)';
+                    ctx.shadowBlur = 0;
+                    ctx.strokeText(line, x, y);
+
+                    // Outline hitam solid
+                    ctx.lineWidth = finalFontSize * 0.14;
+                    ctx.strokeStyle = '#000000';
+                    ctx.strokeText(line, x, y);
+
+                    // Teks kuning dengan glow
+                    ctx.shadowColor = 'rgba(255,210,0,0.6)';
+                    ctx.shadowBlur = finalFontSize * 0.3;
+                    ctx.fillStyle = '#FFE033';
+                    ctx.fillText(line, x, y);
+
+                    // Teks kuning solid di atas glow
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#FFD700';
+                    ctx.fillText(line, x, y);
+                });
+            }
+            return;
+        }
+
         ctx.font = `${Math.max(12, CANVAS_WIDTH * 0.012)}px monospace`;
         ctx.fillStyle = 'rgba(255,255,255,0.15)';
         ctx.textAlign = 'right';
@@ -945,6 +1002,16 @@
             subtitleEl.style.color = '#FFFFFF';
             subtitleEl.textContent = '📝 SUBTITLE (bottom)';
             labelEl.textContent = 'Preview: Subtitle di bawah video (tanpa background)';
+        } else if (layout === 'textonly') {
+            videoEl.style.height = '0px';
+            videoEl.textContent = '';
+            videoEl.style.display = 'none';
+            subtitleEl.style.display = 'flex';
+            subtitleEl.style.height = '80px';
+            subtitleEl.style.background = '#000000';
+            subtitleEl.style.color = '#FFD966';
+            subtitleEl.textContent = '📝 TEKS (40% tinggi, bg hitam)';
+            labelEl.textContent = 'Preview: Hanya teks kuning di background hitam';
         }
     }
 
@@ -981,8 +1048,9 @@
         const CANVAS_WIDTH = config.width;
         const CANVAS_HEIGHT = config.height;
         
-        canvas.width = CANVAS_WIDTH;
-        canvas.height = CANVAS_HEIGHT;
+        // Layout textonly: canvas hanya 40% tinggi
+        canvas.width  = CANVAS_WIDTH;
+        canvas.height = layout === 'textonly' ? Math.round(CANVAS_HEIGHT * 0.4) : CANVAS_HEIGHT;
         
         if (recordingStream) {
             recordingStream.getTracks().forEach(track => track.stop());
@@ -1046,7 +1114,8 @@
             downloadLink.href = url;
             
             const layoutLabel = layout === 'separate' ? 'terpisah' : 
-                               layout === 'overlay' ? 'overlay' : 'bottom';
+                               layout === 'overlay' ? 'overlay' :
+                               layout === 'textonly' ? 'teks' : 'bottom';
             downloadLink.download = `subtitle_${config.width}x${config.height}_${layoutLabel}.${extension}`;
             downloadLink.textContent = `⬇️ Download ${config.label} (${extension.toUpperCase()})`;
             downloadLink.classList.add('active');
@@ -1095,7 +1164,8 @@
             const progress = Math.min(100, Math.round((sourceVideo.currentTime / sourceVideo.duration) * 100));
             if (progress % 5 === 0) {
                 const layoutLabel = layout === 'separate' ? 'terpisah' : 
-                                   layout === 'overlay' ? 'overlay' : 'bottom';
+                                   layout === 'overlay' ? 'overlay' :
+                                   layout === 'textonly' ? 'teks' : 'bottom';
                 updateStatus(`⏳ Merender ${config.label} (${layoutLabel})... ${progress}%`, 'info');
             }
             
