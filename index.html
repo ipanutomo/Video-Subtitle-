@@ -346,29 +346,7 @@
             color: #8899b0;
         }
 
-        .mode-btn {
-            background: #1f2a36;
-            border: 2px solid #384452;
-            border-radius: 14px;
-            padding: 10px 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #b6c8e0;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            width: 100%;
-        }
-        .mode-btn.active {
-            background: #f7c948;
-            border-color: #f7c948;
-            color: #0b0e14;
-        }
-        .mode-btn:not(.active):hover {
-            border-color: #f7c948;
-            color: #fff;
-        }
-
-                @media (max-width: 480px) {
+        @media (max-width: 480px) {
             .app { padding: 16px 12px; }
             .action-btn { font-size: 1rem; padding: 14px; }
             .row-2col { grid-template-columns: 1fr; }
@@ -379,35 +357,8 @@
 <div class="app">
     <h1>📹 Subtitle <small>Multi Format</small></h1>
 
-    <!-- Mode Render -->
-    <div class="card" id="modeCard">
-        <label>🎬 Mode Render</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
-            <button class="mode-btn active" id="modeVideoBtn">📹 Dengan Video</button>
-            <button class="mode-btn" id="modeTextBtn">✍️ Teks Saja</button>
-        </div>
-        <div class="hint" id="modeHint" style="margin-top:8px;">Mode video: subtitle ditampilkan di atas video sumber</div>
-        <div id="partialRangeCard" style="display:none;margin-top:10px;">
-            <label style="font-size:0.8rem;color:#b6c8e0;margin-bottom:6px;display:block;">⏱️ Rentang Render (detik)</label>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                <div>
-                    <label style="font-size:0.72rem;opacity:0.7;margin-bottom:3px;display:block;">Start</label>
-                    <input type="number" id="renderStart" min="0" step="0.01" value="0"
-                        style="width:100%;background:#141a22;border:1px solid #384452;border-radius:10px;padding:8px 10px;color:#eef2f5;font-size:0.9rem;">
-                </div>
-                <div>
-                    <label style="font-size:0.72rem;opacity:0.7;margin-bottom:3px;display:block;">End</label>
-                    <input type="number" id="renderEnd" min="0" step="0.01" value=""
-                        placeholder="auto"
-                        style="width:100%;background:#141a22;border:1px solid #384452;border-radius:10px;padding:8px 10px;color:#eef2f5;font-size:0.9rem;">
-                </div>
-            </div>
-            <div class="hint" style="margin-top:4px;">Kosongkan End untuk render sampai subtitle terakhir</div>
-        </div>
-    </div>
-
-        <!-- Upload Video -->
-    <div class="card" id="videoCard">
+    <!-- Upload Video -->
+    <div class="card">
         <label for="videoInput">📁 Pilih video (.mp4, .webm)</label>
         <input type="file" id="videoInput" accept="video/mp4,video/webm">
     </div>
@@ -472,13 +423,12 @@
     </div>
 
     <!-- Pilihan Layout -->
-    <div class="card" id="layoutCard">
+    <div class="card">
         <label for="layoutSelect">🎨 Layout Subtitle</label>
         <select id="layoutSelect">
             <option value="separate" selected>📝 Terpisah (video di atas, subtitle di bawah)</option>
             <option value="overlay">📺 Overlay (subtitle di atas video)</option>
             <option value="bottom">⬇️ Bottom (subtitle di bawah tanpa background)</option>
-            <option value="textonly">⬛ Teks Saja (background hitam, tanpa video)</option>
         </select>
         <div class="hint">Pilih posisi subtitle pada video</div>
         
@@ -491,7 +441,7 @@
     </div>
 
     <!-- Preview Video -->
-    <div class="preview-box" id="previewBox">
+    <div class="preview-box">
         <video id="sourceVideo" muted playsinline></video>
     </div>
 
@@ -502,7 +452,7 @@
     <div id="statusMessage" class="status-badge">📹 Pilih video & atur subtitle, lalu klik Render</div>
 
     <!-- Download -->
-    <div class="download-section" id="downloadSection">
+    <div class="download-section">
         <a href="#" id="downloadLink" class="download-link" download="subtitle_video.webm">⬇️ Hasil rekaman akan muncul di sini</a>
     </div>
 
@@ -513,42 +463,6 @@
 <script>
 (function() {
     'use strict';
-
-    // ==================== MODE RENDER ====================
-    let renderMode = 'video'; // 'video' | 'text'
-
-    const modeVideoBtn = document.getElementById('modeVideoBtn');
-    const modeTextBtn  = document.getElementById('modeTextBtn');
-    const videoCard    = document.getElementById('videoCard');
-    const layoutCard   = document.getElementById('layoutCard');
-    const previewBox   = document.getElementById('previewBox');
-    const modeHint     = document.getElementById('modeHint');
-
-    function setMode(mode) {
-        renderMode = mode;
-        if (mode === 'video') {
-            modeVideoBtn.classList.add('active');
-            modeTextBtn.classList.remove('active');
-            videoCard.style.display  = '';
-            layoutCard.style.display = '';
-            previewBox.style.display = '';
-            modeHint.textContent = 'Mode video: subtitle ditampilkan di atas video sumber';
-            document.getElementById('partialRangeCard').style.display = 'none';
-            updateStatus('📹 Pilih video & atur subtitle, lalu klik Render', 'info');
-        } else {
-            modeTextBtn.classList.add('active');
-            modeVideoBtn.classList.remove('active');
-            videoCard.style.display  = 'none';
-            layoutCard.style.display = 'none';
-            previewBox.style.display = 'none';
-            modeHint.textContent = 'Mode teks: background hitam, teks kuning — canvas 40% tinggi resolusi';
-            document.getElementById('partialRangeCard').style.display = '';
-            updateStatus('✍️ Atur subtitle JSON, lalu klik Render', 'info');
-        }
-    }
-
-    modeVideoBtn.addEventListener('click', () => setMode('video'));
-    modeTextBtn.addEventListener('click',  () => setMode('text'));
 
     // ==================== DOM ELEMENTS ====================
     const videoInput = document.getElementById('videoInput');
@@ -927,62 +841,6 @@
             }
         }
 
-        // Watermark
-        else if (layout === 'textonly') {
-            // Hanya render teks di background hitam, canvas 40% tinggi
-            const H40 = Math.round(CANVAS_HEIGHT * 0.4);
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, CANVAS_WIDTH, H40);
-
-            if (activeText) {
-                const fontSize = Math.min(CANVAS_WIDTH * 0.07, H40 * 0.22);
-                const finalFontSize = Math.max(20, Math.min(80, fontSize));
-
-                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                const margin = CANVAS_WIDTH * 0.06;
-                const maxWidth = CANVAS_WIDTH - margin * 2;
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
-
-                const lineHeight = finalFontSize * 1.5;
-                const totalTextHeight = wrappedLines.length * lineHeight;
-                const startTextY = H40 / 2 - totalTextHeight / 2 + lineHeight / 2;
-
-                wrappedLines.forEach((line, i) => {
-                    const x = CANVAS_WIDTH / 2;
-                    const y = startTextY + i * lineHeight;
-
-                    ctx.lineJoin = 'round';
-                    ctx.miterLimit = 2;
-
-                    // Outline luar tebal
-                    ctx.lineWidth = finalFontSize * 0.22;
-                    ctx.strokeStyle = 'rgba(0,0,0,0.95)';
-                    ctx.shadowBlur = 0;
-                    ctx.strokeText(line, x, y);
-
-                    // Outline hitam solid
-                    ctx.lineWidth = finalFontSize * 0.14;
-                    ctx.strokeStyle = '#000000';
-                    ctx.strokeText(line, x, y);
-
-                    // Teks kuning dengan glow
-                    ctx.shadowColor = 'rgba(255,210,0,0.6)';
-                    ctx.shadowBlur = finalFontSize * 0.3;
-                    ctx.fillStyle = '#FFE033';
-                    ctx.fillText(line, x, y);
-
-                    // Teks kuning solid di atas glow
-                    ctx.shadowBlur = 0;
-                    ctx.fillStyle = '#FFD700';
-                    ctx.fillText(line, x, y);
-                });
-            }
-            return;
-        }
-
         ctx.font = `${Math.max(12, CANVAS_WIDTH * 0.012)}px monospace`;
         ctx.fillStyle = 'rgba(255,255,255,0.15)';
         ctx.textAlign = 'right';
@@ -1087,16 +945,6 @@
             subtitleEl.style.color = '#FFFFFF';
             subtitleEl.textContent = '📝 SUBTITLE (bottom)';
             labelEl.textContent = 'Preview: Subtitle di bawah video (tanpa background)';
-        } else if (layout === 'textonly') {
-            videoEl.style.height = '0px';
-            videoEl.textContent = '';
-            videoEl.style.display = 'none';
-            subtitleEl.style.display = 'flex';
-            subtitleEl.style.height = '80px';
-            subtitleEl.style.background = '#000000';
-            subtitleEl.style.color = '#FFD966';
-            subtitleEl.textContent = '📝 TEKS (40% tinggi, bg hitam)';
-            labelEl.textContent = 'Preview: Hanya teks kuning di background hitam';
         }
     }
 
@@ -1116,11 +964,6 @@
     function startRender() {
         if (isRendering) return;
 
-        if (renderMode === 'text') {
-            startRenderTextOnly();
-            return;
-        }
-
         if (!sourceVideo.src || sourceVideo.readyState < 2) {
             updateStatus('❌ Video belum dimuat. Pilih file video terlebih dahulu.', 'error');
             return;
@@ -1138,9 +981,8 @@
         const CANVAS_WIDTH = config.width;
         const CANVAS_HEIGHT = config.height;
         
-        // Layout textonly: canvas hanya 40% tinggi
-        canvas.width  = CANVAS_WIDTH;
-        canvas.height = layout === 'textonly' ? Math.round(CANVAS_HEIGHT * 0.4) : CANVAS_HEIGHT;
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
         
         if (recordingStream) {
             recordingStream.getTracks().forEach(track => track.stop());
@@ -1253,8 +1095,7 @@
             const progress = Math.min(100, Math.round((sourceVideo.currentTime / sourceVideo.duration) * 100));
             if (progress % 5 === 0) {
                 const layoutLabel = layout === 'separate' ? 'terpisah' : 
-                                   layout === 'overlay' ? 'overlay' :
-                                   layout === 'textonly' ? 'teks' : 'bottom';
+                                   layout === 'overlay' ? 'overlay' : 'bottom';
                 updateStatus(`⏳ Merender ${config.label} (${layoutLabel})... ${progress}%`, 'info');
             }
             
@@ -1269,388 +1110,80 @@
         };
     }
 
-
-    // ==================== RENDER TEKS SAJA ====================
-    // Canvas height = 40% dari resolusi pilihan, width tetap
-    function renderFrameTextOnly(subtitles, currentTime, config) {
-        const W = config.width;
-        const H = Math.round(config.height * 0.4); // 40% tinggi
-
-        // Background hitam
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, W, H);
-
-        // Cari subtitle aktif
-        let activeText = '';
-        for (let sub of subtitles) {
-            if (currentTime >= sub.start && currentTime <= sub.end) {
-                activeText = sub.text;
-                break;
-            }
-        }
-
-        if (activeText) {
-            const fontSize = Math.min(W * 0.07, H * 0.22);
-            const finalFontSize = Math.max(20, Math.min(80, fontSize));
-
-            ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            const margin = W * 0.06;
-            const maxWidth = W - margin * 2;
-            const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
-
-            const lineHeight = finalFontSize * 1.5;
-            const totalHeight = wrappedLines.length * lineHeight;
-            const startY = H / 2 - totalHeight / 2 + lineHeight / 2;
-
-            wrappedLines.forEach((line, i) => {
-                const x = W / 2;
-                const y = startY + i * lineHeight;
-
-                ctx.lineWidth = Math.max(4, finalFontSize * 0.12);
-                ctx.strokeStyle = '#000000';
-                ctx.shadowColor = 'rgba(0,0,0,0.9)';
-                ctx.shadowBlur = 10;
-                ctx.strokeText(line, x, y);
-
-                ctx.fillStyle = '#FFD966';
-                ctx.shadowColor = 'rgba(247,201,72,0.3)';
-                ctx.shadowBlur = 16;
-                ctx.fillText(line, x, y);
-                ctx.shadowBlur = 0;
-            });
-        }
-    }
-
-    async function startRenderTextOnly() {
-        const subtitles = getSubtitles();
-        if (subtitles.length === 0) {
-            updateStatus('⚠️ Data subtitle kosong atau format JSON tidak valid.', 'warning');
-            return;
-        }
-
-        if (typeof VideoEncoder === 'undefined') {
-            updateStatus('❌ Browser tidak support WebCodecs. Gunakan Chrome/Edge terbaru.', 'error');
-            return;
-        }
-
-        const config = getResolutionConfig();
-        // Lebar harus genap untuk encoder H.264
-        const W = config.width % 2 === 0 ? config.width : config.width - 1;
-        const H = Math.round(config.height * 0.4);
-        const Heven = H % 2 === 0 ? H : H - 1;
-
-        const inputStart  = parseFloat(document.getElementById('renderStart').value) || 0;
-        const inputEndRaw = document.getElementById('renderEnd').value.trim();
-        const maxEnd      = Math.max(...subtitles.map(s => s.end));
-        const inputEnd    = inputEndRaw !== '' ? parseFloat(inputEndRaw) : maxEnd;
-
-        if (inputStart >= inputEnd) {
-            updateStatus('⚠️ Nilai Start harus lebih kecil dari End.', 'warning');
-            return;
-        }
-
-        const totalDuration = inputEnd - inputStart;
-        const FPS           = 30;
-        const totalFrames   = Math.ceil(totalDuration * FPS);
-        const TIMESCALE     = 90000; // standard MP4 timescale
-
-        canvas.width  = W;
-        canvas.height = Heven;
-
-        isRendering = true;
-        renderBtn.disabled = true;
-        renderBtn.textContent = '⏳ Rendering...';
-        updateStatus(`⏳ Render teks ${W}×${Heven}... 0%`, 'info');
-
-        // ---- Kumpulkan encoded chunks ----
-        const videoChunks = []; // { data, type, timestamp, duration }
-        let encoderError  = null;
-
-        const encoder = new VideoEncoder({
-            output: (chunk) => {
-                const buf = new ArrayBuffer(chunk.byteLength);
-                chunk.copyTo(buf);
-                videoChunks.push({
-                    data:      buf,
-                    type:      chunk.type,        // 'key' | 'delta'
-                    timestamp: chunk.timestamp,   // microseconds
-                    duration:  chunk.duration ?? Math.round(1_000_000 / FPS)
-                });
-            },
-            error: (e) => { encoderError = e; }
-        });
-
-        encoder.configure({
-            codec:     'avc1.42001f', // H.264 baseline
-            width:      W,
-            height:     Heven,
-            bitrate:    Math.max(500000, Math.min(2000000, W * Heven * 0.0012)),
-            framerate:  FPS,
-            latencyMode: 'quality',
-            avc: { format: 'annexb' }
-        });
-
-        // ---- Generate frame satu per satu ----
-        for (let f = 0; f < totalFrames; f++) {
-            if (!isRendering) break;
-
-            const t = inputStart + f / FPS;
-            renderFrameTextOnly(subtitles, t, config);
-
-            const frame = new VideoFrame(canvas, {
-                timestamp: Math.round(f * (1_000_000 / FPS)),
-                duration:  Math.round(1_000_000 / FPS)
-            });
-
-            encoder.encode(frame, { keyFrame: f % (FPS * 2) === 0 });
-            frame.close();
-
-            if (f % 15 === 0) {
-                const pct = Math.round((f / totalFrames) * 100);
-                updateStatus(`⏳ Encoding ${W}×${Heven}... ${pct}%`, 'info');
-                await new Promise(r => setTimeout(r, 0));
-            }
-
-            if (encoderError) {
-                updateStatus('❌ Encoder error: ' + encoderError.message, 'error');
-                isRendering = false;
-                renderBtn.disabled = false;
-                renderBtn.textContent = '▶ Mulai Render';
-                return;
-            }
-        }
-
-        updateStatus('⏳ Flushing encoder...', 'info');
-        await encoder.flush();
-        encoder.close();
-
-        if (videoChunks.length === 0) {
-            updateStatus('⚠️ Tidak ada frame ter-encode.', 'warning');
-            isRendering = false;
-            renderBtn.disabled = false;
-            renderBtn.textContent = '▶ Mulai Render';
-            return;
-        }
-
-        // ---- Mux ke MP4 menggunakan struktur minimal ----
-        updateStatus('⏳ Menyusun file MP4...', 'info');
-        await new Promise(r => setTimeout(r, 0));
-
-        const mp4Blob = muxAnnexBtoMP4(videoChunks, W, Heven, FPS, totalDuration);
-
-        const startLabel = inputStart.toString().replace('.', '_');
-        const endLabel   = inputEnd.toString().replace('.', '_');
-        const filename   = `teks_${W}x${Heven}_${startLabel}-${endLabel}.mp4`;
-        const url        = URL.createObjectURL(mp4Blob);
-
-        downloadLink.href        = url;
-        downloadLink.download    = filename;
-        downloadLink.textContent = `⬇️ Download Teks ${W}×${Heven} (MP4)`;
-        downloadLink.classList.add('active');
-        updateStatus(`✅ Render selesai! ${videoChunks.length} frame · ${totalDuration.toFixed(1)}s`, 'success');
-
+    function stopRenderOnError() {
         isRendering = false;
         renderBtn.disabled = false;
         renderBtn.textContent = '▶ Mulai Render';
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        }
+        if (recordingStream) {
+            recordingStream.getTracks().forEach(track => track.stop());
+            recordingStream = null;
+        }
     }
 
-    // ==================== MP4 MUXER MINIMAL (Annexb H.264) ====================
-    // Mux raw annexb H.264 chunks ke file MP4 yang bisa diputar
-    function muxAnnexBtoMP4(chunks, W, H, FPS, durationSec) {
-        // Helper tulis integer big-endian
-        function u8(v)  { return [v & 0xff]; }
-        function u16(v) { return [(v>>8)&0xff, v&0xff]; }
-        function u24(v) { return [(v>>16)&0xff,(v>>8)&0xff,v&0xff]; }
-        function u32(v) { return [(v>>>24)&0xff,(v>>>16)&0xff,(v>>>8)&0xff,v&0xff]; }
+    // ==================== EVENT LISTENERS ====================
+    videoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const url = URL.createObjectURL(file);
+        sourceVideo.src = url;
+        sourceVideo.load();
+        updateStatus('📹 Video dimuat, siap render', 'success');
+    });
 
-        function box(type, ...children) {
-            const name  = [...type].map(c => c.charCodeAt(0));
-            const body  = children.flat();
-            const size  = 8 + body.length;
-            return [...u32(size), ...name, ...body];
+    subtitleTextarea.addEventListener('input', validateSubtitleRealTime);
+
+    renderBtn.addEventListener('click', startRender);
+
+    resolutionSelect.addEventListener('change', function() {
+        const config = getResolutionConfig();
+        updateStatus(`📐 Resolusi: ${config.label} (${config.ratio})`, 'info');
+        validateSubtitleRealTime();
+    });
+
+    layoutSelect.addEventListener('change', updateLayoutPreview);
+
+    formatSelect.addEventListener('change', updateFormatHint);
+
+    // ==================== TOOLBAR BUTTONS ====================
+    pasteBtn.addEventListener('click', async function() {
+        try {
+            const text = await navigator.clipboard.readText();
+            subtitleTextarea.value = text;
+            subtitleTextarea.dispatchEvent(new Event('input'));
+            updateStatus('📋 Data ditempel dari clipboard', 'success');
+        } catch (e) {
+            updateStatus('❌ Gagal membaca clipboard. Izinkan akses clipboard.', 'error');
         }
+    });
 
-        function fullbox(type, version, flags, ...children) {
-            return box(type, version, ...u24(flags), ...children.flat());
+    clearBtn.addEventListener('click', function() {
+        subtitleTextarea.value = '';
+        subtitleTextarea.dispatchEvent(new Event('input'));
+        updateStatus('🗑️ Data subtitle dibersihkan', 'info');
+    });
+
+    formatBtn.addEventListener('click', function() {
+        try {
+            const parsed = JSON.parse(subtitleTextarea.value);
+            subtitleTextarea.value = JSON.stringify(parsed, null, 2);
+            subtitleTextarea.dispatchEvent(new Event('input'));
+            updateStatus('✨ Format JSON dirapikan', 'success');
+        } catch (e) {
+            updateStatus('❌ Format JSON tidak valid: ' + e.message, 'error');
         }
+    });
 
-        // Konversi microseconds timestamp ke timescale unit
-        const TS = 90000;
+    // ==================== INIT ====================
+    updateFormatHint();
+    validateSubtitleRealTime();
+    updateLayoutPreview();
 
-        // ---- ftyp ----
-        const ftyp = box('ftyp',
-            ...[...'isom'].map(c=>c.charCodeAt(0)),  // major brand
-            ...u32(0x200),                             // minor version
-            ...[...'isom'].map(c=>c.charCodeAt(0)),
-            ...[...'iso2'].map(c=>c.charCodeAt(0)),
-            ...[...'avc1'].map(c=>c.charCodeAt(0)),
-            ...[...'mp41'].map(c=>c.charCodeAt(0))
-        );
-
-        // ---- mdat: gabungkan semua sample dalam format AVCC (4-byte length prefix) ----
-        // Annexb -> AVCC: ganti start code 00 00 00 01 atau 00 00 01 dengan 4-byte length
-        function annexbToAvcc(buf) {
-            const src = new Uint8Array(buf);
-            const nalus = [];
-            let i = 0;
-            while (i < src.length) {
-                // cari start code
-                let start = -1;
-                let scLen = 0;
-                if (i+3 < src.length && src[i]===0&&src[i+1]===0&&src[i+2]===0&&src[i+3]===1) {
-                    start = i; scLen = 4;
-                } else if (i+2 < src.length && src[i]===0&&src[i+1]===0&&src[i+2]===1) {
-                    start = i; scLen = 3;
-                }
-                if (start === -1) { i++; continue; }
-                // cari start code berikutnya
-                let end = src.length;
-                for (let j = start + scLen; j < src.length - 2; j++) {
-                    if (src[j]===0&&src[j+1]===0&&src[j+2]===1) { end = j; break; }
-                    if (j+3<src.length&&src[j]===0&&src[j+1]===0&&src[j+2]===0&&src[j+3]===1) { end = j; break; }
-                }
-                const nalu = src.slice(start + scLen, end);
-                if (nalu.length > 0) nalus.push(nalu);
-                i = end;
-            }
-
-            // Hitung total size dengan 4-byte length prefix
-            const totalLen = nalus.reduce((s,n) => s + 4 + n.length, 0);
-            const out = new Uint8Array(totalLen);
-            let off = 0;
-            for (const nalu of nalus) {
-                const len = nalu.length;
-                out[off]   = (len>>>24)&0xff;
-                out[off+1] = (len>>>16)&0xff;
-                out[off+2] = (len>>>8)&0xff;
-                out[off+3] =  len&0xff;
-                out.set(nalu, off + 4);
-                off += 4 + len;
-            }
-            return out;
-        }
-
-        // Ekstrak SPS dan PPS dari frame keyframe pertama (annexb)
-        let sps = null, pps = null;
-        for (const ch of chunks) {
-            if (ch.type !== 'key') continue;
-            const src = new Uint8Array(ch.data);
-            const nalus = [];
-            let i = 0;
-            while (i < src.length) {
-                let scLen = 0;
-                if (i+3<src.length&&src[i]===0&&src[i+1]===0&&src[i+2]===0&&src[i+3]===1) scLen=4;
-                else if (i+2<src.length&&src[i]===0&&src[i+1]===0&&src[i+2]===1) scLen=3;
-                if (!scLen) { i++; continue; }
-                let end = src.length;
-                for (let j=i+scLen;j<src.length-2;j++) {
-                    if (src[j]===0&&src[j+1]===0&&src[j+2]===1){end=j;break;}
-                    if (j+3<src.length&&src[j]===0&&src[j+1]===0&&src[j+2]===0&&src[j+3]===1){end=j;break;}
-                }
-                nalus.push(src.slice(i+scLen, end));
-                i = end;
-            }
-            for (const n of nalus) {
-                const t = n[0] & 0x1f;
-                if (t === 7 && !sps) sps = n;
-                if (t === 8 && !pps) pps = n;
-            }
-            if (sps && pps) break;
-        }
-
-        if (!sps || !pps) {
-            // Fallback: return empty mp4-like blob
-            return new Blob([new Uint8Array(0)], {type:'video/mp4'});
-        }
-
-        // Konversi semua sample ke AVCC
-        const samples = chunks.map(ch => ({
-            data:     annexbToAvcc(ch.data),
-            isKey:    ch.type === 'key',
-            pts:      Math.round(ch.timestamp * TS / 1_000_000),
-            duration: Math.round((ch.duration ?? Math.round(1_000_000/FPS)) * TS / 1_000_000)
-        }));
-
-        // Hitung offset mdat (ftyp + moov)
-        // Kita hitung dulu moov size, lalu ftyp + moov + mdat
-
-        // ---- avcC (decoder config) ----
-        const avcC = box('avcC',
-            0x01, sps[1], sps[2], sps[3], 0xff, // configVersion, profile, compat, level, lengthSizeMinusOne
-            0xe1,                                   // numSPS = 1
-            ...u16(sps.length), ...Array.from(sps),
-            0x01,                                   // numPPS = 1
-            ...u16(pps.length), ...Array.from(pps)
-        );
-
-        // ---- stsd ----
-        const avc1box = box('avc1',
-            0,0,0,0,0,0,               // reserved(6)
-            0,1,                        // data-ref-index
-            0,0,0,0,0,0,0,0,           // reserved
-            0,0,0,0,0,0,0,0,           // reserved
-            ...u16(W), ...u16(H),       // width, height
-            0,0x48,0,0,                 // horiz resolution 72dpi
-            0,0x48,0,0,                 // vert resolution 72dpi
-            0,0,0,1,                    // reserved, frame count
-            ...new Array(32).fill(0),   // compressorname
-            0,0x18,                     // depth
-            0xff,0xff,                  // pre-defined
-            ...avcC
-        );
-
-        const stsd = fullbox('stsd', 0, 0, ...u32(1), ...avc1box);
-
-        // stts: sample durations
-        // Group consecutive same-duration samples
-        const sttsEntries = [];
-        let prevDur = samples[0].duration, count = 1;
-        for (let i = 1; i < samples.length; i++) {
-            if (samples[i].duration === prevDur) { count++; }
-            else { sttsEntries.push({count, duration: prevDur}); prevDur = samples[i].duration; count = 1; }
-        }
-        sttsEntries.push({count, duration: prevDur});
-        const stts = fullbox('stts', 0, 0,
-            ...u32(sttsEntries.length),
-            ...sttsEntries.flatMap(e => [...u32(e.count), ...u32(e.duration)])
-        );
-
-        // stss: sync samples (keyframes)
-        const syncIdxs = samples.map((s,i) => s.isKey ? i+1 : 0).filter(Boolean);
-        const stss = fullbox('stss', 0, 0, ...u32(syncIdxs.length), ...syncIdxs.flatMap(i => u32(i)));
-
-        // stsz: sample sizes — kita isi setelah tahu ukuran mdat
-        const sampleSizes = samples.map(s => s.data.length);
-        const stsz = fullbox('stsz', 0, 0, ...u32(0), ...u32(sampleSizes.length), ...sampleSizes.flatMap(s => u32(s)));
-
-        // Hitung offset awal mdat dan stco
-        // ftyp size
-        const ftypBytes = new Uint8Array(ftyp);
-
-        // Bangun moov sementara untuk hitung ukurannya (stco pakai placeholder)
-        function buildMoov(chunkOffsets) {
-            const stco = fullbox('stco', 0, 0, ...u32(chunkOffsets.length), ...chunkOffsets.flatMap(o => u32(o)));
-            const stbl = box('stbl', ...stsd, ...stts, ...stss, ...stsz, ...stco);
-            const url_ = fullbox('url ', 0, 1); // self-contained
-            const dref = fullbox('dref', 0, 0, ...u32(1), ...url_);
-            const dinf = box('dinf', ...dref);
-            const smhd = fullbox('smhd', 0, 0); // video uses vmhd
-            const vmhd = fullbox('vmhd', 0, 1, ...u16(0), ...u16(0), ...u16(0), ...u16(0));
-            const minf = box('minf', ...vmhd, ...dinf, ...stbl);
-
-            const totalDurationTS = Math.round(durationSec * TS);
-            const mdhd = fullbox('mdhd', 0, 0,
-                ...u32(0), ...u32(0),   // creation, modification time
-                ...u32(TS),              // timescale
-                ...u32(totalDurationTS), // duration
-                0x55,0xc4,              // language = und
-                0,0
-            );
-            const hdlr = fullbox('hdlr', 0, 0,
-                ...u32(0),
-                ...[...'vide'].map(c=>c.charCodeAt(0)),
-                ...u32(0),...u32(0),...u32(0),
-                ...[...'VideoHandler
+})();
+</script>
+</body>
+</html>
