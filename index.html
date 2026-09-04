@@ -852,56 +852,64 @@
             }
         }
 
-        // ==================== LAYOUT: TEXTONLY ====================
-        else if (layout === 'textonly') {
-            // Hanya render teks di background hitam, canvas 40% tinggi
-            const H40 = Math.round(CANVAS_HEIGHT * 0.4);
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, CANVAS_WIDTH, H40);
+// ==================== LAYOUT: TEXTONLY ====================
+else if (layout === 'textonly') {
+    const H40 = Math.round(CANVAS_HEIGHT * 0.4);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, CANVAS_WIDTH, H40);
 
-            if (activeText) {
-                const fontSize = Math.min(CANVAS_WIDTH * 0.07, H40 * 0.22);
-                const finalFontSize = Math.max(20, Math.min(80, fontSize));
+    if (activeText) {
+        const fontSize = Math.min(CANVAS_WIDTH * 0.07, H40 * 0.22);
+        const finalFontSize = Math.max(20, Math.min(80, fontSize));
 
-                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+        ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
 
-                const margin = CANVAS_WIDTH * 0.06;
-                const maxWidth = CANVAS_WIDTH - margin * 2;
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
+        const margin = CANVAS_WIDTH * 0.06;
+        const maxWidth = CANVAS_WIDTH - margin * 2;
+        const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
 
-                const lineHeight = finalFontSize * 1.5;
-                const totalTextHeight = wrappedLines.length * lineHeight;
-                const startTextY = H40 / 2 - totalTextHeight / 2 + lineHeight / 2;
+        const lineHeight = finalFontSize * 1.5;
+        const totalTextHeight = wrappedLines.length * lineHeight;
+        const startTextY = H40 / 2 - totalTextHeight / 2 + lineHeight / 2;
 
-                wrappedLines.forEach((line, i) => {
-                    const x = CANVAS_WIDTH / 2;
-                    const y = startTextY + i * lineHeight;
+        wrappedLines.forEach((line, i) => {
+            const x = CANVAS_WIDTH / 2;
+            const y = startTextY + i * lineHeight;
 
-                    ctx.lineJoin = 'round';
-                    ctx.miterLimit = 2;
+            ctx.lineJoin = 'round';
+            ctx.miterLimit = 2;
 
-                    // Outline hitam tebal - TANPA GLOW
-                    ctx.lineWidth = finalFontSize * 0.22;
-                    ctx.strokeStyle = '#000000';
-                    ctx.shadowBlur = 0;
-                    ctx.strokeText(line, x, y);
+            // ====== GLOW TIPIS untuk CapCut ======
+            // Outline hitam tebal
+            ctx.lineWidth = finalFontSize * 0.22;
+            ctx.strokeStyle = '#000000';
+            ctx.shadowColor = 'rgba(255,215,0,0.15)'; // GLOW TIPIS
+            ctx.shadowBlur = finalFontSize * 0.08;    // GLOW TIPIS
+            ctx.strokeText(line, x, y);
 
-                    // Outline hitam solid
-                    ctx.lineWidth = finalFontSize * 0.14;
-                    ctx.strokeStyle = '#000000';
-                    ctx.shadowBlur = 0;
-                    ctx.strokeText(line, x, y);
+            // Outline hitam sedang
+            ctx.lineWidth = finalFontSize * 0.14;
+            ctx.strokeStyle = '#000000';
+            ctx.shadowColor = 'rgba(255,215,0,0.10)';
+            ctx.shadowBlur = finalFontSize * 0.05;
+            ctx.strokeText(line, x, y);
 
-                    // Teks kuning solid - TANPA GLOW
-                    ctx.shadowBlur = 0;
-                    ctx.fillStyle = '#FFD700';
-                    ctx.fillText(line, x, y);
-                });
-            }
-            return;
-        }
+            // Teks kuning dengan glow minimal
+            ctx.shadowColor = 'rgba(255,215,0,0.08)';
+            ctx.shadowBlur = finalFontSize * 0.03;
+            ctx.fillStyle = '#FFD700';
+            ctx.fillText(line, x, y);
+
+            // Teks kuning solid di atas (tanpa glow)
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#FFD700';
+            ctx.fillText(line, x, y);
+        });
+    }
+    return;
+}
 
         ctx.font = `${Math.max(12, CANVAS_WIDTH * 0.012)}px monospace`;
         ctx.fillStyle = 'rgba(255,255,255,0.15)';
