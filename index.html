@@ -852,15 +852,19 @@
             }
         }
 
-// ==================== LAYOUT: TEXTONLY ====================
+// ==================== LAYOUT: TEXTONLY (40% BAWAH) ====================
 else if (layout === 'textonly') {
     const H40 = Math.round(CANVAS_HEIGHT * 0.4);
+    const Y_START = CANVAS_HEIGHT - H40;  // Mulai dari bawah
+    
+    // Gambar background hitam di 40% bagian bawah
     ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, CANVAS_WIDTH, H40);
+    ctx.fillRect(0, Y_START, CANVAS_WIDTH, H40);
 
     if (activeText) {
-        const fontSize = Math.min(CANVAS_WIDTH * 0.07, H40 * 0.22);
-        const finalFontSize = Math.max(20, Math.min(80, fontSize));
+        // Ukuran huruf lebih kecil
+        const fontSize = Math.min(CANVAS_WIDTH * 0.05, H40 * 0.16);
+        const finalFontSize = Math.max(14, Math.min(60, fontSize));
 
         ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
         ctx.textAlign = 'center';
@@ -868,11 +872,13 @@ else if (layout === 'textonly') {
 
         const margin = CANVAS_WIDTH * 0.06;
         const maxWidth = CANVAS_WIDTH - margin * 2;
-        const wrappedLines = wrapText(activeText, ctx, maxWidth, 3);
+        const wrappedLines = wrapText(activeText, ctx, maxWidth, 4);
 
-        const lineHeight = finalFontSize * 1.5;
+        // Line spacing lebih rapat
+        const lineHeight = finalFontSize * 1.2;
         const totalTextHeight = wrappedLines.length * lineHeight;
-        const startTextY = H40 / 2 - totalTextHeight / 2 + lineHeight / 2;
+        const centerY = Y_START + (H40 / 2);  // Tengah dari area 40% bawah
+        const startTextY = centerY - totalTextHeight / 2 + lineHeight / 2;
 
         wrappedLines.forEach((line, i) => {
             const x = CANVAS_WIDTH / 2;
@@ -881,12 +887,11 @@ else if (layout === 'textonly') {
             ctx.lineJoin = 'round';
             ctx.miterLimit = 2;
 
-            // ====== GLOW TIPIS untuk CapCut ======
             // Outline hitam tebal
             ctx.lineWidth = finalFontSize * 0.22;
             ctx.strokeStyle = '#000000';
-            ctx.shadowColor = 'rgba(255,215,0,0.15)'; // GLOW TIPIS
-            ctx.shadowBlur = finalFontSize * 0.08;    // GLOW TIPIS
+            ctx.shadowColor = 'rgba(255,215,0,0.15)';
+            ctx.shadowBlur = finalFontSize * 0.08;
             ctx.strokeText(line, x, y);
 
             // Outline hitam sedang
@@ -896,13 +901,12 @@ else if (layout === 'textonly') {
             ctx.shadowBlur = finalFontSize * 0.05;
             ctx.strokeText(line, x, y);
 
-            // Teks kuning dengan glow minimal
+            // Teks kuning
             ctx.shadowColor = 'rgba(255,215,0,0.08)';
             ctx.shadowBlur = finalFontSize * 0.03;
             ctx.fillStyle = '#FFD700';
             ctx.fillText(line, x, y);
 
-            // Teks kuning solid di atas (tanpa glow)
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#FFD700';
             ctx.fillText(line, x, y);
