@@ -932,7 +932,12 @@ else if (layout === 'textonly') {
         const layout = layoutSelect.value;
         const CANVAS_WIDTH = config.width;
         const CANVAS_HEIGHT = config.height;
-        const height = layout === 'textonly' ? Math.round(CANVAS_HEIGHT * 0.4) : CANVAS_HEIGHT;
+        let height = CANVAS_HEIGHT;
+        let width = CANVAS_WIDTH;
+        if (layout === 'textonly') {
+        width = Math.round(CANVAS_WIDTH * 0.4);
+        height = Math.round(CANVAS_HEIGHT * 0.4);
+        }
         
         // Set preview canvas size (dengan aspect ratio)
         const maxWidth = previewCanvas.parentElement.clientWidth - 2;
@@ -945,7 +950,7 @@ else if (layout === 'textonly') {
             displayWidth = 300 * aspectRatio;
         }
         
-        previewCanvas.width = CANVAS_WIDTH;
+        previewCanvas.width = width;
         previewCanvas.height = height;
         previewCanvas.style.width = displayWidth + 'px';
         previewCanvas.style.height = displayHeight + 'px';
@@ -1118,9 +1123,14 @@ else if (layout === 'textonly') {
         const CANVAS_WIDTH = config.width;
         const CANVAS_HEIGHT = config.height;
         
-        // Layout textonly: canvas hanya 40% tinggi
-        canvas.width  = CANVAS_WIDTH;
-        canvas.height = layout === 'textonly' ? Math.round(CANVAS_HEIGHT * 0.4) : CANVAS_HEIGHT;
+        // Layout textonly: canvas 40% dari resolusi (width & height)
+        if (layout === 'textonly') {
+        canvas.width = Math.round(CANVAS_WIDTH * 0.4);
+        canvas.height = Math.round(CANVAS_HEIGHT * 0.4);
+        } else {
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+        }
         
         if (recordingStream) {
             recordingStream.getTracks().forEach(track => track.stop());
