@@ -208,27 +208,7 @@
             color: #f7c948;
             opacity: 1;
         }
-        #canvas-preview {
-            display: none;
-        }
 
-        .format-support {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-left: 6px;
-        }
-        .format-support.supported {
-            background: rgba(46, 160, 67, 0.3);
-            color: #8cd9a0;
-        }
-        .format-support.unsupported {
-            background: rgba(255, 59, 48, 0.3);
-            color: #ff6b63;
-        }
-        
         /* Layout Preview */
         #layoutPreview {
             margin-top: 12px;
@@ -291,8 +271,7 @@
             padding: 10px 12px;
         }
 
-
-        /* ===== Subtitle Toolbar ===== */
+        /* Subtitle Toolbar */
         .subtitle-toolbar {
             display: flex;
             gap: 8px;
@@ -353,6 +332,17 @@
             color: #8899b0;
         }
 
+        /* Info audio badge */
+        .audio-info {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            background: rgba(86,156,214,0.12);
+            border: 1px solid rgba(86,156,214,0.25);
+            color: #7ab8e8;
+        }
+
         @media (max-width: 480px) {
             .app { padding: 16px 12px; }
             .action-btn { font-size: 1rem; padding: 14px; }
@@ -368,6 +358,7 @@
     <div class="card">
         <label for="videoInput">📁 Pilih video (.mp4, .webm)</label>
         <input type="file" id="videoInput" accept="video/mp4,video/webm">
+        <div class="audio-info" id="audioInfo">🔇 Belum ada video — audio akan otomatis disertakan saat render</div>
     </div>
 
     <!-- Data Subtitle -->
@@ -448,9 +439,10 @@
         </div>
     </div>
 
-    <!-- Preview Video -->
+    <!-- Preview Canvas -->
     <div class="preview-box">
-        <video id="sourceVideo" playsinline></video>
+        <!-- Video tersembunyi — sumber audio & frame -->
+        <video id="sourceVideo" playsinline style="display:none;"></video>
         <canvas id="previewCanvas"></canvas>
     </div>
 
@@ -465,8 +457,8 @@
         <a href="#" id="downloadLink" class="download-link" download="subtitle_video.webm">⬇️ Hasil rekaman akan muncul di sini</a>
     </div>
 
-    <!-- Canvas tersembunyi -->
-    <canvas id="canvas-preview"></canvas>
+    <!-- Canvas render tersembunyi -->
+    <canvas id="renderCanvas" style="display:none;"></canvas>
 </div>
 
 <script>
@@ -474,76 +466,61 @@
     'use strict';
 
     // ==================== DOM ELEMENTS ====================
-    const videoInput = document.getElementById('videoInput');
-    const subtitleTextarea = document.getElementById('subtitleData');
-    const sourceVideo = document.getElementById('sourceVideo');
-    const renderBtn = document.getElementById('renderBtn');
-    const statusMsg = document.getElementById('statusMessage');
-    const downloadLink = document.getElementById('downloadLink');
-    const resolutionSelect = document.getElementById('resolutionSelect');
-    const layoutSelect = document.getElementById('layoutSelect');
-    const formatSelect = document.getElementById('formatSelect');
-    const formatHint = document.getElementById('formatHint');
-    const canvas = document.getElementById('canvas-preview');
-    const ctx = canvas.getContext('2d');
-    const previewCanvas = document.getElementById('previewCanvas');
-    const previewCtx = previewCanvas.getContext('2d');
-    const layoutPreview = document.getElementById('layoutPreview');
-    const pasteBtn  = document.getElementById('pasteBtn');
-    const clearBtn  = document.getElementById('clearBtn');
-    const formatBtn = document.getElementById('formatBtn');
+    const videoInput        = document.getElementById('videoInput');
+    const subtitleTextarea  = document.getElementById('subtitleData');
+    const sourceVideo       = document.getElementById('sourceVideo');
+    const renderBtn         = document.getElementById('renderBtn');
+    const statusMsg         = document.getElementById('statusMessage');
+    const downloadLink      = document.getElementById('downloadLink');
+    const resolutionSelect  = document.getElementById('resolutionSelect');
+    const layoutSelect      = document.getElementById('layoutSelect');
+    const formatSelect      = document.getElementById('formatSelect');
+    const formatHint        = document.getElementById('formatHint');
+    const previewCanvas     = document.getElementById('previewCanvas');
+    const previewCtx        = previewCanvas.getContext('2d');
+    const renderCanvas      = document.getElementById('renderCanvas');
+    const renderCtx         = renderCanvas.getContext('2d');
+    const layoutPreview     = document.getElementById('layoutPreview');
+    const audioInfo         = document.getElementById('audioInfo');
+    const pasteBtn          = document.getElementById('pasteBtn');
+    const clearBtn          = document.getElementById('clearBtn');
+    const formatBtn         = document.getElementById('formatBtn');
 
     // ==================== KONFIGURASI RESOLUSI ====================
     const RESOLUTIONS = {
-        '720x1280': { width: 720, height: 1280, label: 'HD (720×1280)', ratio: '9:16', platform: 'TikTok' },
+        '720x1280':  { width: 720,  height: 1280, label: 'HD (720×1280)',       ratio: '9:16', platform: 'TikTok' },
         '1080x1920': { width: 1080, height: 1920, label: 'Full HD (1080×1920)', ratio: '9:16', platform: 'TikTok' },
-        '854x480': { width: 854, height: 480, label: '480p (854×480)', ratio: '16:9', platform: 'YouTube' },
-        '1280x720': { width: 1280, height: 720, label: '720p (1280×720)', ratio: '16:9', platform: 'YouTube' },
-        '1920x1080': { width: 1920, height: 1080, label: '1080p (1920×1080)', ratio: '16:9', platform: 'YouTube' },
-        '1080x1080': { width: 1080, height: 1080, label: '1080×1080', ratio: '1:1', platform: 'Instagram' }
+        '854x480':   { width: 854,  height: 480,  label: '480p (854×480)',       ratio: '16:9', platform: 'YouTube' },
+        '1280x720':  { width: 1280, height: 720,  label: '720p (1280×720)',      ratio: '16:9', platform: 'YouTube' },
+        '1920x1080': { width: 1920, height: 1080, label: '1080p (1920×1080)',    ratio: '16:9', platform: 'YouTube' },
+        '1080x1080': { width: 1080, height: 1080, label: '1080×1080',            ratio: '1:1',  platform: 'Instagram' }
     };
+
+    function getResolutionConfig() {
+        return RESOLUTIONS[resolutionSelect.value] || RESOLUTIONS['720x1280'];
+    }
 
     // ==================== FORMAT SUPPORT ====================
     function getSupportedMimeType(format) {
         const mimeTypes = {
-            'webm': [
-                'video/webm;codecs=vp9',
-                'video/webm;codecs=vp8',
-                'video/webm'
-            ],
-            'mp4': [
-                'video/mp4;codecs=avc1.42E01E',
-                'video/mp4;codecs=avc1',
-                'video/mp4'
-            ]
+            'webm': ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'],
+            'mp4':  ['video/mp4;codecs=avc1.42E01E', 'video/mp4;codecs=avc1', 'video/mp4']
         };
-
-        const types = mimeTypes[format] || mimeTypes['webm'];
-        for (let mime of types) {
-            if (MediaRecorder.isTypeSupported(mime)) {
-                return mime;
-            }
+        for (let mime of (mimeTypes[format] || mimeTypes['webm'])) {
+            if (MediaRecorder.isTypeSupported(mime)) return mime;
         }
         return null;
     }
 
-    function getFormatExtension(format) {
-        return format === 'mp4' ? 'mp4' : 'webm';
-    }
-
-    function getFormatLabel(format) {
-        return format === 'mp4' ? 'MP4 (H.264)' : 'WebM';
-    }
-
     function updateFormatHint() {
         const format = formatSelect.value;
-        const mime = getSupportedMimeType(format);
-        
+        const mime   = getSupportedMimeType(format);
+        const label  = format === 'mp4' ? 'MP4 (H.264)' : 'WebM';
         if (mime) {
-            formatHint.innerHTML = `✅ ${getFormatLabel(format)} didukung di browser ini`;
+            formatHint.innerHTML = `✅ ${label} didukung di browser ini`;
             formatHint.style.color = '#8cd9a0';
         } else {
-            formatHint.innerHTML = `⚠️ ${getFormatLabel(format)} TIDAK didukung, akan fallback ke WebM`;
+            formatHint.innerHTML = `⚠️ ${label} TIDAK didukung, akan fallback ke WebM`;
             formatHint.style.color = '#ff6b63';
         }
     }
@@ -555,553 +532,330 @@
             if (!raw) return [];
             const parsed = JSON.parse(raw);
             if (!Array.isArray(parsed)) return [];
-            return parsed.filter(item => 
+            return parsed.filter(item =>
                 item && typeof item === 'object' &&
                 typeof item.start === 'number' &&
-                typeof item.end === 'number' &&
-                typeof item.text === 'string'
+                typeof item.end   === 'number' &&
+                typeof item.text  === 'string'
             );
-        } catch (e) {
-            return [];
-        }
+        } catch (e) { return []; }
     }
 
     // ==================== TEXT WRAPPING ====================
-    function wrapText(text, context, maxWidth, maxLines = 2) {
+    function wrapText(text, ctx, maxWidth, maxLines = 2) {
         if (!text || text.trim() === '') return [];
-        
         const words = text.trim().split(' ');
         const lines = [];
-        let currentLine = '';
-        
-        for (let i = 0; i < words.length; i++) {
-            const word = words[i];
-            const testLine = currentLine ? currentLine + ' ' + word : word;
-            const metrics = context.measureText(testLine);
-            
-            if (metrics.width > maxWidth && currentLine !== '') {
-                lines.push(currentLine);
-                currentLine = word;
-                
+        let current = '';
+
+        for (const word of words) {
+            const test = current ? current + ' ' + word : word;
+            if (ctx.measureText(test).width > maxWidth && current !== '') {
+                lines.push(current);
+                current = word;
                 if (lines.length >= maxLines) {
-                    const lastLine = lines[lines.length - 1];
-                    let truncated = lastLine;
-                    while (context.measureText(truncated + '…').width > maxWidth && truncated.length > 1) {
-                        truncated = truncated.slice(0, -1);
-                    }
-                    lines[lines.length - 1] = truncated + '…';
+                    let trunc = lines[lines.length - 1];
+                    while (ctx.measureText(trunc + '…').width > maxWidth && trunc.length > 1) trunc = trunc.slice(0, -1);
+                    lines[lines.length - 1] = trunc + '…';
                     return lines;
                 }
             } else {
-                currentLine = testLine;
+                current = test;
             }
         }
-        
-        if (currentLine) {
-            lines.push(currentLine);
-        }
-        
-        while (lines.length > maxLines) {
-            const lastLine = lines[lines.length - 1];
-            let truncated = lines[lines.length - 2] + ' ' + lastLine;
-            while (context.measureText(truncated + '…').width > maxWidth && truncated.length > 1) {
-                truncated = truncated.slice(0, -1);
-            }
-            lines[lines.length - 2] = truncated + '…';
-            lines.pop();
-        }
-        
+        if (current) lines.push(current);
         return lines;
     }
 
-    // ==================== RENDER FRAME ====================
-    function renderFrame(videoElement, subtitles, currentTime, config, layout) {
-        const CANVAS_WIDTH = config.width;
-        const CANVAS_HEIGHT = config.height;
-        canvas.width = CANVAS_WIDTH;
-        canvas.height = CANVAS_HEIGHT;
-        
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        
+    // ==================== RENDER FRAME ke context ====================
+    function renderFrame(ctx, videoElement, subtitles, currentTime, config, layout) {
+        const W = config.width;
+        const H = config.height;
+
+        ctx.clearRect(0, 0, W, H);
+
         // Cari subtitle aktif
         let activeText = '';
-        for (let sub of subtitles) {
+        for (const sub of subtitles) {
             if (currentTime >= sub.start && currentTime <= sub.end) {
                 activeText = sub.text;
                 break;
             }
         }
 
-        // ==================== LAYOUT: TERPISAH ====================
+        // ===== LAYOUT: TERPISAH =====
         if (layout === 'separate') {
-            const videoRatio = videoElement.videoWidth / videoElement.videoHeight;
-            const canvasRatio = CANVAS_WIDTH / CANVAS_HEIGHT;
-            
-            let videoWidth, videoHeight, videoX, videoY;
-            let subtitleHeight, subtitleY;
-            
-            if (canvasRatio < 1) {
-                const videoAreaHeight = CANVAS_HEIGHT * 0.60;
-                subtitleHeight = CANVAS_HEIGHT * 0.40;
-                
-                if (videoRatio > canvasRatio) {
-                    videoWidth = CANVAS_WIDTH;
-                    videoHeight = CANVAS_WIDTH / videoRatio;
-                    videoX = 0;
-                    videoY = (videoAreaHeight - videoHeight) / 2;
-                } else {
-                    videoHeight = videoAreaHeight;
-                    videoWidth = videoAreaHeight * videoRatio;
-                    videoX = (CANVAS_WIDTH - videoWidth) / 2;
-                    videoY = 0;
-                }
-                subtitleY = videoAreaHeight;
-            } else {
-                const videoAreaHeight = CANVAS_HEIGHT * 0.75;
-                subtitleHeight = CANVAS_HEIGHT * 0.25;
-                
-                videoWidth = CANVAS_WIDTH;
-                videoHeight = CANVAS_WIDTH / videoRatio;
-                videoX = 0;
-                videoY = (videoAreaHeight - videoHeight) / 2;
-                subtitleY = videoAreaHeight;
+            const videoRatio   = videoElement.videoWidth / videoElement.videoHeight || 16/9;
+            const canvasRatio  = W / H;
+            let vW, vH, vX, vY, subY, subH;
+
+            if (canvasRatio < 1) { // portrait
+                subH  = H * 0.40;
+                const videoAreaH = H - subH;
+                if (videoRatio > canvasRatio) { vW = W; vH = W / videoRatio; vX = 0; vY = (videoAreaH - vH) / 2; }
+                else { vH = videoAreaH; vW = videoAreaH * videoRatio; vX = (W - vW) / 2; vY = 0; }
+                subY = videoAreaH;
+            } else { // landscape / square
+                subH  = H * 0.25;
+                const videoAreaH = H - subH;
+                vW = W; vH = W / videoRatio; vX = 0; vY = (videoAreaH - vH) / 2;
+                subY = videoAreaH;
             }
-            
-            ctx.drawImage(videoElement, videoX, videoY, videoWidth, videoHeight);
-            
+
+            ctx.drawImage(videoElement, vX, vY, vW, vH);
             ctx.fillStyle = '#0a0a0a';
-            ctx.fillRect(0, subtitleY, CANVAS_WIDTH, subtitleHeight);
-            
+            ctx.fillRect(0, subY, W, subH);
             ctx.strokeStyle = 'rgba(255,255,255,0.08)';
             ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(0, subtitleY);
-            ctx.lineTo(CANVAS_WIDTH, subtitleY);
-            ctx.stroke();
-            
+            ctx.beginPath(); ctx.moveTo(0, subY); ctx.lineTo(W, subY); ctx.stroke();
+
             if (activeText) {
-                const fontSize = Math.min(
-                    CANVAS_WIDTH * 0.055,
-                    subtitleHeight * 0.50
-                );
-                const finalFontSize = Math.max(20, Math.min(60, fontSize));
-                
-                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                const margin = CANVAS_WIDTH * 0.05;
-                const maxWidth = CANVAS_WIDTH - (margin * 2);
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 2);
-                
-                const lineHeight = finalFontSize * 1.4;
-                const totalHeight = wrappedLines.length * lineHeight;
-                const centerY = subtitleY + (subtitleHeight / 2);
-                const startY = centerY - (totalHeight / 2) + (lineHeight / 2);
-                
-                wrappedLines.forEach((line, index) => {
-                    const x = CANVAS_WIDTH / 2;
-                    const y = startY + (index * lineHeight);
-                    
-                    if (wrappedLines.length > 1 || line.length > 30) {
-                        const metrics = ctx.measureText(line);
-                        const textWidth = metrics.width;
-                        const padding = finalFontSize * 0.4;
-                        const bgX = x - textWidth/2 - padding;
-                        const bgY = y - finalFontSize/2 - 6;
-                        const bgWidth = textWidth + padding * 2;
-                        const bgHeight = finalFontSize + 12;
-                        
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                        ctx.shadowBlur = 8;
-                        ctx.beginPath();
-                        if (ctx.roundRect) {
-                            ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 6);
-                        } else {
-                            ctx.rect(bgX, bgY, bgWidth, bgHeight);
-                        }
-                        ctx.fill();
-                        ctx.shadowBlur = 0;
-                    }
-                    
-                    ctx.lineWidth = Math.max(3, finalFontSize * 0.12);
-                    ctx.strokeStyle = '#000000';
-                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                    ctx.shadowBlur = 8;
-                    ctx.strokeText(line, x, y);
-                    
-                    ctx.fillStyle = '#FFD966';
-                    ctx.shadowBlur = 10;
-                    ctx.fillText(line, x, y);
-                });
+                const fs = Math.max(20, Math.min(60, Math.min(W * 0.055, subH * 0.50)));
+                ctx.font = `bold ${fs}px Arial, "Segoe UI", sans-serif`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                const margin = W * 0.05;
+                const lines  = wrapText(activeText, ctx, W - margin * 2, 2);
+                const lh     = fs * 1.4;
+                const startY = subY + subH / 2 - (lines.length * lh) / 2 + lh / 2;
+                drawSubtitleLines(ctx, lines, W / 2, startY, lh, fs, '#FFD966');
             }
+
+            drawWatermark(ctx, W, H, config);
         }
 
-        // ==================== LAYOUT: OVERLAY ====================
+        // ===== LAYOUT: OVERLAY =====
         else if (layout === 'overlay') {
-            ctx.drawImage(videoElement, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            
+            ctx.drawImage(videoElement, 0, 0, W, H);
             if (activeText) {
-                const fontSize = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) * 0.045;
-                const finalFontSize = Math.max(18, Math.min(48, fontSize));
-                
-                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                
-                const margin = CANVAS_WIDTH * 0.05;
-                const maxWidth = CANVAS_WIDTH - (margin * 2);
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 2);
-                
-                const lineHeight = finalFontSize * 1.4;
-                const totalHeight = wrappedLines.length * lineHeight;
-                const bottomPadding = CANVAS_HEIGHT * 0.08;
-                const startY = CANVAS_HEIGHT - bottomPadding;
-                
-                wrappedLines.forEach((line, index) => {
-                    const x = CANVAS_WIDTH / 2;
-                    const y = startY - (totalHeight - (index + 1) * lineHeight);
-                    
-                    if (wrappedLines.length > 1 || line.length > 30) {
-                        const metrics = ctx.measureText(line);
-                        const textWidth = metrics.width;
-                        const padding = finalFontSize * 0.4;
-                        const bgX = x - textWidth/2 - padding;
-                        const bgY = y - finalFontSize - 6;
-                        const bgWidth = textWidth + padding * 2;
-                        const bgHeight = finalFontSize + 12;
-                        
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                        ctx.shadowBlur = 0;
-                        ctx.beginPath();
-                        if (ctx.roundRect) {
-                            ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 6);
-                        } else {
-                            ctx.rect(bgX, bgY, bgWidth, bgHeight);
-                        }
-                        ctx.fill();
-                    }
-                    
-                    ctx.lineWidth = Math.max(3, finalFontSize * 0.15);
-                    ctx.strokeStyle = '#000000';
-                    ctx.shadowColor = 'rgba(0,0,0,0.9)';
-                    ctx.shadowBlur = 10;
-                    ctx.strokeText(line, x, y);
-                    
-                    ctx.fillStyle = '#FFD966';
-                    ctx.shadowBlur = 12;
-                    ctx.fillText(line, x, y);
-                });
+                const fs  = Math.max(18, Math.min(48, Math.min(W, H) * 0.045));
+                ctx.font  = `bold ${fs}px Arial, "Segoe UI", sans-serif`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+                const lines = wrapText(activeText, ctx, W - W * 0.05 * 2, 2);
+                const lh    = fs * 1.4;
+                const baseY = H - H * 0.08;
+                drawSubtitleLines(ctx, lines, W / 2, baseY - (lines.length - 1) * lh, lh, fs, '#FFD966', true);
             }
+            drawWatermark(ctx, W, H, config);
         }
 
-        // ==================== LAYOUT: BOTTOM ====================
+        // ===== LAYOUT: BOTTOM =====
         else if (layout === 'bottom') {
-            ctx.drawImage(videoElement, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            
+            ctx.drawImage(videoElement, 0, 0, W, H);
             if (activeText) {
-                const fontSize = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) * 0.04;
-                const finalFontSize = Math.max(16, Math.min(42, fontSize));
-                
-                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                
-                const margin = CANVAS_WIDTH * 0.05;
-                const maxWidth = CANVAS_WIDTH - (margin * 2);
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 2);
-                
-                const lineHeight = finalFontSize * 1.4;
-                const totalHeight = wrappedLines.length * lineHeight;
-                const bottomPadding = CANVAS_HEIGHT * 0.05;
-                const startY = CANVAS_HEIGHT - bottomPadding;
-                
-                wrappedLines.forEach((line, index) => {
-                    const x = CANVAS_WIDTH / 2;
-                    const y = startY - (totalHeight - (index + 1) * lineHeight);
-                    
-                    const metrics = ctx.measureText(line);
-                    const textWidth = metrics.width;
-                    const padding = finalFontSize * 0.4;
-                    const bgX = x - textWidth/2 - padding;
-                    const bgY = y - finalFontSize - 6;
-                    const bgWidth = textWidth + padding * 2;
-                    const bgHeight = finalFontSize + 12;
-                    
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                    ctx.shadowBlur = 0;
-                    ctx.beginPath();
-                    if (ctx.roundRect) {
-                        ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 6);
-                    } else {
-                        ctx.rect(bgX, bgY, bgWidth, bgHeight);
-                    }
-                    ctx.fill();
-                    
-                    ctx.lineWidth = Math.max(3, finalFontSize * 0.12);
+                const fs  = Math.max(16, Math.min(42, Math.min(W, H) * 0.04));
+                ctx.font  = `bold ${fs}px Arial, "Segoe UI", sans-serif`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+                const lines = wrapText(activeText, ctx, W - W * 0.05 * 2, 2);
+                const lh    = fs * 1.4;
+                const baseY = H - H * 0.05;
+                drawSubtitleLines(ctx, lines, W / 2, baseY - (lines.length - 1) * lh, lh, fs, '#FFFFFF', true);
+            }
+            drawWatermark(ctx, W, H, config);
+        }
+
+        // ===== LAYOUT: TEXTONLY (40% bawah) =====
+        else if (layout === 'textonly') {
+            const H40   = Math.round(H * 0.4);
+            const yTop  = H - H40;
+
+            // Area atas: hitam (tanpa video)
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, W, H);
+
+            if (activeText) {
+                const fs = Math.max(14, Math.min(60, Math.min(W * 0.05, H40 * 0.16)));
+                ctx.font = `bold ${fs}px Arial, "Segoe UI", sans-serif`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                const lines  = wrapText(activeText, ctx, W - W * 0.06 * 2, 4);
+                const lh     = fs * 1.2;
+                const startY = yTop + H40 / 2 - (lines.length * lh) / 2 + lh / 2;
+
+                lines.forEach((line, i) => {
+                    const x = W / 2;
+                    const y = startY + i * lh;
+                    ctx.lineJoin   = 'round';
+                    ctx.miterLimit = 2;
+                    ctx.lineWidth  = fs * 0.22;
                     ctx.strokeStyle = '#000000';
-                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                    ctx.shadowBlur  = fs * 0.1;
                     ctx.strokeText(line, x, y);
-                    
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.shadowBlur = 10;
+                    ctx.fillStyle  = '#FFD700';
+                    ctx.shadowBlur = 0;
                     ctx.fillText(line, x, y);
                 });
             }
+            // Tidak ada watermark untuk textonly (sudah return)
+            return;
         }
+    }
 
-// ==================== LAYOUT: TEXTONLY (40% BAWAH) ====================
-else if (layout === 'textonly') {
-    const H40 = Math.round(CANVAS_HEIGHT * 0.4);
-    const Y_START = CANVAS_HEIGHT - H40;  // Mulai dari bawah
-    
-    // Gambar background hitam di 40% bagian bawah
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, Y_START, CANVAS_WIDTH, H40);
+    function drawWatermark(ctx, W, H, config) {
+        ctx.font         = `${Math.max(12, W * 0.012)}px monospace`;
+        ctx.fillStyle    = 'rgba(255,255,255,0.15)';
+        ctx.textAlign    = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.shadowBlur   = 0;
+        ctx.fillText(`${config.width}×${config.height} | ${config.platform}`, W - 12, H - 8);
+    }
 
-    if (activeText) {
-        // Ukuran huruf lebih kecil
-        const fontSize = Math.min(CANVAS_WIDTH * 0.05, H40 * 0.16);
-        const finalFontSize = Math.max(14, Math.min(60, fontSize));
+    function drawSubtitleLines(ctx, lines, cx, baseY, lh, fs, color, isBottom = false) {
+        lines.forEach((line, i) => {
+            const y = isBottom ? baseY + i * lh : baseY + i * lh;
+            // background pill
+            const tw      = ctx.measureText(line).width;
+            const pad     = fs * 0.4;
+            const bgX     = cx - tw / 2 - pad;
+            const bgY     = y - fs / 2 - 6;
+            const bgW     = tw + pad * 2;
+            const bgH     = fs + 12;
 
-        ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        const margin = CANVAS_WIDTH * 0.06;
-        const maxWidth = CANVAS_WIDTH - margin * 2;
-        const wrappedLines = wrapText(activeText, ctx, maxWidth, 4);
-
-        // Line spacing lebih rapat
-        const lineHeight = finalFontSize * 1.2;
-        const totalTextHeight = wrappedLines.length * lineHeight;
-        const centerY = Y_START + (H40 / 2);  // Tengah dari area 40% bawah
-        const startTextY = centerY - totalTextHeight / 2 + lineHeight / 2;
-
-        wrappedLines.forEach((line, i) => {
-            const x = CANVAS_WIDTH / 2;
-            const y = startTextY + i * lineHeight;
-
-            ctx.lineJoin = 'round';
-            ctx.miterLimit = 2;
-
-            // Outline hitam tebal
-            ctx.lineWidth = finalFontSize * 0.22;
-            ctx.strokeStyle = '#000000';
-            ctx.shadowColor = 'rgba(255,215,0,0.15)';
-            ctx.shadowBlur = finalFontSize * 0.08;
-            ctx.strokeText(line, x, y);
-
-            // Outline hitam sedang
-            ctx.lineWidth = finalFontSize * 0.14;
-            ctx.strokeStyle = '#000000';
-            ctx.shadowColor = 'rgba(255,215,0,0.10)';
-            ctx.shadowBlur = finalFontSize * 0.05;
-            ctx.strokeText(line, x, y);
-
-            // Teks kuning
-            ctx.shadowColor = 'rgba(255,215,0,0.08)';
-            ctx.shadowBlur = finalFontSize * 0.03;
-            ctx.fillStyle = '#FFD700';
-            ctx.fillText(line, x, y);
-
+            ctx.fillStyle = 'rgba(0,0,0,0.45)';
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#FFD700';
-            ctx.fillText(line, x, y);
+            ctx.beginPath();
+            if (ctx.roundRect) ctx.roundRect(bgX, bgY, bgW, bgH, 6);
+            else ctx.rect(bgX, bgY, bgW, bgH);
+            ctx.fill();
+
+            // outline
+            ctx.lineWidth   = Math.max(3, fs * 0.13);
+            ctx.strokeStyle = '#000000';
+            ctx.shadowColor = 'rgba(0,0,0,0.85)';
+            ctx.shadowBlur  = 8;
+            ctx.strokeText(line, cx, y);
+
+            // fill
+            ctx.fillStyle  = color;
+            ctx.shadowBlur = 10;
+            ctx.fillText(line, cx, y);
+            ctx.shadowBlur = 0;
         });
     }
-    return;
-}
 
-        ctx.font = `${Math.max(12, CANVAS_WIDTH * 0.012)}px monospace`;
-        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(
-            `${config.width}×${config.height} | ${config.platform}`, 
-            CANVAS_WIDTH - 12, 
-            CANVAS_HEIGHT - 8
-        );
-    }
+    // ==================== PREVIEW CANVAS (real-time dari video) ====================
+    let previewRAF = null;
 
-    // ==================== UPDATE PREVIEW CANVAS ====================
-    function updatePreviewCanvas() {
-        const config = getResolutionConfig();
-        const layout = layoutSelect.value;
-        const CANVAS_WIDTH = config.width;
-        const CANVAS_HEIGHT = config.height;
-        let height = CANVAS_HEIGHT;
-        let width = CANVAS_WIDTH;
-        if (layout === 'textonly') {
-        width = Math.round(CANVAS_WIDTH * 0.4);
-        height = Math.round(CANVAS_HEIGHT * 0.4);
+    function startPreviewLoop() {
+        if (previewRAF) cancelAnimationFrame(previewRAF);
+
+        const config    = getResolutionConfig();
+        const layout    = layoutSelect.value;
+        const subtitles = getSubtitles();
+
+        // Hitung ukuran canvas preview dengan aspect ratio benar
+        const W = config.width;
+        const H = config.height;
+        // Untuk textonly, canvas preview tetap ukuran penuh agar aspect ratio sama dengan output
+        previewCanvas.width  = W;
+        previewCanvas.height = H;
+
+        // Tampilkan dengan CSS scaling agar tidak memakan ruang terlalu besar
+        const maxW = previewCanvas.parentElement.clientWidth - 4;
+        const ar   = W / H;
+        let dispW  = Math.min(maxW, W);
+        let dispH  = dispW / ar;
+        if (dispH > 280) { dispH = 280; dispW = dispH * ar; }
+        previewCanvas.style.width  = dispW + 'px';
+        previewCanvas.style.height = dispH + 'px';
+        previewCanvas.style.display = 'block';
+        previewCanvas.style.margin  = '0 auto';
+
+        function loop() {
+            if (sourceVideo.readyState >= 2) {
+                renderFrame(previewCtx, sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
+            } else {
+                // Gambar placeholder
+                previewCtx.fillStyle = '#111';
+                previewCtx.fillRect(0, 0, W, H);
+                previewCtx.fillStyle = '#444';
+                previewCtx.font = `${Math.max(14, W * 0.03)}px Arial`;
+                previewCtx.textAlign = 'center';
+                previewCtx.textBaseline = 'middle';
+                previewCtx.fillText('🎬 Pilih video untuk preview', W / 2, H / 2);
+            }
+            previewRAF = requestAnimationFrame(loop);
         }
-        
-        // Set preview canvas size (dengan aspect ratio)
-        const maxWidth = previewCanvas.parentElement.clientWidth - 2;
-        const aspectRatio = CANVAS_WIDTH / height;
-        let displayWidth = maxWidth;
-        let displayHeight = maxWidth / aspectRatio;
-        
-        if (displayHeight > 300) {
-            displayHeight = 300;
-            displayWidth = 300 * aspectRatio;
-        }
-        
-        previewCanvas.width = width;
-        previewCanvas.height = height;
-        previewCanvas.style.width = displayWidth + 'px';
-        previewCanvas.style.height = displayHeight + 'px';
-        previewCanvas.style.margin = '0 auto';
-        
-        // Gambar frame kosong
-        previewCtx.fillStyle = '#000000';
-        previewCtx.fillRect(0, 0, CANVAS_WIDTH, height);
-        
-        if (layout === 'textonly') {
-            previewCtx.fillStyle = '#000000';
-            previewCtx.fillRect(0, 0, CANVAS_WIDTH, height);
-            previewCtx.fillStyle = '#444444';
-            previewCtx.font = '24px Arial';
-            previewCtx.textAlign = 'center';
-            previewCtx.textBaseline = 'middle';
-            previewCtx.fillText('⬛ Teks Saja', CANVAS_WIDTH/2, height/2);
-        } else {
-            previewCtx.fillStyle = '#222222';
-            previewCtx.fillRect(0, 0, CANVAS_WIDTH, height);
-            previewCtx.fillStyle = '#444444';
-            previewCtx.font = '24px Arial';
-            previewCtx.textAlign = 'center';
-            previewCtx.textBaseline = 'middle';
-            previewCtx.fillText('🎬 Preview', CANVAS_WIDTH/2, height/2);
-        }
+        loop();
     }
 
     // ==================== VALIDASI SUBTITLE ====================
-    function validateSubtitles(subtitles) {
-        const config = getResolutionConfig();
-        const canvas = document.createElement('canvas');
-        const ctxTest = canvas.getContext('2d');
-        
-        const testFontSize = Math.min(config.width, config.height) * 0.045;
-        ctxTest.font = `bold ${testFontSize}px Arial`;
-        const maxWidth = config.width - (config.width * 0.05 * 2);
-        
-        const warnings = [];
-        subtitles.forEach((sub, index) => {
-            const metrics = ctxTest.measureText(sub.text);
-            if (metrics.width > maxWidth) {
-                warnings.push({
-                    index: index,
-                    text: sub.text,
-                    length: sub.text.length,
-                    estimatedLines: Math.ceil(metrics.width / maxWidth)
-                });
-            }
-        });
-        
-        return { warnings, total: warnings.length };
-    }
-
-    // ==================== UPDATE STATUS ====================
-    function updateStatus(message, type = 'info') {
-        statusMsg.textContent = message;
-        statusMsg.className = 'status-badge';
-        if (type === 'warning') statusMsg.classList.add('warning');
-        else if (type === 'success') statusMsg.classList.add('success');
-        else if (type === 'error') statusMsg.classList.add('error');
-    }
-
-    // ==================== VALIDASI REAL-TIME ====================
     function validateSubtitleRealTime() {
         const subtitles = getSubtitles();
         if (subtitles.length === 0) {
             updateStatus('📝 Masukkan data subtitle JSON', 'info');
             return;
         }
-        
-        const result = validateSubtitles(subtitles);
-        if (result.total > 0) {
-            const maxLines = Math.max(...result.warnings.map(w => w.estimatedLines));
-            updateStatus(
-                `⚠️ ${result.total} SUBTITLE TERLALU PANJANG (AKAN DI-WRAP ${maxLines} BARIS)`, 
-                'warning'
-            );
+        const config   = getResolutionConfig();
+        const testCtx  = document.createElement('canvas').getContext('2d');
+        const fs       = Math.min(config.width, config.height) * 0.045;
+        testCtx.font   = `bold ${fs}px Arial`;
+        const maxWidth = config.width - config.width * 0.1;
+        let warnings   = 0;
+        for (const sub of subtitles) {
+            if (testCtx.measureText(sub.text).width > maxWidth) warnings++;
+        }
+        if (warnings > 0) {
+            updateStatus(`⚠️ ${warnings} SUBTITLE TERLALU PANJANG (AKAN DI-WRAP)`, 'warning');
         } else {
             updateStatus('✅ Semua subtitle dalam batas normal', 'success');
         }
     }
 
-    // ==================== UPDATE LAYOUT PREVIEW ====================
-    function updateLayoutPreview() {
-        const layout = layoutSelect.value;
-        const videoEl = layoutPreview.querySelector('.layout-preview-video');
-        const subtitleEl = layoutPreview.querySelector('.layout-preview-subtitle');
-        const labelEl = layoutPreview.querySelector('.layout-preview-label');
-        
-        const existingOverlay = layoutPreview.querySelector('.layout-preview-overlay');
-        if (existingOverlay) existingOverlay.remove();
-        
-        if (layout === 'separate') {
-            videoEl.style.height = '60px';
-            videoEl.textContent = '🎬 VIDEO (60%)';
-            videoEl.style.display = 'flex';
-            subtitleEl.style.display = 'flex';
-            subtitleEl.style.height = '35px';
-            subtitleEl.style.background = '#1a1f27';
-            subtitleEl.style.color = '#FFD966';
-            subtitleEl.textContent = '📝 SUBTITLE (40%)';
-            labelEl.textContent = 'Preview: Video di atas, subtitle di bawah (terpisah)';
-        } else if (layout === 'overlay') {
-            videoEl.style.height = '85px';
-            videoEl.textContent = '🎬 VIDEO (full)';
-            videoEl.style.display = 'flex';
-            subtitleEl.style.display = 'none';
-            labelEl.textContent = 'Preview: Subtitle di atas video (overlay)';
-            
-            const overlay = document.createElement('div');
-            overlay.className = 'layout-preview-overlay';
-            overlay.textContent = '📝 SUBTITLE OVERLAY';
-            layoutPreview.appendChild(overlay);
-        } else if (layout === 'bottom') {
-            videoEl.style.height = '70px';
-            videoEl.textContent = '🎬 VIDEO';
-            videoEl.style.display = 'flex';
-            subtitleEl.style.display = 'flex';
-            subtitleEl.style.height = '20px';
-            subtitleEl.style.background = 'transparent';
-            subtitleEl.style.color = '#FFFFFF';
-            subtitleEl.textContent = '📝 SUBTITLE (bottom)';
-            labelEl.textContent = 'Preview: Subtitle di bawah video (tanpa background)';
-        } else if (layout === 'textonly') {
-            videoEl.style.height = '0px';
-            videoEl.textContent = '';
-            videoEl.style.display = 'none';
-            subtitleEl.style.display = 'flex';
-            subtitleEl.style.height = '80px';
-            subtitleEl.style.background = '#000000';
-            subtitleEl.style.color = '#FFD700';
-            subtitleEl.textContent = '📝 TEKS (40% tinggi, bg hitam)';
-            labelEl.textContent = 'Preview: Hanya teks kuning di background hitam';
-        }
-        
-        updatePreviewCanvas();
+    // ==================== UPDATE STATUS ====================
+    function updateStatus(msg, type = 'info') {
+        statusMsg.textContent = msg;
+        statusMsg.className   = 'status-badge';
+        if (type === 'warning') statusMsg.classList.add('warning');
+        else if (type === 'success') statusMsg.classList.add('success');
+        else if (type === 'error')   statusMsg.classList.add('error');
     }
 
-    // ==================== GET RESOLUTION CONFIG ====================
-    function getResolutionConfig() {
-        const value = resolutionSelect.value;
-        return RESOLUTIONS[value] || RESOLUTIONS['1080x1920'];
+    // ==================== UPDATE LAYOUT PREVIEW (UI card kecil) ====================
+    function updateLayoutPreview() {
+        const layout    = layoutSelect.value;
+        const videoEl   = layoutPreview.querySelector('.layout-preview-video');
+        const subtitEl  = layoutPreview.querySelector('.layout-preview-subtitle');
+        const labelEl   = layoutPreview.querySelector('.layout-preview-label');
+        const existing  = layoutPreview.querySelector('.layout-preview-overlay');
+        if (existing) existing.remove();
+
+        if (layout === 'separate') {
+            videoEl.style.cssText  = 'height:60px;display:flex;';
+            videoEl.textContent    = '🎬 VIDEO (60%)';
+            subtitEl.style.cssText = 'height:35px;display:flex;background:#1a1f27;color:#FFD966;';
+            subtitEl.textContent   = '📝 SUBTITLE (40%)';
+            labelEl.textContent    = 'Preview: Video di atas, subtitle di bawah (terpisah)';
+        } else if (layout === 'overlay') {
+            videoEl.style.cssText  = 'height:85px;display:flex;';
+            videoEl.textContent    = '🎬 VIDEO (full)';
+            subtitEl.style.display = 'none';
+            labelEl.textContent    = 'Preview: Subtitle di atas video (overlay)';
+            const o = document.createElement('div');
+            o.className   = 'layout-preview-overlay';
+            o.textContent = '📝 SUBTITLE OVERLAY';
+            layoutPreview.appendChild(o);
+        } else if (layout === 'bottom') {
+            videoEl.style.cssText  = 'height:70px;display:flex;';
+            videoEl.textContent    = '🎬 VIDEO';
+            subtitEl.style.cssText = 'height:20px;display:flex;background:transparent;color:#fff;';
+            subtitEl.textContent   = '📝 SUBTITLE (bottom)';
+            labelEl.textContent    = 'Preview: Subtitle di bawah video (tanpa background)';
+        } else if (layout === 'textonly') {
+            videoEl.style.display  = 'none';
+            subtitEl.style.cssText = 'height:80px;display:flex;background:#000;color:#FFD700;';
+            subtitEl.textContent   = '📝 TEKS KUNING (100% tinggi, bg hitam)';
+            labelEl.textContent    = 'Preview: Hanya teks kuning di background hitam';
+        }
+
+        startPreviewLoop(); // restart preview dengan layout baru
     }
 
     // ==================== RENDER UTAMA ====================
-    let isRendering = false;
-    let mediaRecorder = null;
+    let isRendering    = false;
+    let mediaRecorder  = null;
     let recordedChunks = [];
     let recordingStream = null;
-    let animationFrameId = null;
+    let renderRAF      = null;
 
     function startRender() {
         if (isRendering) return;
@@ -1110,232 +864,187 @@ else if (layout === 'textonly') {
             updateStatus('❌ Video belum dimuat. Pilih file video terlebih dahulu.', 'error');
             return;
         }
-        
+
         const subtitles = getSubtitles();
         if (subtitles.length === 0) {
             updateStatus('⚠️ Data subtitle kosong atau format JSON tidak valid.', 'warning');
             return;
         }
-        
+
         const config = getResolutionConfig();
         const layout = layoutSelect.value;
         const format = formatSelect.value;
-        const CANVAS_WIDTH = config.width;
-        const CANVAS_HEIGHT = config.height;
-        
-        // Layout textonly: canvas 40% dari resolusi (width & height)
-        if (layout === 'textonly') {
-        canvas.width = Math.round(CANVAS_WIDTH * 0.4);
-        canvas.height = Math.round(CANVAS_HEIGHT * 0.4);
-        } else {
-        canvas.width = CANVAS_WIDTH;
-        canvas.height = CANVAS_HEIGHT;
-        }
-        
-        if (recordingStream) {
-            recordingStream.getTracks().forEach(track => track.stop());
-            recordingStream = null;
-        }
+        const W      = config.width;
+        const H      = config.height;
+
+        // Set renderCanvas ukuran PENUH selalu
+        renderCanvas.width  = W;
+        renderCanvas.height = H;
+
+        // Cleanup stream lama
+        if (recordingStream) { recordingStream.getTracks().forEach(t => t.stop()); recordingStream = null; }
         recordedChunks = [];
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop();
-        }
-        
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+
         sourceVideo.currentTime = 0;
-        sourceVideo.muted = true;
-        
-        recordingStream = canvas.captureStream(30);
-        const bitrate = CANVAS_WIDTH * CANVAS_HEIGHT * 0.002;
-        const bitsPerSecond = Math.max(800000, Math.min(5000000, bitrate));
-        
-        // Cari MIME type yang didukung
-        let mimeType = getSupportedMimeType(format);
-        let actualFormat = format;
-        
-        if (!mimeType) {
-            // Fallback ke WebM
-            mimeType = getSupportedMimeType('webm');
-            actualFormat = 'webm';
-            updateStatus(`⚠️ ${getFormatLabel(format)} tidak didukung, menggunakan WebM`, 'warning');
-        }
-        
+        sourceVideo.muted       = false; // ← Jaga audio tetap ON
+
+        // ===== AUDIO TRACK dari video =====
+        let audioStream = null;
         try {
-            mediaRecorder = new MediaRecorder(recordingStream, {
-                mimeType: mimeType || undefined,
-                bitsPerSecond: bitsPerSecond
-            });
+            // Beberapa browser butuh video tidak muted untuk capture audio
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source   = audioCtx.createMediaElementSource(sourceVideo);
+            const dest     = audioCtx.createMediaStreamDestination();
+            source.connect(dest);
+            source.connect(audioCtx.destination); // agar user masih dengar
+            audioStream = dest.stream;
         } catch (e) {
-            mediaRecorder = new MediaRecorder(recordingStream, {
-                bitsPerSecond: bitsPerSecond
-            });
-            actualFormat = 'webm';
+            console.warn('Audio capture fallback:', e);
         }
-        
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data && event.data.size > 0) {
-                recordedChunks.push(event.data);
-            }
-        };
-        
+
+        // ===== VIDEO STREAM dari canvas =====
+        const bitrate   = W * H * 0.002;
+        const bps       = Math.max(800000, Math.min(5000000, bitrate));
+        const canvasStream = renderCanvas.captureStream(30);
+
+        // Gabungkan canvas stream + audio stream
+        let combinedStream;
+        if (audioStream && audioStream.getAudioTracks().length > 0) {
+            const tracks = [...canvasStream.getVideoTracks(), ...audioStream.getAudioTracks()];
+            combinedStream = new MediaStream(tracks);
+        } else {
+            combinedStream = canvasStream;
+        }
+        recordingStream = combinedStream;
+
+        let mimeType    = getSupportedMimeType(format);
+        let actualFormat = format;
+        if (!mimeType) { mimeType = getSupportedMimeType('webm'); actualFormat = 'webm'; }
+
+        try {
+            mediaRecorder = new MediaRecorder(combinedStream, { mimeType: mimeType || undefined, bitsPerSecond: bps });
+        } catch (e) {
+            mediaRecorder = new MediaRecorder(combinedStream, { bitsPerSecond: bps });
+            actualFormat  = 'webm';
+        }
+
+        mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) recordedChunks.push(e.data); };
+
         mediaRecorder.onstop = () => {
             if (recordedChunks.length === 0) {
                 updateStatus('⚠️ Tidak ada data rekaman. Coba ulangi.', 'warning');
-                isRendering = false;
-                renderBtn.disabled = false;
-                renderBtn.textContent = '▶ Mulai Render';
+                resetRenderState();
                 return;
             }
-            
-            const extension = getFormatExtension(actualFormat);
-            const blob = new Blob(recordedChunks, { 
-                type: actualFormat === 'mp4' ? 'video/mp4' : 'video/webm' 
-            });
-            const url = URL.createObjectURL(blob);
-            downloadLink.href = url;
-            
-            const layoutLabel = layout === 'separate' ? 'terpisah' : 
-                               layout === 'overlay' ? 'overlay' :
-                               layout === 'textonly' ? 'teks' : 'bottom';
-            downloadLink.download = `subtitle_${config.width}x${config.height}_${layoutLabel}.${extension}`;
-            downloadLink.textContent = `⬇️ Download ${config.label} (${extension.toUpperCase()})`;
+            const ext  = actualFormat === 'mp4' ? 'mp4' : 'webm';
+            const blob = new Blob(recordedChunks, { type: actualFormat === 'mp4' ? 'video/mp4' : 'video/webm' });
+            const url  = URL.createObjectURL(blob);
+            const lbl  = layout === 'separate' ? 'terpisah' : layout === 'overlay' ? 'overlay' : layout === 'textonly' ? 'teks' : 'bottom';
+            downloadLink.href      = url;
+            downloadLink.download  = `subtitle_${W}x${H}_${lbl}.${ext}`;
+            downloadLink.textContent = `⬇️ Download ${config.label} (${ext.toUpperCase()})`;
             downloadLink.classList.add('active');
-            
-            updateStatus(`✅ Render selesai! Klik link di atas untuk unduh (${extension.toUpperCase()})`, 'success');
-            isRendering = false;
-            renderBtn.disabled = false;
-            renderBtn.textContent = '▶ Mulai Render';
-            
-            if (recordingStream) {
-                recordingStream.getTracks().forEach(track => track.stop());
-                recordingStream = null;
-            }
+            updateStatus(`✅ Render selesai! Klik link di atas untuk unduh (${ext.toUpperCase()})`, 'success');
+            resetRenderState();
+            if (recordingStream) { recordingStream.getTracks().forEach(t => t.stop()); recordingStream = null; }
         };
-        
+
         mediaRecorder.start(250);
-        updateStatus(`⏳ Merender ${config.label} (${actualFormat.toUpperCase()})... 0%`, 'info');
-        renderBtn.disabled = true;
-        renderBtn.textContent = '⏳ Rendering...';
-        isRendering = true;
-        
+        updateStatus(`⏳ Merender ${config.label}... 0%`, 'info');
+        renderBtn.disabled      = true;
+        renderBtn.textContent   = '⏳ Rendering...';
+        isRendering             = true;
+
         sourceVideo.play().catch(err => {
             updateStatus('❌ Gagal memutar video: ' + err.message, 'error');
-            stopRenderOnError();
-            return;
+            resetRenderState();
         });
-        
-        function frameLoop() {
-            if (!isRendering) {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                }
-                return;
-            }
-            
+
+        function renderLoop() {
+            if (!isRendering) { if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop(); return; }
             if (sourceVideo.ended || sourceVideo.currentTime >= sourceVideo.duration) {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                }
+                if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
                 updateStatus('✅ Proses selesai, menyimpan...', 'success');
                 return;
             }
-            
-            renderFrame(sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
-            
-            // Update preview canvas
-            previewCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
-            
-            const progress = Math.min(100, Math.round((sourceVideo.currentTime / sourceVideo.duration) * 100));
-            if (progress % 5 === 0) {
-                const layoutLabel = layout === 'separate' ? 'terpisah' : 
-                                   layout === 'overlay' ? 'overlay' :
-                                   layout === 'textonly' ? 'teks' : 'bottom';
-                updateStatus(`⏳ Merender ${config.label} (${layoutLabel})... ${progress}%`, 'info');
-            }
-            
-            animationFrameId = requestAnimationFrame(frameLoop);
+
+            // Render ke canvas tersembunyi (resolusi penuh)
+            renderFrame(renderCtx, sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
+
+            // Mirror ke preview canvas (scaling otomatis via CSS)
+            previewCtx.drawImage(renderCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+
+            const pct = Math.min(100, Math.round((sourceVideo.currentTime / sourceVideo.duration) * 100));
+            if (pct % 5 === 0) updateStatus(`⏳ Merender ${config.label}... ${pct}%`, 'info');
+
+            renderRAF = requestAnimationFrame(renderLoop);
         }
-        
-        animationFrameId = requestAnimationFrame(frameLoop);
-        
-        sourceVideo.onerror = function(e) {
-            updateStatus('❌ Error pada video: ' + (sourceVideo.error ? sourceVideo.error.message : ''), 'error');
-            stopRenderOnError();
+
+        renderRAF = requestAnimationFrame(renderLoop);
+
+        sourceVideo.onerror = () => {
+            updateStatus('❌ Error pada video', 'error');
+            resetRenderState();
         };
     }
 
-    function stopRenderOnError() {
-        isRendering = false;
-        renderBtn.disabled = false;
+    function resetRenderState() {
+        isRendering           = false;
+        renderBtn.disabled    = false;
         renderBtn.textContent = '▶ Mulai Render';
-        if (animationFrameId) cancelAnimationFrame(animationFrameId);
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-        }
-        if (recordingStream) {
-            recordingStream.getTracks().forEach(track => track.stop());
-            recordingStream = null;
-        }
+        if (renderRAF) cancelAnimationFrame(renderRAF);
     }
 
     // ==================== EVENT LISTENERS ====================
     videoInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-        
+        // Revoke URL lama
+        if (sourceVideo.src && sourceVideo.src.startsWith('blob:')) URL.revokeObjectURL(sourceVideo.src);
         const url = URL.createObjectURL(file);
-        sourceVideo.src = url;
+        sourceVideo.src  = url;
         sourceVideo.load();
-        updateStatus('📹 Video dimuat, siap render', 'success');
+        sourceVideo.onloadedmetadata = () => {
+            audioInfo.textContent = sourceVideo.mozHasAudio !== false
+                ? `🔊 Video dimuat — audio akan disertakan dalam output`
+                : `⚠️ Video tidak memiliki track audio`;
+            startPreviewLoop();
+            updateStatus('📹 Video dimuat, siap render', 'success');
+        };
     });
 
     subtitleTextarea.addEventListener('input', validateSubtitleRealTime);
-
     renderBtn.addEventListener('click', startRender);
-
-    resolutionSelect.addEventListener('change', function() {
-        const config = getResolutionConfig();
-        updateStatus(`📐 Resolusi: ${config.label} (${config.ratio})`, 'info');
-        validateSubtitleRealTime();
-        updatePreviewCanvas();
-    });
-
+    resolutionSelect.addEventListener('change', () => { validateSubtitleRealTime(); startPreviewLoop(); });
     layoutSelect.addEventListener('change', updateLayoutPreview);
-
     formatSelect.addEventListener('change', updateFormatHint);
 
-    // ==================== TOOLBAR BUTTONS ====================
-    pasteBtn.addEventListener('click', async function() {
+    // Toolbar
+    pasteBtn.addEventListener('click', async () => {
         try {
-            const text = await navigator.clipboard.readText();
-            subtitleTextarea.value = text;
+            subtitleTextarea.value = await navigator.clipboard.readText();
             subtitleTextarea.dispatchEvent(new Event('input'));
             updateStatus('📋 Data ditempel dari clipboard', 'success');
-        } catch (e) {
-            updateStatus('❌ Gagal membaca clipboard. Izinkan akses clipboard.', 'error');
-        }
+        } catch (e) { updateStatus('❌ Gagal membaca clipboard. Izinkan akses clipboard.', 'error'); }
     });
-
-    clearBtn.addEventListener('click', function() {
+    clearBtn.addEventListener('click', () => {
         subtitleTextarea.value = '';
         subtitleTextarea.dispatchEvent(new Event('input'));
         updateStatus('🗑️ Data subtitle dibersihkan', 'info');
     });
-
-    formatBtn.addEventListener('click', function() {
+    formatBtn.addEventListener('click', () => {
         try {
-            const parsed = JSON.parse(subtitleTextarea.value);
-            subtitleTextarea.value = JSON.stringify(parsed, null, 2);
+            subtitleTextarea.value = JSON.stringify(JSON.parse(subtitleTextarea.value), null, 2);
             subtitleTextarea.dispatchEvent(new Event('input'));
             updateStatus('✨ Format JSON dirapikan', 'success');
-        } catch (e) {
-            updateStatus('❌ Format JSON tidak valid: ' + e.message, 'error');
-        }
+        } catch (e) { updateStatus('❌ Format JSON tidak valid: ' + e.message, 'error'); }
     });
 
     // ==================== INIT ====================
     updateFormatHint();
     validateSubtitleRealTime();
-    updateLayoutPreview();
+    updateLayoutPreview(); // juga memanggil startPreviewLoop()
 
 })();
 </script>
