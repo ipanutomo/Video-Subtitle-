@@ -118,6 +118,43 @@
             max-height: 300px;
             border-radius: 4px;
         }
+        /* [NEW] Preview controls */
+        .preview-controls {
+            background: #0f141c;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-top: 1px solid #2f3a48;
+        }
+        .preview-controls button {
+            background: #1f2a36;
+            border: 1px solid #384452;
+            border-radius: 20px;
+            padding: 5px 14px;
+            color: #b6c8e0;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .preview-controls button:hover { border-color: #f7c948; color: #fff; }
+        .preview-controls input[type="range"] {
+            flex: 1;
+            height: 4px;
+            padding: 0;
+            border-radius: 4px;
+            border: none;
+            accent-color: #f7c948;
+            cursor: pointer;
+            background: #384452;
+        }
+        .preview-controls span {
+            font-size: 0.75rem;
+            color: #7a90a8;
+            white-space: nowrap;
+            min-width: 60px;
+            text-align: right;
+        }
         .action-btn {
             width: 100%;
             background: #f7c948;
@@ -146,6 +183,39 @@
             transform: translateY(2px);
             box-shadow: 0 3px 0 #5f4b1d;
             pointer-events: none;
+        }
+        /* [NEW] Tombol render + preview side by side */
+        .render-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .render-row .action-btn {
+            margin-top: 0;
+            flex: 1;
+        }
+        .render-row .preview-btn {
+            flex: 0 0 auto;
+            background: #2a3848;
+            border: 1px solid #384452;
+            border-radius: 60px;
+            padding: 0 20px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #b6c8e0;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.1s;
+        }
+        .render-row .preview-btn:hover { border-color: #f7c948; color: #fff; }
+        .render-row .preview-btn.active {
+            background: #3d1f1f;
+            border-color: #ff6b63;
+            color: #ff8a80;
         }
         .download-section {
             margin-top: 18px;
@@ -211,7 +281,6 @@
         #canvas-preview {
             display: none;
         }
-
         .format-support {
             display: inline-block;
             padding: 2px 10px;
@@ -228,7 +297,6 @@
             background: rgba(255, 59, 48, 0.3);
             color: #ff6b63;
         }
-        
         /* Layout Preview */
         #layoutPreview {
             margin-top: 12px;
@@ -281,7 +349,6 @@
             padding: 2px 12px;
             border-radius: 4px;
         }
-
         .row-2col {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -290,8 +357,6 @@
         .row-2col select {
             padding: 10px 12px;
         }
-
-
         /* ===== Subtitle Toolbar ===== */
         .subtitle-toolbar {
             display: flex;
@@ -352,11 +417,131 @@
             font-weight: 700;
             color: #8899b0;
         }
-
+        /* [NEW] ===== Segment Editor ===== */
+        #segmentEditor {
+            margin-top: 12px;
+        }
+        #segmentList {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 340px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        #segmentList::-webkit-scrollbar { width: 4px; }
+        #segmentList::-webkit-scrollbar-thumb { background: #384452; border-radius: 4px; }
+        .seg-card {
+            background: #141a22;
+            border: 1px solid #384452;
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            transition: border-color 0.2s;
+        }
+        .seg-card.active-seg {
+            border-color: #f7c948 !important;
+            background: #1a2030;
+        }
+        .seg-card.error-seg { border-color: #ff3b30 !important; }
+        .seg-card.warn-seg  { border-color: #f7c948 !important; }
+        .seg-card-header {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .seg-idx {
+            font-size: 0.7rem;
+            color: #5a7090;
+            font-family: monospace;
+        }
+        .seg-overlap-label {
+            font-size: 0.7rem;
+            color: #f7c948;
+            margin-left: auto;
+        }
+        .seg-card-header button {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: #ff6b63;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 2px 4px;
+        }
+        .seg-card-header button:hover { color: #ff3b30; }
+        .seg-field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .seg-field label {
+            font-size: 0.65rem;
+            color: #5a7090;
+            margin: 0;
+        }
+        .seg-field input[type="number"],
+        .seg-field input[type="text"] {
+            background: #0e141c;
+            border: 1px solid #2e3a48;
+            border-radius: 8px;
+            padding: 5px 8px;
+            color: #eef2f5;
+            font-size: 0.82rem;
+            width: 100%;
+        }
+        .seg-field input:focus {
+            border-color: #f7c948;
+            outline: none;
+        }
+        .seg-text-field {
+            grid-column: 1 / -1;
+        }
+        .seg-time-btns {
+            display: flex;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        .seg-time-btn {
+            background: #1f2a36;
+            border: 1px solid #384452;
+            border-radius: 8px;
+            padding: 3px 8px;
+            color: #b6c8e0;
+            font-size: 0.7rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .seg-time-btn:hover { border-color: #f7c948; color: #f7c948; }
+        .seg-editor-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .seg-editor-actions button {
+            background: #1f2a36;
+            border: 1px solid #384452;
+            border-radius: 20px;
+            padding: 6px 14px;
+            color: #b6c8e0;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .seg-editor-actions button:hover { border-color: #f7c948; color: #f7c948; }
+        .seg-error-msg {
+            color: #ff6b63;
+            font-size: 0.8rem;
+            margin-top: 6px;
+        }
         @media (max-width: 480px) {
             .app { padding: 16px 12px; }
             .action-btn { font-size: 1rem; padding: 14px; }
             .row-2col { grid-template-columns: 1fr; }
+            .render-row { flex-wrap: wrap; }
         }
     </style>
 </head>
@@ -395,6 +580,16 @@
             </button>
         </div>
         <div class="hint">Format: array objek dengan properti start, end, text</div>
+
+        <!-- [NEW] Segment Editor -->
+        <div id="segmentEditor">
+            <div id="segmentList"></div>
+            <div id="segErrorMsg" class="seg-error-msg" style="display:none;"></div>
+            <div class="seg-editor-actions">
+                <button id="addSegBtn">+ Tambah Segmen</button>
+                <button id="sortSegBtn">⬆ Sort by Start</button>
+            </div>
+        </div>
     </div>
 
     <!-- Pilihan Resolusi & Format -->
@@ -448,14 +643,23 @@
         </div>
     </div>
 
-    <!-- Preview Video -->
+    <!-- Preview Video + Canvas -->
     <div class="preview-box">
         <video id="sourceVideo" muted playsinline></video>
         <canvas id="previewCanvas"></canvas>
+        <!-- [NEW] Preview Controls -->
+        <div class="preview-controls" id="previewControls" style="display:none;">
+            <button id="playPauseBtn">▶</button>
+            <input type="range" id="seekBar" min="0" max="100" step="0.1" value="0">
+            <span id="timeDisplay">0:00 / 0:00</span>
+        </div>
     </div>
 
-    <!-- Tombol Render -->
-    <button class="action-btn" id="renderBtn">▶ Mulai Render</button>
+    <!-- [NEW] Tombol Render + Preview -->
+    <div class="render-row">
+        <button class="action-btn" id="renderBtn">▶ Mulai Render</button>
+        <button class="preview-btn" id="previewBtn">👁 Preview</button>
+    </div>
 
     <!-- Status -->
     <div id="statusMessage" class="status-badge">📹 Pilih video & atur subtitle, lalu klik Render</div>
@@ -465,7 +669,7 @@
         <a href="#" id="downloadLink" class="download-link" download="subtitle_video.webm">⬇️ Hasil rekaman akan muncul di sini</a>
     </div>
 
-    <!-- Canvas tersembunyi -->
+    <!-- Canvas tersembunyi untuk render final -->
     <canvas id="canvas-preview"></canvas>
 </div>
 
@@ -492,53 +696,47 @@
     const pasteBtn  = document.getElementById('pasteBtn');
     const clearBtn  = document.getElementById('clearBtn');
     const formatBtn = document.getElementById('formatBtn');
+    // [NEW] Preview controls
+    const previewBtn      = document.getElementById('previewBtn');
+    const previewControls = document.getElementById('previewControls');
+    const playPauseBtn    = document.getElementById('playPauseBtn');
+    const seekBar         = document.getElementById('seekBar');
+    const timeDisplay     = document.getElementById('timeDisplay');
+    // [NEW] Segment editor
+    const segmentList  = document.getElementById('segmentList');
+    const segErrorMsg  = document.getElementById('segErrorMsg');
+    const addSegBtn    = document.getElementById('addSegBtn');
+    const sortSegBtn   = document.getElementById('sortSegBtn');
 
     // ==================== KONFIGURASI RESOLUSI ====================
     const RESOLUTIONS = {
-        '720x1280': { width: 720, height: 1280, label: 'HD (720×1280)', ratio: '9:16', platform: 'TikTok' },
+        '720x1280':  { width: 720,  height: 1280, label: 'HD (720×1280)',     ratio: '9:16', platform: 'TikTok' },
         '1080x1920': { width: 1080, height: 1920, label: 'Full HD (1080×1920)', ratio: '9:16', platform: 'TikTok' },
-        '854x480': { width: 854, height: 480, label: '480p (854×480)', ratio: '16:9', platform: 'YouTube' },
-        '1280x720': { width: 1280, height: 720, label: '720p (1280×720)', ratio: '16:9', platform: 'YouTube' },
+        '854x480':   { width: 854,  height: 480,  label: '480p (854×480)',     ratio: '16:9', platform: 'YouTube' },
+        '1280x720':  { width: 1280, height: 720,  label: '720p (1280×720)',    ratio: '16:9', platform: 'YouTube' },
         '1920x1080': { width: 1920, height: 1080, label: '1080p (1920×1080)', ratio: '16:9', platform: 'YouTube' },
-        '1080x1080': { width: 1080, height: 1080, label: '1080×1080', ratio: '1:1', platform: 'Instagram' }
+        '1080x1080': { width: 1080, height: 1080, label: '1080×1080',         ratio: '1:1',  platform: 'Instagram' }
     };
 
     // ==================== FORMAT SUPPORT ====================
     function getSupportedMimeType(format) {
         const mimeTypes = {
-            'webm': [
-                'video/webm;codecs=vp9',
-                'video/webm;codecs=vp8',
-                'video/webm'
-            ],
-            'mp4': [
-                'video/mp4;codecs=avc1.42E01E',
-                'video/mp4;codecs=avc1',
-                'video/mp4'
-            ]
+            'webm': ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'],
+            'mp4':  ['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1','video/mp4']
         };
-
         const types = mimeTypes[format] || mimeTypes['webm'];
         for (let mime of types) {
-            if (MediaRecorder.isTypeSupported(mime)) {
-                return mime;
-            }
+            if (MediaRecorder.isTypeSupported(mime)) return mime;
         }
         return null;
     }
 
-    function getFormatExtension(format) {
-        return format === 'mp4' ? 'mp4' : 'webm';
-    }
-
-    function getFormatLabel(format) {
-        return format === 'mp4' ? 'MP4 (H.264)' : 'WebM';
-    }
+    function getFormatExtension(format) { return format === 'mp4' ? 'mp4' : 'webm'; }
+    function getFormatLabel(format) { return format === 'mp4' ? 'MP4 (H.264)' : 'WebM'; }
 
     function updateFormatHint() {
         const format = formatSelect.value;
         const mime = getSupportedMimeType(format);
-        
         if (mime) {
             formatHint.innerHTML = `✅ ${getFormatLabel(format)} didukung di browser ini`;
             formatHint.style.color = '#8cd9a0';
@@ -555,7 +753,7 @@
             if (!raw) return [];
             const parsed = JSON.parse(raw);
             if (!Array.isArray(parsed)) return [];
-            return parsed.filter(item => 
+            return parsed.filter(item =>
                 item && typeof item === 'object' &&
                 typeof item.start === 'number' &&
                 typeof item.end === 'number' &&
@@ -566,23 +764,25 @@
         }
     }
 
+    // ==================== GET RESOLUTION CONFIG ====================
+    function getResolutionConfig() {
+        const value = resolutionSelect.value;
+        return RESOLUTIONS[value] || RESOLUTIONS['1080x1920'];
+    }
+
     // ==================== TEXT WRAPPING ====================
     function wrapText(text, context, maxWidth, maxLines = 2) {
         if (!text || text.trim() === '') return [];
-        
         const words = text.trim().split(' ');
         const lines = [];
         let currentLine = '';
-        
         for (let i = 0; i < words.length; i++) {
             const word = words[i];
             const testLine = currentLine ? currentLine + ' ' + word : word;
             const metrics = context.measureText(testLine);
-            
             if (metrics.width > maxWidth && currentLine !== '') {
                 lines.push(currentLine);
                 currentLine = word;
-                
                 if (lines.length >= maxLines) {
                     const lastLine = lines[lines.length - 1];
                     let truncated = lastLine;
@@ -596,11 +796,7 @@
                 currentLine = testLine;
             }
         }
-        
-        if (currentLine) {
-            lines.push(currentLine);
-        }
-        
+        if (currentLine) lines.push(currentLine);
         while (lines.length > maxLines) {
             const lastLine = lines[lines.length - 1];
             let truncated = lines[lines.length - 2] + ' ' + lastLine;
@@ -610,19 +806,21 @@
             lines[lines.length - 2] = truncated + '…';
             lines.pop();
         }
-        
         return lines;
     }
 
-    // ==================== RENDER FRAME ====================
-    function renderFrame(videoElement, subtitles, currentTime, config, layout) {
-        const CANVAS_WIDTH = config.width;
-        const CANVAS_HEIGHT = config.height;
-        canvas.width = CANVAS_WIDTH;
-        canvas.height = CANVAS_HEIGHT;
-        
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        
+    // ==================== RENDER FRAME (REFACTORED) ====================
+    // [CHANGE 2 + 3b] Menerima targetCanvas sebagai parameter pertama.
+    // canvas.width/height TIDAK di-set di sini (hanya di startRender & initPreviewCanvas).
+    // Gunakan ctx.clearRect untuk menghapus frame, bukan reset canvas.width.
+    function renderFrame(targetCanvas, videoElement, subtitles, currentTime, config, layout) {
+        const tCtx = targetCanvas.getContext('2d');
+        const W = targetCanvas.width;
+        const H = targetCanvas.height;
+
+        // [CHANGE 3b] clearRect menggantikan canvas.width = ... yang reset state
+        tCtx.clearRect(0, 0, W, H);
+
         // Cari subtitle aktif
         let activeText = '';
         for (let sub of subtitles) {
@@ -634,375 +832,291 @@
 
         // ==================== LAYOUT: TERPISAH ====================
         if (layout === 'separate') {
-            const videoRatio = videoElement.videoWidth / videoElement.videoHeight;
-            const canvasRatio = CANVAS_WIDTH / CANVAS_HEIGHT;
-            
+            const videoRatio = videoElement.videoWidth / videoElement.videoHeight || 16/9;
+            const canvasRatio = W / H;
             let videoWidth, videoHeight, videoX, videoY;
             let subtitleHeight, subtitleY;
-            
+
             if (canvasRatio < 1) {
-                const videoAreaHeight = CANVAS_HEIGHT * 0.60;
-                subtitleHeight = CANVAS_HEIGHT * 0.40;
-                
+                const videoAreaHeight = H * 0.60;
+                subtitleHeight = H * 0.40;
                 if (videoRatio > canvasRatio) {
-                    videoWidth = CANVAS_WIDTH;
-                    videoHeight = CANVAS_WIDTH / videoRatio;
-                    videoX = 0;
-                    videoY = (videoAreaHeight - videoHeight) / 2;
+                    videoWidth = W; videoHeight = W / videoRatio;
+                    videoX = 0; videoY = (videoAreaHeight - videoHeight) / 2;
                 } else {
-                    videoHeight = videoAreaHeight;
-                    videoWidth = videoAreaHeight * videoRatio;
-                    videoX = (CANVAS_WIDTH - videoWidth) / 2;
-                    videoY = 0;
+                    videoHeight = videoAreaHeight; videoWidth = videoAreaHeight * videoRatio;
+                    videoX = (W - videoWidth) / 2; videoY = 0;
                 }
                 subtitleY = videoAreaHeight;
             } else {
-                const videoAreaHeight = CANVAS_HEIGHT * 0.75;
-                subtitleHeight = CANVAS_HEIGHT * 0.25;
-                
-                videoWidth = CANVAS_WIDTH;
-                videoHeight = CANVAS_WIDTH / videoRatio;
-                videoX = 0;
-                videoY = (videoAreaHeight - videoHeight) / 2;
+                const videoAreaHeight = H * 0.75;
+                subtitleHeight = H * 0.25;
+                videoWidth = W; videoHeight = W / videoRatio;
+                videoX = 0; videoY = (videoAreaHeight - videoHeight) / 2;
                 subtitleY = videoAreaHeight;
             }
-            
-            ctx.drawImage(videoElement, videoX, videoY, videoWidth, videoHeight);
-            
-            ctx.fillStyle = '#0a0a0a';
-            ctx.fillRect(0, subtitleY, CANVAS_WIDTH, subtitleHeight);
-            
-            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(0, subtitleY);
-            ctx.lineTo(CANVAS_WIDTH, subtitleY);
-            ctx.stroke();
-            
+
+            tCtx.drawImage(videoElement, videoX, videoY, videoWidth, videoHeight);
+            tCtx.fillStyle = '#0a0a0a';
+            tCtx.fillRect(0, subtitleY, W, subtitleHeight);
+            tCtx.strokeStyle = 'rgba(255,255,255,0.08)';
+            tCtx.lineWidth = 1;
+            tCtx.beginPath();
+            tCtx.moveTo(0, subtitleY);
+            tCtx.lineTo(W, subtitleY);
+            tCtx.stroke();
+
             if (activeText) {
-                const fontSize = Math.min(
-                    CANVAS_WIDTH * 0.055,
-                    subtitleHeight * 0.50
-                );
+                const fontSize = Math.min(W * 0.055, subtitleHeight * 0.50);
                 const finalFontSize = Math.max(20, Math.min(60, fontSize));
-                
-                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                const margin = CANVAS_WIDTH * 0.05;
-                const maxWidth = CANVAS_WIDTH - (margin * 2);
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 2);
-                
+                tCtx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
+                tCtx.textAlign = 'center';
+                tCtx.textBaseline = 'middle';
+                const margin = W * 0.05;
+                const maxWidth = W - margin * 2;
+                const wrappedLines = wrapText(activeText, tCtx, maxWidth, 2);
                 const lineHeight = finalFontSize * 1.4;
                 const totalHeight = wrappedLines.length * lineHeight;
-                const centerY = subtitleY + (subtitleHeight / 2);
-                const startY = centerY - (totalHeight / 2) + (lineHeight / 2);
-                
+                const centerY = subtitleY + subtitleHeight / 2;
+                const startY = centerY - totalHeight / 2 + lineHeight / 2;
+
                 wrappedLines.forEach((line, index) => {
-                    const x = CANVAS_WIDTH / 2;
-                    const y = startY + (index * lineHeight);
-                    
+                    const x = W / 2;
+                    const y = startY + index * lineHeight;
                     if (wrappedLines.length > 1 || line.length > 30) {
-                        const metrics = ctx.measureText(line);
-                        const textWidth = metrics.width;
-                        const padding = finalFontSize * 0.4;
-                        const bgX = x - textWidth/2 - padding;
-                        const bgY = y - finalFontSize/2 - 6;
-                        const bgWidth = textWidth + padding * 2;
-                        const bgHeight = finalFontSize + 12;
-                        
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                        ctx.shadowBlur = 8;
-                        ctx.beginPath();
-                        if (ctx.roundRect) {
-                            ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 6);
-                        } else {
-                            ctx.rect(bgX, bgY, bgWidth, bgHeight);
-                        }
-                        ctx.fill();
-                        ctx.shadowBlur = 0;
+                        const metrics = tCtx.measureText(line);
+                        const tw = metrics.width;
+                        const pad = finalFontSize * 0.4;
+                        tCtx.fillStyle = 'rgba(0,0,0,0.5)';
+                        tCtx.shadowColor = 'rgba(0,0,0,0.3)'; tCtx.shadowBlur = 8;
+                        tCtx.beginPath();
+                        if (tCtx.roundRect) tCtx.roundRect(x-tw/2-pad, y-finalFontSize/2-6, tw+pad*2, finalFontSize+12, 6);
+                        else tCtx.rect(x-tw/2-pad, y-finalFontSize/2-6, tw+pad*2, finalFontSize+12);
+                        tCtx.fill(); tCtx.shadowBlur = 0;
                     }
-                    
-                    ctx.lineWidth = Math.max(3, finalFontSize * 0.12);
-                    ctx.strokeStyle = '#000000';
-                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                    ctx.shadowBlur = 8;
-                    ctx.strokeText(line, x, y);
-                    
-                    ctx.fillStyle = '#FFD966';
-                    ctx.shadowBlur = 10;
-                    ctx.fillText(line, x, y);
+                    tCtx.lineWidth = Math.max(3, finalFontSize * 0.12);
+                    tCtx.strokeStyle = '#000000';
+                    tCtx.shadowColor = 'rgba(0,0,0,0.8)'; tCtx.shadowBlur = 8;
+                    tCtx.strokeText(line, x, y);
+                    tCtx.fillStyle = '#FFD966'; tCtx.shadowBlur = 10;
+                    tCtx.fillText(line, x, y);
+                    tCtx.shadowBlur = 0;
                 });
             }
         }
 
         // ==================== LAYOUT: OVERLAY ====================
         else if (layout === 'overlay') {
-            ctx.drawImage(videoElement, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            
+            tCtx.drawImage(videoElement, 0, 0, W, H);
             if (activeText) {
-                const fontSize = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) * 0.045;
+                const fontSize = Math.min(W, H) * 0.045;
                 const finalFontSize = Math.max(18, Math.min(48, fontSize));
-                
-                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                
-                const margin = CANVAS_WIDTH * 0.05;
-                const maxWidth = CANVAS_WIDTH - (margin * 2);
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 2);
-                
+                tCtx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
+                tCtx.textAlign = 'center';
+                tCtx.textBaseline = 'bottom';
+                const margin = W * 0.05;
+                const maxWidth = W - margin * 2;
+                const wrappedLines = wrapText(activeText, tCtx, maxWidth, 2);
                 const lineHeight = finalFontSize * 1.4;
                 const totalHeight = wrappedLines.length * lineHeight;
-                const bottomPadding = CANVAS_HEIGHT * 0.08;
-                const startY = CANVAS_HEIGHT - bottomPadding;
-                
+                const bottomPadding = H * 0.08;
+                const startY = H - bottomPadding;
+
                 wrappedLines.forEach((line, index) => {
-                    const x = CANVAS_WIDTH / 2;
+                    const x = W / 2;
                     const y = startY - (totalHeight - (index + 1) * lineHeight);
-                    
                     if (wrappedLines.length > 1 || line.length > 30) {
-                        const metrics = ctx.measureText(line);
-                        const textWidth = metrics.width;
-                        const padding = finalFontSize * 0.4;
-                        const bgX = x - textWidth/2 - padding;
-                        const bgY = y - finalFontSize - 6;
-                        const bgWidth = textWidth + padding * 2;
-                        const bgHeight = finalFontSize + 12;
-                        
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                        ctx.shadowBlur = 0;
-                        ctx.beginPath();
-                        if (ctx.roundRect) {
-                            ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 6);
-                        } else {
-                            ctx.rect(bgX, bgY, bgWidth, bgHeight);
-                        }
-                        ctx.fill();
+                        const metrics = tCtx.measureText(line);
+                        const tw = metrics.width; const pad = finalFontSize * 0.4;
+                        tCtx.fillStyle = 'rgba(0,0,0,0.4)'; tCtx.shadowBlur = 0;
+                        tCtx.beginPath();
+                        if (tCtx.roundRect) tCtx.roundRect(x-tw/2-pad, y-finalFontSize-6, tw+pad*2, finalFontSize+12, 6);
+                        else tCtx.rect(x-tw/2-pad, y-finalFontSize-6, tw+pad*2, finalFontSize+12);
+                        tCtx.fill();
                     }
-                    
-                    ctx.lineWidth = Math.max(3, finalFontSize * 0.15);
-                    ctx.strokeStyle = '#000000';
-                    ctx.shadowColor = 'rgba(0,0,0,0.9)';
-                    ctx.shadowBlur = 10;
-                    ctx.strokeText(line, x, y);
-                    
-                    ctx.fillStyle = '#FFD966';
-                    ctx.shadowBlur = 12;
-                    ctx.fillText(line, x, y);
+                    tCtx.lineWidth = Math.max(3, finalFontSize * 0.15);
+                    tCtx.strokeStyle = '#000000';
+                    tCtx.shadowColor = 'rgba(0,0,0,0.9)'; tCtx.shadowBlur = 10;
+                    tCtx.strokeText(line, x, y);
+                    tCtx.fillStyle = '#FFD966'; tCtx.shadowBlur = 12;
+                    tCtx.fillText(line, x, y);
+                    tCtx.shadowBlur = 0;
                 });
             }
         }
 
         // ==================== LAYOUT: BOTTOM ====================
         else if (layout === 'bottom') {
-            ctx.drawImage(videoElement, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            
+            tCtx.drawImage(videoElement, 0, 0, W, H);
             if (activeText) {
-                const fontSize = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) * 0.04;
+                const fontSize = Math.min(W, H) * 0.04;
                 const finalFontSize = Math.max(16, Math.min(42, fontSize));
-                
-                ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                
-                const margin = CANVAS_WIDTH * 0.05;
-                const maxWidth = CANVAS_WIDTH - (margin * 2);
-                const wrappedLines = wrapText(activeText, ctx, maxWidth, 2);
-                
+                tCtx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
+                tCtx.textAlign = 'center';
+                tCtx.textBaseline = 'bottom';
+                const margin = W * 0.05;
+                const maxWidth = W - margin * 2;
+                const wrappedLines = wrapText(activeText, tCtx, maxWidth, 2);
                 const lineHeight = finalFontSize * 1.4;
                 const totalHeight = wrappedLines.length * lineHeight;
-                const bottomPadding = CANVAS_HEIGHT * 0.05;
-                const startY = CANVAS_HEIGHT - bottomPadding;
-                
+                const bottomPadding = H * 0.05;
+                const startY = H - bottomPadding;
+
                 wrappedLines.forEach((line, index) => {
-                    const x = CANVAS_WIDTH / 2;
+                    const x = W / 2;
                     const y = startY - (totalHeight - (index + 1) * lineHeight);
-                    
-                    const metrics = ctx.measureText(line);
-                    const textWidth = metrics.width;
-                    const padding = finalFontSize * 0.4;
-                    const bgX = x - textWidth/2 - padding;
-                    const bgY = y - finalFontSize - 6;
-                    const bgWidth = textWidth + padding * 2;
-                    const bgHeight = finalFontSize + 12;
-                    
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                    ctx.shadowBlur = 0;
-                    ctx.beginPath();
-                    if (ctx.roundRect) {
-                        ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 6);
-                    } else {
-                        ctx.rect(bgX, bgY, bgWidth, bgHeight);
-                    }
-                    ctx.fill();
-                    
-                    ctx.lineWidth = Math.max(3, finalFontSize * 0.12);
-                    ctx.strokeStyle = '#000000';
-                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                    ctx.shadowBlur = 8;
-                    ctx.strokeText(line, x, y);
-                    
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.shadowBlur = 10;
-                    ctx.fillText(line, x, y);
+                    const metrics = tCtx.measureText(line);
+                    const tw = metrics.width; const pad = finalFontSize * 0.4;
+                    tCtx.fillStyle = 'rgba(0,0,0,0.4)'; tCtx.shadowBlur = 0;
+                    tCtx.beginPath();
+                    if (tCtx.roundRect) tCtx.roundRect(x-tw/2-pad, y-finalFontSize-6, tw+pad*2, finalFontSize+12, 6);
+                    else tCtx.rect(x-tw/2-pad, y-finalFontSize-6, tw+pad*2, finalFontSize+12);
+                    tCtx.fill();
+                    tCtx.lineWidth = Math.max(3, finalFontSize * 0.12);
+                    tCtx.strokeStyle = '#000000';
+                    tCtx.shadowColor = 'rgba(0,0,0,0.8)'; tCtx.shadowBlur = 8;
+                    tCtx.strokeText(line, x, y);
+                    tCtx.fillStyle = '#FFFFFF'; tCtx.shadowBlur = 10;
+                    tCtx.fillText(line, x, y);
+                    tCtx.shadowBlur = 0;
                 });
             }
         }
 
-// ==================== LAYOUT: TEXTONLY (40% BAWAH) ====================
-else if (layout === 'textonly') {
-    const H40 = Math.round(CANVAS_HEIGHT * 0.4);
-    const Y_START = CANVAS_HEIGHT - H40;  // Mulai dari bawah
-    
-    // Gambar background hitam di 40% bagian bawah
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, Y_START, CANVAS_WIDTH, H40);
+        // ==================== LAYOUT: TEXTONLY ====================
+        // [CHANGE 3c] Background hitam PENUH, teks di area 40% bawah.
+        // Canvas dimensi TIDAK diubah — selalu = resolusi terpilih.
+        else if (layout === 'textonly') {
+            // Background hitam penuh
+            tCtx.fillStyle = '#000000';
+            tCtx.fillRect(0, 0, W, H);
 
-    if (activeText) {
-        // Ukuran huruf lebih kecil
-        const fontSize = Math.min(CANVAS_WIDTH * 0.05, H40 * 0.16);
-        const finalFontSize = Math.max(14, Math.min(60, fontSize));
+            // Area teks = 40% bagian bawah canvas
+            const textAreaHeight = H * 0.4;
+            const textAreaY = H - textAreaHeight;
 
-        ctx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+            if (activeText) {
+                const fontSize = Math.min(W * 0.05, textAreaHeight * 0.16);
+                const finalFontSize = Math.max(14, Math.min(60, fontSize));
+                tCtx.font = `bold ${finalFontSize}px Arial, "Segoe UI", sans-serif`;
+                tCtx.textAlign = 'center';
+                tCtx.textBaseline = 'middle';
+                const margin = W * 0.06;
+                const maxWidth = W - margin * 2;
+                const wrappedLines = wrapText(activeText, tCtx, maxWidth, 4);
+                const lineHeight = finalFontSize * 1.2;
+                const totalTextHeight = wrappedLines.length * lineHeight;
+                const centerY = textAreaY + textAreaHeight / 2;
+                const startTextY = centerY - totalTextHeight / 2 + lineHeight / 2;
 
-        const margin = CANVAS_WIDTH * 0.06;
-        const maxWidth = CANVAS_WIDTH - margin * 2;
-        const wrappedLines = wrapText(activeText, ctx, maxWidth, 4);
+                wrappedLines.forEach((line, i) => {
+                    const x = W / 2;
+                    const y = startTextY + i * lineHeight;
+                    tCtx.lineJoin = 'round'; tCtx.miterLimit = 2;
+                    tCtx.lineWidth = finalFontSize * 0.22;
+                    tCtx.strokeStyle = '#000000';
+                    tCtx.shadowColor = 'rgba(255,215,0,0.15)'; tCtx.shadowBlur = finalFontSize * 0.08;
+                    tCtx.strokeText(line, x, y);
+                    tCtx.lineWidth = finalFontSize * 0.14;
+                    tCtx.strokeStyle = '#000000';
+                    tCtx.shadowColor = 'rgba(255,215,0,0.10)'; tCtx.shadowBlur = finalFontSize * 0.05;
+                    tCtx.strokeText(line, x, y);
+                    tCtx.shadowColor = 'rgba(255,215,0,0.08)'; tCtx.shadowBlur = finalFontSize * 0.03;
+                    tCtx.fillStyle = '#FFD700'; tCtx.fillText(line, x, y);
+                    tCtx.shadowBlur = 0;
+                    tCtx.fillStyle = '#FFD700'; tCtx.fillText(line, x, y);
+                });
+            }
+            return; // tidak perlu watermark untuk textonly
+        }
 
-        // Line spacing lebih rapat
-        const lineHeight = finalFontSize * 1.2;
-        const totalTextHeight = wrappedLines.length * lineHeight;
-        const centerY = Y_START + (H40 / 2);  // Tengah dari area 40% bawah
-        const startTextY = centerY - totalTextHeight / 2 + lineHeight / 2;
-
-        wrappedLines.forEach((line, i) => {
-            const x = CANVAS_WIDTH / 2;
-            const y = startTextY + i * lineHeight;
-
-            ctx.lineJoin = 'round';
-            ctx.miterLimit = 2;
-
-            // Outline hitam tebal
-            ctx.lineWidth = finalFontSize * 0.22;
-            ctx.strokeStyle = '#000000';
-            ctx.shadowColor = 'rgba(255,215,0,0.15)';
-            ctx.shadowBlur = finalFontSize * 0.08;
-            ctx.strokeText(line, x, y);
-
-            // Outline hitam sedang
-            ctx.lineWidth = finalFontSize * 0.14;
-            ctx.strokeStyle = '#000000';
-            ctx.shadowColor = 'rgba(255,215,0,0.10)';
-            ctx.shadowBlur = finalFontSize * 0.05;
-            ctx.strokeText(line, x, y);
-
-            // Teks kuning
-            ctx.shadowColor = 'rgba(255,215,0,0.08)';
-            ctx.shadowBlur = finalFontSize * 0.03;
-            ctx.fillStyle = '#FFD700';
-            ctx.fillText(line, x, y);
-
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#FFD700';
-            ctx.fillText(line, x, y);
-        });
-    }
-    return;
-}
-
-        ctx.font = `${Math.max(12, CANVAS_WIDTH * 0.012)}px monospace`;
-        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(
-            `${config.width}×${config.height} | ${config.platform}`, 
-            CANVAS_WIDTH - 12, 
-            CANVAS_HEIGHT - 8
-        );
+        // Watermark resolusi (layout non-textonly)
+        tCtx.font = `${Math.max(12, W * 0.012)}px monospace`;
+        tCtx.fillStyle = 'rgba(255,255,255,0.15)';
+        tCtx.textAlign = 'right';
+        tCtx.textBaseline = 'bottom';
+        tCtx.fillText(`${config.width}×${config.height} | ${config.platform}`, W - 12, H - 8);
     }
 
-    // ==================== UPDATE PREVIEW CANVAS ====================
+    // ==================== INIT PREVIEW CANVAS ====================
+    // [CHANGE 3d] Selalu set canvas = dimensi penuh resolusi.
+    // Preview placeholder textonly: background hitam + teks di 40% bawah.
     function updatePreviewCanvas() {
         const config = getResolutionConfig();
-        const layout = layoutSelect.value;
-        const CANVAS_WIDTH = config.width;
-        const CANVAS_HEIGHT = config.height;
-        let height = CANVAS_HEIGHT;
-        let width = CANVAS_WIDTH;
-        if (layout === 'textonly') {
-        width = Math.round(CANVAS_WIDTH * 0.4);
-        height = Math.round(CANVAS_HEIGHT * 0.4);
-        }
-        
-        // Set preview canvas size (dengan aspect ratio)
-        const maxWidth = previewCanvas.parentElement.clientWidth - 2;
-        const aspectRatio = CANVAS_WIDTH / height;
-        let displayWidth = maxWidth;
-        let displayHeight = maxWidth / aspectRatio;
-        
-        if (displayHeight > 300) {
-            displayHeight = 300;
-            displayWidth = 300 * aspectRatio;
-        }
-        
-        previewCanvas.width = width;
-        previewCanvas.height = height;
-        previewCanvas.style.width = displayWidth + 'px';
-        previewCanvas.style.height = displayHeight + 'px';
+        const layout  = layoutSelect.value;
+        const W = config.width;
+        const H = config.height;
+
+        // [CHANGE 3d] Ukuran canvas SELALU = resolusi penuh untuk semua layout
+        previewCanvas.width  = W;
+        previewCanvas.height = H;
+
+        // Display size (CSS) — scale to fit container
+        const maxW = (previewCanvas.parentElement.clientWidth || 500) - 2;
+        const aspectRatio = W / H;
+        let dispW = maxW;
+        let dispH = maxW / aspectRatio;
+        if (dispH > 300) { dispH = 300; dispW = 300 * aspectRatio; }
+        previewCanvas.style.width  = dispW + 'px';
+        previewCanvas.style.height = dispH + 'px';
         previewCanvas.style.margin = '0 auto';
-        
-        // Gambar frame kosong
+
+        // Placeholder
         previewCtx.fillStyle = '#000000';
-        previewCtx.fillRect(0, 0, CANVAS_WIDTH, height);
-        
+        previewCtx.fillRect(0, 0, W, H);
+
         if (layout === 'textonly') {
-            previewCtx.fillStyle = '#000000';
-            previewCtx.fillRect(0, 0, CANVAS_WIDTH, height);
-            previewCtx.fillStyle = '#444444';
-            previewCtx.font = '24px Arial';
+            // Tampilkan placeholder di area 40% bawah (konsisten dengan render)
+            const areaH = H * 0.4;
+            const areaY = H - areaH;
+            previewCtx.fillStyle = '#333333';
+            previewCtx.font = `${Math.max(16, W * 0.03)}px Arial`;
             previewCtx.textAlign = 'center';
             previewCtx.textBaseline = 'middle';
-            previewCtx.fillText('⬛ Teks Saja', CANVAS_WIDTH/2, height/2);
+            previewCtx.fillText('⬛ Teks Saja', W / 2, areaY + areaH / 2);
         } else {
             previewCtx.fillStyle = '#222222';
-            previewCtx.fillRect(0, 0, CANVAS_WIDTH, height);
+            previewCtx.fillRect(0, 0, W, H);
             previewCtx.fillStyle = '#444444';
-            previewCtx.font = '24px Arial';
+            previewCtx.font = `${Math.max(18, W * 0.025)}px Arial`;
             previewCtx.textAlign = 'center';
             previewCtx.textBaseline = 'middle';
-            previewCtx.fillText('🎬 Preview', CANVAS_WIDTH/2, height/2);
+            previewCtx.fillText('🎬 Preview', W / 2, H / 2);
         }
     }
 
     // ==================== VALIDASI SUBTITLE ====================
+    // [BONUS] Tambah cek start < end, start >= 0, dan overlap
     function validateSubtitles(subtitles) {
         const config = getResolutionConfig();
-        const canvas = document.createElement('canvas');
-        const ctxTest = canvas.getContext('2d');
-        
+        const canvas2 = document.createElement('canvas');
+        const ctxTest = canvas2.getContext('2d');
         const testFontSize = Math.min(config.width, config.height) * 0.045;
         ctxTest.font = `bold ${testFontSize}px Arial`;
-        const maxWidth = config.width - (config.width * 0.05 * 2);
-        
+        const maxWidth = config.width - config.width * 0.05 * 2;
+
         const warnings = [];
         subtitles.forEach((sub, index) => {
+            const issues = [];
+            // Cek start >= 0
+            if (sub.start < 0) issues.push('start < 0');
+            // Cek start < end
+            if (sub.start >= sub.end) issues.push('start >= end');
+            // Cek teks terlalu panjang
             const metrics = ctxTest.measureText(sub.text);
             if (metrics.width > maxWidth) {
-                warnings.push({
-                    index: index,
-                    text: sub.text,
-                    length: sub.text.length,
-                    estimatedLines: Math.ceil(metrics.width / maxWidth)
-                });
+                warnings.push({ index, text: sub.text, length: sub.text.length, estimatedLines: Math.ceil(metrics.width / maxWidth) });
             }
         });
-        
-        return { warnings, total: warnings.length };
+        // Cek overlap antar segmen
+        const overlaps = [];
+        for (let i = 0; i < subtitles.length; i++) {
+            for (let j = i + 1; j < subtitles.length; j++) {
+                const a = subtitles[i], b = subtitles[j];
+                if (a.start < b.end && a.end > b.start) overlaps.push([i, j]);
+            }
+        }
+        return { warnings, overlaps, total: warnings.length };
     }
 
     // ==================== UPDATE STATUS ====================
@@ -1021,14 +1135,10 @@ else if (layout === 'textonly') {
             updateStatus('📝 Masukkan data subtitle JSON', 'info');
             return;
         }
-        
         const result = validateSubtitles(subtitles);
         if (result.total > 0) {
             const maxLines = Math.max(...result.warnings.map(w => w.estimatedLines));
-            updateStatus(
-                `⚠️ ${result.total} SUBTITLE TERLALU PANJANG (AKAN DI-WRAP ${maxLines} BARIS)`, 
-                'warning'
-            );
+            updateStatus(`⚠️ ${result.total} SUBTITLE TERLALU PANJANG (AKAN DI-WRAP ${maxLines} BARIS)`, 'warning');
         } else {
             updateStatus('✅ Semua subtitle dalam batas normal', 'success');
         }
@@ -1037,230 +1147,505 @@ else if (layout === 'textonly') {
     // ==================== UPDATE LAYOUT PREVIEW ====================
     function updateLayoutPreview() {
         const layout = layoutSelect.value;
-        const videoEl = layoutPreview.querySelector('.layout-preview-video');
+        const videoEl    = layoutPreview.querySelector('.layout-preview-video');
         const subtitleEl = layoutPreview.querySelector('.layout-preview-subtitle');
-        const labelEl = layoutPreview.querySelector('.layout-preview-label');
-        
+        const labelEl    = layoutPreview.querySelector('.layout-preview-label');
         const existingOverlay = layoutPreview.querySelector('.layout-preview-overlay');
         if (existingOverlay) existingOverlay.remove();
-        
+
         if (layout === 'separate') {
-            videoEl.style.height = '60px';
-            videoEl.textContent = '🎬 VIDEO (60%)';
-            videoEl.style.display = 'flex';
-            subtitleEl.style.display = 'flex';
-            subtitleEl.style.height = '35px';
-            subtitleEl.style.background = '#1a1f27';
-            subtitleEl.style.color = '#FFD966';
+            videoEl.style.height = '60px'; videoEl.textContent = '🎬 VIDEO (60%)'; videoEl.style.display = 'flex';
+            subtitleEl.style.display = 'flex'; subtitleEl.style.height = '35px';
+            subtitleEl.style.background = '#1a1f27'; subtitleEl.style.color = '#FFD966';
             subtitleEl.textContent = '📝 SUBTITLE (40%)';
             labelEl.textContent = 'Preview: Video di atas, subtitle di bawah (terpisah)';
         } else if (layout === 'overlay') {
-            videoEl.style.height = '85px';
-            videoEl.textContent = '🎬 VIDEO (full)';
-            videoEl.style.display = 'flex';
+            videoEl.style.height = '85px'; videoEl.textContent = '🎬 VIDEO (full)'; videoEl.style.display = 'flex';
             subtitleEl.style.display = 'none';
             labelEl.textContent = 'Preview: Subtitle di atas video (overlay)';
-            
             const overlay = document.createElement('div');
             overlay.className = 'layout-preview-overlay';
             overlay.textContent = '📝 SUBTITLE OVERLAY';
             layoutPreview.appendChild(overlay);
         } else if (layout === 'bottom') {
-            videoEl.style.height = '70px';
-            videoEl.textContent = '🎬 VIDEO';
-            videoEl.style.display = 'flex';
-            subtitleEl.style.display = 'flex';
-            subtitleEl.style.height = '20px';
-            subtitleEl.style.background = 'transparent';
-            subtitleEl.style.color = '#FFFFFF';
+            videoEl.style.height = '70px'; videoEl.textContent = '🎬 VIDEO'; videoEl.style.display = 'flex';
+            subtitleEl.style.display = 'flex'; subtitleEl.style.height = '20px';
+            subtitleEl.style.background = 'transparent'; subtitleEl.style.color = '#FFFFFF';
             subtitleEl.textContent = '📝 SUBTITLE (bottom)';
             labelEl.textContent = 'Preview: Subtitle di bawah video (tanpa background)';
         } else if (layout === 'textonly') {
-            videoEl.style.height = '0px';
-            videoEl.textContent = '';
-            videoEl.style.display = 'none';
-            subtitleEl.style.display = 'flex';
-            subtitleEl.style.height = '80px';
-            subtitleEl.style.background = '#000000';
-            subtitleEl.style.color = '#FFD700';
+            videoEl.style.height = '0px'; videoEl.textContent = ''; videoEl.style.display = 'none';
+            subtitleEl.style.display = 'flex'; subtitleEl.style.height = '80px';
+            subtitleEl.style.background = '#000000'; subtitleEl.style.color = '#FFD700';
             subtitleEl.textContent = '📝 TEKS (40% tinggi, bg hitam)';
             labelEl.textContent = 'Preview: Hanya teks kuning di background hitam';
         }
-        
         updatePreviewCanvas();
     }
 
-    // ==================== GET RESOLUTION CONFIG ====================
-    function getResolutionConfig() {
-        const value = resolutionSelect.value;
-        return RESOLUTIONS[value] || RESOLUTIONS['1080x1920'];
+    // ==================== [NEW] SEGMENT EDITOR ====================
+    // Sinkronisasi 2 arah: textarea ↔ card list
+
+    let _ignoreTextareaInput = false; // flag untuk cegah loop infinite
+
+    // Render ulang semua card dari array data
+    function renderSegmentCards(data, activeIndex) {
+        segmentList.innerHTML = '';
+        if (!Array.isArray(data)) return;
+
+        data.forEach((seg, i) => {
+            const card = document.createElement('div');
+            card.className = 'seg-card';
+            if (i === activeIndex) card.classList.add('active-seg');
+
+            // Deteksi error per card
+            const isStartGe0 = (seg.start < 0);
+            const isStartGeEnd = (seg.start >= seg.end);
+            if (isStartGe0 || isStartGeEnd) card.classList.add('error-seg');
+
+            // Header: indeks + hapus
+            const header = document.createElement('div');
+            header.className = 'seg-card-header';
+            const idx = document.createElement('span');
+            idx.className = 'seg-idx';
+            idx.textContent = `#${i + 1}`;
+            header.appendChild(idx);
+
+            // Label overlap (diisi setelah semua card dibuat)
+            const overlapLabel = document.createElement('span');
+            overlapLabel.className = 'seg-overlap-label';
+            overlapLabel.style.display = 'none';
+            header.appendChild(overlapLabel);
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '🗑️';
+            delBtn.title = 'Hapus segmen';
+            delBtn.addEventListener('click', () => {
+                const cur = parseTextareaJSON();
+                if (!cur) return;
+                cur.splice(i, 1);
+                writeToTextarea(cur);
+            });
+            header.appendChild(delBtn);
+            card.appendChild(header);
+
+            // Field start
+            const startField = document.createElement('div');
+            startField.className = 'seg-field';
+            const startLabel = document.createElement('label'); startLabel.textContent = 'Start (s)';
+            const startInput = document.createElement('input');
+            startInput.type = 'number'; startInput.step = '0.1'; startInput.min = '0';
+            startInput.value = seg.start;
+            const startBtns = document.createElement('div'); startBtns.className = 'seg-time-btns';
+            const setStartBtn = document.createElement('button');
+            setStartBtn.className = 'seg-time-btn'; setStartBtn.textContent = '⏱ Set Start';
+            setStartBtn.addEventListener('click', () => {
+                startInput.value = parseFloat(sourceVideo.currentTime.toFixed(2));
+                startInput.dispatchEvent(new Event('change'));
+            });
+            startBtns.appendChild(setStartBtn);
+            startInput.addEventListener('change', () => {
+                const cur = parseTextareaJSON();
+                if (!cur) return;
+                cur[i].start = parseFloat(startInput.value) || 0;
+                writeToTextarea(cur);
+            });
+            startField.appendChild(startLabel); startField.appendChild(startInput); startField.appendChild(startBtns);
+
+            // Field end
+            const endField = document.createElement('div');
+            endField.className = 'seg-field';
+            const endLabel = document.createElement('label'); endLabel.textContent = 'End (s)';
+            const endInput = document.createElement('input');
+            endInput.type = 'number'; endInput.step = '0.1'; endInput.min = '0';
+            endInput.value = seg.end;
+            const endBtns = document.createElement('div'); endBtns.className = 'seg-time-btns';
+            const setEndBtn = document.createElement('button');
+            setEndBtn.className = 'seg-time-btn'; setEndBtn.textContent = '⏱ Set End';
+            setEndBtn.addEventListener('click', () => {
+                endInput.value = parseFloat(sourceVideo.currentTime.toFixed(2));
+                endInput.dispatchEvent(new Event('change'));
+            });
+            endBtns.appendChild(setEndBtn);
+            endInput.addEventListener('change', () => {
+                const cur = parseTextareaJSON();
+                if (!cur) return;
+                cur[i].end = parseFloat(endInput.value) || 0;
+                writeToTextarea(cur);
+            });
+            endField.appendChild(endLabel); endField.appendChild(endInput); endField.appendChild(endBtns);
+
+            card.appendChild(startField);
+            card.appendChild(endField);
+
+            // Field text (full width)
+            const textField = document.createElement('div');
+            textField.className = 'seg-field seg-text-field';
+            const textLabel = document.createElement('label'); textLabel.textContent = 'Teks';
+            const textInput = document.createElement('input');
+            textInput.type = 'text'; textInput.value = seg.text;
+            textInput.addEventListener('input', () => {
+                const cur = parseTextareaJSON();
+                if (!cur) return;
+                cur[i].text = textInput.value;
+                writeToTextarea(cur);
+            });
+            textField.appendChild(textLabel); textField.appendChild(textInput);
+            card.appendChild(textField);
+
+            // Store reference untuk overlap label
+            card._overlapLabel = overlapLabel;
+            segmentList.appendChild(card);
+        });
+
+        // Tandai overlap setelah semua card ter-render
+        const cards = segmentList.querySelectorAll('.seg-card');
+        const result = validateSubtitles(data);
+        result.overlaps.forEach(([a, b]) => {
+            [a, b].forEach(idx => {
+                if (cards[idx] && !cards[idx].classList.contains('error-seg')) {
+                    cards[idx].classList.add('warn-seg');
+                }
+                if (cards[idx] && cards[idx]._overlapLabel) {
+                    cards[idx]._overlapLabel.textContent = '⚠ overlap';
+                    cards[idx]._overlapLabel.style.display = '';
+                }
+            });
+        });
     }
 
+    // Parse textarea → array (null jika invalid)
+    function parseTextareaJSON() {
+        try {
+            const raw = subtitleTextarea.value.trim();
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : null;
+        } catch(e) {
+            return null;
+        }
+    }
+
+    // Tulis array ke textarea dan trigger input (tanpa loop)
+    function writeToTextarea(arr) {
+        _ignoreTextareaInput = true;
+        subtitleTextarea.value = JSON.stringify(arr, null, 2);
+        _ignoreTextareaInput = false;
+        validateSubtitleRealTime();
+        const cur = parseTextareaJSON();
+        if (cur) renderSegmentCards(cur, -1);
+        else {
+            segErrorMsg.textContent = '❌ JSON tidak valid — perbaiki di textarea';
+            segErrorMsg.style.display = '';
+        }
+    }
+
+    // Rebuild card list saat textarea diubah manual
+    function onTextareaInput() {
+        if (_ignoreTextareaInput) return;
+        validateSubtitleRealTime();
+        const data = parseTextareaJSON();
+        if (data) {
+            segErrorMsg.style.display = 'none';
+            renderSegmentCards(data, -1);
+        } else {
+            segErrorMsg.textContent = '❌ JSON tidak valid — card tidak diperbarui';
+            segErrorMsg.style.display = '';
+            // Jangan hapus card yang sedang diedit
+        }
+    }
+
+    // Tambah segmen baru di akhir
+    addSegBtn.addEventListener('click', () => {
+        const cur = parseTextareaJSON() || [];
+        const lastEnd = cur.length > 0 ? (cur[cur.length - 1].end || 0) : 0;
+        cur.push({ start: parseFloat(lastEnd.toFixed(2)), end: parseFloat((lastEnd + 2).toFixed(2)), text: '' });
+        writeToTextarea(cur);
+        // Scroll ke bawah
+        setTimeout(() => segmentList.lastElementChild && segmentList.lastElementChild.scrollIntoView({ behavior: 'smooth' }), 50);
+    });
+
+    // Sort berdasarkan start
+    sortSegBtn.addEventListener('click', () => {
+        const cur = parseTextareaJSON();
+        if (!cur) return;
+        cur.sort((a, b) => a.start - b.start);
+        writeToTextarea(cur);
+    });
+
+    // ==================== [NEW] PREVIEW DENGAN SUARA ====================
+    let isPreviewing = false;
+    let previewAFId  = null;
+
+    function startPreview() {
+        if (isRendering) {
+            updateStatus('⚠️ Render sedang berjalan, tunggu selesai.', 'warning');
+            return;
+        }
+        if (!sourceVideo.src || sourceVideo.readyState < 2) {
+            updateStatus('❌ Video belum dimuat.', 'error');
+            return;
+        }
+
+        const config    = getResolutionConfig();
+        const layout    = layoutSelect.value;
+        const subtitles = getSubtitles();
+
+        // Set ukuran previewCanvas = resolusi penuh (sama seperti render final)
+        previewCanvas.width  = config.width;
+        previewCanvas.height = config.height;
+
+        isPreviewing = true;
+        sourceVideo.muted       = false; // audio aktif
+        sourceVideo.currentTime = 0;
+
+        previewBtn.textContent = '⏹ Stop Preview';
+        previewBtn.classList.add('active');
+        previewControls.style.display = 'flex';
+        playPauseBtn.textContent = '⏸';
+
+        sourceVideo.play().catch(err => {
+            updateStatus('❌ Gagal memutar video: ' + err.message, 'error');
+            stopPreview();
+        });
+
+        // Update seek bar
+        sourceVideo.ontimeupdate = () => {
+            if (!isPreviewing) return;
+            const pct = sourceVideo.duration ? (sourceVideo.currentTime / sourceVideo.duration) * 100 : 0;
+            seekBar.value = pct;
+            timeDisplay.textContent = fmtTime(sourceVideo.currentTime) + ' / ' + fmtTime(sourceVideo.duration);
+            // Highlight card aktif
+            highlightActiveCard(sourceVideo.currentTime);
+        };
+
+        sourceVideo.onended = () => stopPreview();
+
+        function previewLoop() {
+            if (!isPreviewing) return;
+            // Render ke previewCanvas langsung (bukan canvas tersembunyi)
+            renderFrame(previewCanvas, sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
+            previewAFId = requestAnimationFrame(previewLoop);
+        }
+        previewAFId = requestAnimationFrame(previewLoop);
+        updateStatus('👁 Preview berjalan — audio aktif', 'success');
+    }
+
+    function stopPreview() {
+        isPreviewing = false;
+        if (previewAFId) { cancelAnimationFrame(previewAFId); previewAFId = null; }
+        sourceVideo.pause();
+        sourceVideo.muted = true; // reset agar render final tetap bisu
+        sourceVideo.ontimeupdate = null;
+        sourceVideo.onended = null;
+        previewBtn.textContent = '👁 Preview';
+        previewBtn.classList.remove('active');
+        playPauseBtn.textContent = '▶';
+        updateStatus('⏹ Preview dihentikan', 'info');
+        // Kembalikan placeholder
+        updatePreviewCanvas();
+    }
+
+    // Highlight card yang sedang aktif berdasarkan currentTime
+    function highlightActiveCard(currentTime) {
+    const cards = segmentList.querySelectorAll('.seg-card');
+    const data  = parseTextareaJSON() || [];
+
+    data.forEach((seg, i) => {
+        const card = cards[i];
+        if (!card) return;
+
+        if (currentTime >= seg.start && currentTime <= seg.end) {
+            card.classList.add('active-seg');
+
+            // [OPSI B] Scroll manual HANYA di dalam segmentList,
+            // tidak memengaruhi scroll halaman utama.
+            const cardTop    = card.offsetTop;
+            const cardBottom = cardTop + card.offsetHeight;
+            const listTop    = segmentList.scrollTop;
+            const listBottom = listTop + segmentList.clientHeight;
+
+            if (cardTop < listTop) {
+                // Card di atas viewport list → scroll ke atas
+                segmentList.scrollTop = cardTop;
+            } else if (cardBottom > listBottom) {
+                // Card di bawah viewport list → scroll ke bawah
+                segmentList.scrollTop = cardBottom - segmentList.clientHeight;
+            }
+        } else {
+            card.classList.remove('active-seg');
+        }
+    });
+    }
+
+    function fmtTime(sec) {
+        if (!sec || isNaN(sec)) return '0:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    previewBtn.addEventListener('click', () => {
+        if (isPreviewing) stopPreview(); else startPreview();
+    });
+
+    // Seek bar
+    seekBar.addEventListener('input', () => {
+        if (sourceVideo.duration) {
+            sourceVideo.currentTime = (seekBar.value / 100) * sourceVideo.duration;
+        }
+    });
+
+    // Play/Pause
+    playPauseBtn.addEventListener('click', () => {
+        if (sourceVideo.paused) {
+            sourceVideo.play();
+            playPauseBtn.textContent = '⏸';
+        } else {
+            sourceVideo.pause();
+            playPauseBtn.textContent = '▶';
+        }
+    });
+
     // ==================== RENDER UTAMA ====================
-    let isRendering = false;
-    let mediaRecorder = null;
+    let isRendering    = false;
+    let mediaRecorder  = null;
     let recordedChunks = [];
     let recordingStream = null;
     let animationFrameId = null;
 
+    // [BONUS] sourceVideo.onerror di-set sekali di init, bukan di dalam startRender
+    sourceVideo.onerror = function() {
+        if (isRendering) {
+            updateStatus('❌ Error pada video: ' + (sourceVideo.error ? sourceVideo.error.message : ''), 'error');
+            stopRenderOnError();
+        }
+    };
+
     function startRender() {
         if (isRendering) return;
+        if (isPreviewing) stopPreview(); // hentikan preview jika berjalan
 
         if (!sourceVideo.src || sourceVideo.readyState < 2) {
             updateStatus('❌ Video belum dimuat. Pilih file video terlebih dahulu.', 'error');
             return;
         }
-        
         const subtitles = getSubtitles();
         if (subtitles.length === 0) {
             updateStatus('⚠️ Data subtitle kosong atau format JSON tidak valid.', 'warning');
             return;
         }
-        
+
         const config = getResolutionConfig();
         const layout = layoutSelect.value;
         const format = formatSelect.value;
-        const CANVAS_WIDTH = config.width;
-        const CANVAS_HEIGHT = config.height;
-        
-        // Layout textonly: canvas 40% dari resolusi (width & height)
-        if (layout === 'textonly') {
-        canvas.width = Math.round(CANVAS_WIDTH * 0.4);
-        canvas.height = Math.round(CANVAS_HEIGHT * 0.4);
-        } else {
-        canvas.width = CANVAS_WIDTH;
-        canvas.height = CANVAS_HEIGHT;
-        }
-        
+
+        // [CHANGE 3a] Canvas SELALU = resolusi terpilih, untuk semua layout termasuk textonly
+        canvas.width  = config.width;
+        canvas.height = config.height;
+
+        // [CHANGE 3d] previewCanvas juga harus sama
+        previewCanvas.width  = config.width;
+        previewCanvas.height = config.height;
+
         if (recordingStream) {
-            recordingStream.getTracks().forEach(track => track.stop());
+            recordingStream.getTracks().forEach(t => t.stop());
             recordingStream = null;
         }
         recordedChunks = [];
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop();
-        }
-        
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+
         sourceVideo.currentTime = 0;
         sourceVideo.muted = true;
-        
+
         recordingStream = canvas.captureStream(30);
-        const bitrate = CANVAS_WIDTH * CANVAS_HEIGHT * 0.002;
-        const bitsPerSecond = Math.max(800000, Math.min(5000000, bitrate));
-        
-        // Cari MIME type yang didukung
+
+        // [BONUS] Bitrate minimum 3 Mbps untuk teks crisp
+        const bitrate = Math.max(3000000, Math.min(5000000, config.width * config.height * 0.002));
+        const bitsPerSecond = bitrate;
+
         let mimeType = getSupportedMimeType(format);
         let actualFormat = format;
-        
         if (!mimeType) {
-            // Fallback ke WebM
             mimeType = getSupportedMimeType('webm');
             actualFormat = 'webm';
             updateStatus(`⚠️ ${getFormatLabel(format)} tidak didukung, menggunakan WebM`, 'warning');
         }
-        
+
         try {
-            mediaRecorder = new MediaRecorder(recordingStream, {
-                mimeType: mimeType || undefined,
-                bitsPerSecond: bitsPerSecond
-            });
-        } catch (e) {
-            mediaRecorder = new MediaRecorder(recordingStream, {
-                bitsPerSecond: bitsPerSecond
-            });
+            mediaRecorder = new MediaRecorder(recordingStream, { mimeType: mimeType || undefined, bitsPerSecond });
+        } catch(e) {
+            mediaRecorder = new MediaRecorder(recordingStream, { bitsPerSecond });
             actualFormat = 'webm';
         }
-        
+
         mediaRecorder.ondataavailable = (event) => {
-            if (event.data && event.data.size > 0) {
-                recordedChunks.push(event.data);
-            }
+            if (event.data && event.data.size > 0) recordedChunks.push(event.data);
         };
-        
+
         mediaRecorder.onstop = () => {
             if (recordedChunks.length === 0) {
                 updateStatus('⚠️ Tidak ada data rekaman. Coba ulangi.', 'warning');
-                isRendering = false;
-                renderBtn.disabled = false;
-                renderBtn.textContent = '▶ Mulai Render';
+                isRendering = false; renderBtn.disabled = false; renderBtn.textContent = '▶ Mulai Render';
                 return;
             }
-            
             const extension = getFormatExtension(actualFormat);
-            const blob = new Blob(recordedChunks, { 
-                type: actualFormat === 'mp4' ? 'video/mp4' : 'video/webm' 
-            });
+            const blob = new Blob(recordedChunks, { type: actualFormat === 'mp4' ? 'video/mp4' : 'video/webm' });
             const url = URL.createObjectURL(blob);
             downloadLink.href = url;
-            
-            const layoutLabel = layout === 'separate' ? 'terpisah' : 
-                               layout === 'overlay' ? 'overlay' :
-                               layout === 'textonly' ? 'teks' : 'bottom';
+            const layoutLabel = { separate: 'terpisah', overlay: 'overlay', textonly: 'teks', bottom: 'bottom' }[layout] || layout;
             downloadLink.download = `subtitle_${config.width}x${config.height}_${layoutLabel}.${extension}`;
             downloadLink.textContent = `⬇️ Download ${config.label} (${extension.toUpperCase()})`;
             downloadLink.classList.add('active');
-            
             updateStatus(`✅ Render selesai! Klik link di atas untuk unduh (${extension.toUpperCase()})`, 'success');
-            isRendering = false;
-            renderBtn.disabled = false;
-            renderBtn.textContent = '▶ Mulai Render';
-            
-            if (recordingStream) {
-                recordingStream.getTracks().forEach(track => track.stop());
-                recordingStream = null;
-            }
+            isRendering = false; renderBtn.disabled = false; renderBtn.textContent = '▶ Mulai Render';
+            if (recordingStream) { recordingStream.getTracks().forEach(t => t.stop()); recordingStream = null; }
         };
-        
+
         mediaRecorder.start(250);
         updateStatus(`⏳ Merender ${config.label} (${actualFormat.toUpperCase()})... 0%`, 'info');
         renderBtn.disabled = true;
         renderBtn.textContent = '⏳ Rendering...';
         isRendering = true;
-        
+
         sourceVideo.play().catch(err => {
             updateStatus('❌ Gagal memutar video: ' + err.message, 'error');
             stopRenderOnError();
-            return;
         });
-        
+
+        // [BONUS] Track lastProgress untuk hindari spam update status
+        let lastProgress = -1;
+
         function frameLoop() {
             if (!isRendering) {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                }
+                if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
                 return;
             }
-            
             if (sourceVideo.ended || sourceVideo.currentTime >= sourceVideo.duration) {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                }
+                if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
                 updateStatus('✅ Proses selesai, menyimpan...', 'success');
                 return;
             }
-            
-            renderFrame(sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
-            
-            // Update preview canvas
+
+            // [CHANGE 2] renderFrame ke canvas tersembunyi
+            renderFrame(canvas, sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
+
+            // [CHANGE 3e] Copy ke previewCanvas tanpa scaling ganda
+            // (canvas.width === previewCanvas.width, jadi tidak ada scale ganda)
             previewCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
-            
+
+            // [BONUS] Update progress hanya saat berubah (lastProgress)
             const progress = Math.min(100, Math.round((sourceVideo.currentTime / sourceVideo.duration) * 100));
-            if (progress % 5 === 0) {
-                const layoutLabel = layout === 'separate' ? 'terpisah' : 
-                                   layout === 'overlay' ? 'overlay' :
-                                   layout === 'textonly' ? 'teks' : 'bottom';
+            if (progress !== lastProgress) {
+                lastProgress = progress;
+                const layoutLabel = { separate: 'terpisah', overlay: 'overlay', textonly: 'teks', bottom: 'bottom' }[layout] || layout;
                 updateStatus(`⏳ Merender ${config.label} (${layoutLabel})... ${progress}%`, 'info');
             }
-            
+
             animationFrameId = requestAnimationFrame(frameLoop);
         }
-        
+
         animationFrameId = requestAnimationFrame(frameLoop);
-        
-        sourceVideo.onerror = function(e) {
-            updateStatus('❌ Error pada video: ' + (sourceVideo.error ? sourceVideo.error.message : ''), 'error');
-            stopRenderOnError();
-        };
     }
 
     function stopRenderOnError() {
@@ -1268,28 +1653,21 @@ else if (layout === 'textonly') {
         renderBtn.disabled = false;
         renderBtn.textContent = '▶ Mulai Render';
         if (animationFrameId) cancelAnimationFrame(animationFrameId);
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-        }
-        if (recordingStream) {
-            recordingStream.getTracks().forEach(track => track.stop());
-            recordingStream = null;
-        }
+        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+        if (recordingStream) { recordingStream.getTracks().forEach(t => t.stop()); recordingStream = null; }
     }
 
     // ==================== EVENT LISTENERS ====================
     videoInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-        
         const url = URL.createObjectURL(file);
         sourceVideo.src = url;
         sourceVideo.load();
         updateStatus('📹 Video dimuat, siap render', 'success');
     });
 
-    subtitleTextarea.addEventListener('input', validateSubtitleRealTime);
-
+    subtitleTextarea.addEventListener('input', onTextareaInput);
     renderBtn.addEventListener('click', startRender);
 
     resolutionSelect.addEventListener('change', function() {
@@ -1300,7 +1678,6 @@ else if (layout === 'textonly') {
     });
 
     layoutSelect.addEventListener('change', updateLayoutPreview);
-
     formatSelect.addEventListener('change', updateFormatHint);
 
     // ==================== TOOLBAR BUTTONS ====================
@@ -1310,7 +1687,7 @@ else if (layout === 'textonly') {
             subtitleTextarea.value = text;
             subtitleTextarea.dispatchEvent(new Event('input'));
             updateStatus('📋 Data ditempel dari clipboard', 'success');
-        } catch (e) {
+        } catch(e) {
             updateStatus('❌ Gagal membaca clipboard. Izinkan akses clipboard.', 'error');
         }
     });
@@ -1327,7 +1704,7 @@ else if (layout === 'textonly') {
             subtitleTextarea.value = JSON.stringify(parsed, null, 2);
             subtitleTextarea.dispatchEvent(new Event('input'));
             updateStatus('✨ Format JSON dirapikan', 'success');
-        } catch (e) {
+        } catch(e) {
             updateStatus('❌ Format JSON tidak valid: ' + e.message, 'error');
         }
     });
@@ -1336,6 +1713,9 @@ else if (layout === 'textonly') {
     updateFormatHint();
     validateSubtitleRealTime();
     updateLayoutPreview();
+    // Render awal card segmen
+    const initData = parseTextareaJSON();
+    if (initData) renderSegmentCards(initData, -1);
 
 })();
 </script>
