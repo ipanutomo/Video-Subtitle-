@@ -118,7 +118,6 @@
             max-height: 300px;
             border-radius: 4px;
         }
-        /* [NEW] Preview controls */
         .preview-controls {
             background: #0f141c;
             padding: 8px 12px;
@@ -184,7 +183,6 @@
             box-shadow: 0 3px 0 #5f4b1d;
             pointer-events: none;
         }
-        /* [NEW] Tombol render + preview side by side */
         .render-row {
             display: flex;
             gap: 10px;
@@ -297,7 +295,6 @@
             background: rgba(255, 59, 48, 0.3);
             color: #ff6b63;
         }
-        /* Layout Preview */
         #layoutPreview {
             margin-top: 12px;
             background: #0f141c;
@@ -408,6 +405,16 @@
             border-color: #3fb86a;
             color: #8cd9a0;
         }
+        /* [NEW] Tombol SRT */
+        .subtitle-toolbar .tool-btn.srt-btn {
+            color: #8db4ff;
+            border-color: #2d3d5a;
+        }
+        .subtitle-toolbar .tool-btn.srt-btn:hover {
+            background: #1f2a3d;
+            border-color: #5b8def;
+            color: #a8c5ff;
+        }
         .subtitle-toolbar .tool-btn .icon { font-size: 1.1rem; line-height: 1; }
         .subtitle-toolbar .tool-btn .badge {
             background: rgba(255,255,255,0.08);
@@ -417,7 +424,7 @@
             font-weight: 700;
             color: #8899b0;
         }
-        /* [NEW] ===== Segment Editor ===== */
+        /* ===== Segment Editor ===== */
         #segmentEditor {
             margin-top: 12px;
         }
@@ -578,10 +585,13 @@
             <button class="tool-btn" id="formatBtn" title="Rapikan format JSON">
                 <span class="icon">✨</span> Format
             </button>
+            <button class="tool-btn srt-btn" id="exportSrtBtn" title="Export ke format SRT">
+                <span class="icon">💾</span> Export SRT
+            </button>
         </div>
         <div class="hint">Format: array objek dengan properti start, end, text</div>
 
-        <!-- [NEW] Segment Editor -->
+        <!-- Segment Editor -->
         <div id="segmentEditor">
             <div id="segmentList"></div>
             <div id="segErrorMsg" class="seg-error-msg" style="display:none;"></div>
@@ -635,7 +645,6 @@
         </select>
         <div class="hint">Pilih posisi subtitle pada video</div>
         
-        <!-- Preview Layout -->
         <div id="layoutPreview">
             <div class="layout-preview-video" style="height:60px;">🎬 VIDEO</div>
             <div class="layout-preview-subtitle" style="height:30px;background:#1a1f27;color:#FFD966;">📝 SUBTITLE</div>
@@ -647,7 +656,6 @@
     <div class="preview-box">
         <video id="sourceVideo" muted playsinline></video>
         <canvas id="previewCanvas"></canvas>
-        <!-- [NEW] Preview Controls -->
         <div class="preview-controls" id="previewControls" style="display:none;">
             <button id="playPauseBtn">▶</button>
             <input type="range" id="seekBar" min="0" max="100" step="0.1" value="0">
@@ -655,7 +663,7 @@
         </div>
     </div>
 
-    <!-- [NEW] Tombol Render + Preview -->
+    <!-- Tombol Render + Preview -->
     <div class="render-row">
         <button class="action-btn" id="renderBtn">▶ Mulai Render</button>
         <button class="preview-btn" id="previewBtn">👁 Preview</button>
@@ -696,13 +704,14 @@
     const pasteBtn  = document.getElementById('pasteBtn');
     const clearBtn  = document.getElementById('clearBtn');
     const formatBtn = document.getElementById('formatBtn');
-    // [NEW] Preview controls
+    const exportSrtBtn = document.getElementById('exportSrtBtn'); // [NEW] Export SRT
+    // Preview controls
     const previewBtn      = document.getElementById('previewBtn');
     const previewControls = document.getElementById('previewControls');
     const playPauseBtn    = document.getElementById('playPauseBtn');
     const seekBar         = document.getElementById('seekBar');
     const timeDisplay     = document.getElementById('timeDisplay');
-    // [NEW] Segment editor
+    // Segment editor
     const segmentList  = document.getElementById('segmentList');
     const segErrorMsg  = document.getElementById('segErrorMsg');
     const addSegBtn    = document.getElementById('addSegBtn');
@@ -809,19 +818,14 @@
         return lines;
     }
 
-    // ==================== RENDER FRAME (REFACTORED) ====================
-    // [CHANGE 2 + 3b] Menerima targetCanvas sebagai parameter pertama.
-    // canvas.width/height TIDAK di-set di sini (hanya di startRender & initPreviewCanvas).
-    // Gunakan ctx.clearRect untuk menghapus frame, bukan reset canvas.width.
+    // ==================== RENDER FRAME ====================
     function renderFrame(targetCanvas, videoElement, subtitles, currentTime, config, layout) {
         const tCtx = targetCanvas.getContext('2d');
         const W = targetCanvas.width;
         const H = targetCanvas.height;
 
-        // [CHANGE 3b] clearRect menggantikan canvas.width = ... yang reset state
         tCtx.clearRect(0, 0, W, H);
 
-        // Cari subtitle aktif
         let activeText = '';
         for (let sub of subtitles) {
             if (currentTime >= sub.start && currentTime <= sub.end) {
@@ -984,14 +988,10 @@
         }
 
         // ==================== LAYOUT: TEXTONLY ====================
-        // [CHANGE 3c] Background hitam PENUH, teks di area 40% bawah.
-        // Canvas dimensi TIDAK diubah — selalu = resolusi terpilih.
         else if (layout === 'textonly') {
-            // Background hitam penuh
             tCtx.fillStyle = '#000000';
             tCtx.fillRect(0, 0, W, H);
 
-            // Area teks = 40% bagian bawah canvas
             const textAreaHeight = H * 0.4;
             const textAreaY = H - textAreaHeight;
 
@@ -1027,10 +1027,9 @@
                     tCtx.fillStyle = '#FFD700'; tCtx.fillText(line, x, y);
                 });
             }
-            return; // tidak perlu watermark untuk textonly
+            return;
         }
 
-        // Watermark resolusi (layout non-textonly)
         tCtx.font = `${Math.max(12, W * 0.012)}px monospace`;
         tCtx.fillStyle = 'rgba(255,255,255,0.15)';
         tCtx.textAlign = 'right';
@@ -1039,19 +1038,15 @@
     }
 
     // ==================== INIT PREVIEW CANVAS ====================
-    // [CHANGE 3d] Selalu set canvas = dimensi penuh resolusi.
-    // Preview placeholder textonly: background hitam + teks di 40% bawah.
     function updatePreviewCanvas() {
         const config = getResolutionConfig();
         const layout  = layoutSelect.value;
         const W = config.width;
         const H = config.height;
 
-        // [CHANGE 3d] Ukuran canvas SELALU = resolusi penuh untuk semua layout
         previewCanvas.width  = W;
         previewCanvas.height = H;
 
-        // Display size (CSS) — scale to fit container
         const maxW = (previewCanvas.parentElement.clientWidth || 500) - 2;
         const aspectRatio = W / H;
         let dispW = maxW;
@@ -1061,12 +1056,10 @@
         previewCanvas.style.height = dispH + 'px';
         previewCanvas.style.margin = '0 auto';
 
-        // Placeholder
         previewCtx.fillStyle = '#000000';
         previewCtx.fillRect(0, 0, W, H);
 
         if (layout === 'textonly') {
-            // Tampilkan placeholder di area 40% bawah (konsisten dengan render)
             const areaH = H * 0.4;
             const areaY = H - areaH;
             previewCtx.fillStyle = '#333333';
@@ -1086,7 +1079,6 @@
     }
 
     // ==================== VALIDASI SUBTITLE ====================
-    // [BONUS] Tambah cek start < end, start >= 0, dan overlap
     function validateSubtitles(subtitles) {
         const config = getResolutionConfig();
         const canvas2 = document.createElement('canvas');
@@ -1098,17 +1090,13 @@
         const warnings = [];
         subtitles.forEach((sub, index) => {
             const issues = [];
-            // Cek start >= 0
             if (sub.start < 0) issues.push('start < 0');
-            // Cek start < end
             if (sub.start >= sub.end) issues.push('start >= end');
-            // Cek teks terlalu panjang
             const metrics = ctxTest.measureText(sub.text);
             if (metrics.width > maxWidth) {
                 warnings.push({ index, text: sub.text, length: sub.text.length, estimatedLines: Math.ceil(metrics.width / maxWidth) });
             }
         });
-        // Cek overlap antar segmen
         const overlaps = [];
         for (let i = 0; i < subtitles.length; i++) {
             for (let j = i + 1; j < subtitles.length; j++) {
@@ -1183,12 +1171,9 @@
         updatePreviewCanvas();
     }
 
-    // ==================== [NEW] SEGMENT EDITOR ====================
-    // Sinkronisasi 2 arah: textarea ↔ card list
+    // ==================== SEGMENT EDITOR ====================
+    let _ignoreTextareaInput = false;
 
-    let _ignoreTextareaInput = false; // flag untuk cegah loop infinite
-
-    // Render ulang semua card dari array data
     function renderSegmentCards(data, activeIndex) {
         segmentList.innerHTML = '';
         if (!Array.isArray(data)) return;
@@ -1198,12 +1183,10 @@
             card.className = 'seg-card';
             if (i === activeIndex) card.classList.add('active-seg');
 
-            // Deteksi error per card
             const isStartGe0 = (seg.start < 0);
             const isStartGeEnd = (seg.start >= seg.end);
             if (isStartGe0 || isStartGeEnd) card.classList.add('error-seg');
 
-            // Header: indeks + hapus
             const header = document.createElement('div');
             header.className = 'seg-card-header';
             const idx = document.createElement('span');
@@ -1211,7 +1194,6 @@
             idx.textContent = `#${i + 1}`;
             header.appendChild(idx);
 
-            // Label overlap (diisi setelah semua card dibuat)
             const overlapLabel = document.createElement('span');
             overlapLabel.className = 'seg-overlap-label';
             overlapLabel.style.display = 'none';
@@ -1229,7 +1211,6 @@
             header.appendChild(delBtn);
             card.appendChild(header);
 
-            // Field start
             const startField = document.createElement('div');
             startField.className = 'seg-field';
             const startLabel = document.createElement('label'); startLabel.textContent = 'Start (s)';
@@ -1252,7 +1233,6 @@
             });
             startField.appendChild(startLabel); startField.appendChild(startInput); startField.appendChild(startBtns);
 
-            // Field end
             const endField = document.createElement('div');
             endField.className = 'seg-field';
             const endLabel = document.createElement('label'); endLabel.textContent = 'End (s)';
@@ -1278,7 +1258,6 @@
             card.appendChild(startField);
             card.appendChild(endField);
 
-            // Field text (full width)
             const textField = document.createElement('div');
             textField.className = 'seg-field seg-text-field';
             const textLabel = document.createElement('label'); textLabel.textContent = 'Teks';
@@ -1293,12 +1272,10 @@
             textField.appendChild(textLabel); textField.appendChild(textInput);
             card.appendChild(textField);
 
-            // Store reference untuk overlap label
             card._overlapLabel = overlapLabel;
             segmentList.appendChild(card);
         });
 
-        // Tandai overlap setelah semua card ter-render
         const cards = segmentList.querySelectorAll('.seg-card');
         const result = validateSubtitles(data);
         result.overlaps.forEach(([a, b]) => {
@@ -1314,7 +1291,6 @@
         });
     }
 
-    // Parse textarea → array (null jika invalid)
     function parseTextareaJSON() {
         try {
             const raw = subtitleTextarea.value.trim();
@@ -1326,7 +1302,6 @@
         }
     }
 
-    // Tulis array ke textarea dan trigger input (tanpa loop)
     function writeToTextarea(arr) {
         _ignoreTextareaInput = true;
         subtitleTextarea.value = JSON.stringify(arr, null, 2);
@@ -1340,7 +1315,6 @@
         }
     }
 
-    // Rebuild card list saat textarea diubah manual
     function onTextareaInput() {
         if (_ignoreTextareaInput) return;
         validateSubtitleRealTime();
@@ -1351,21 +1325,17 @@
         } else {
             segErrorMsg.textContent = '❌ JSON tidak valid — card tidak diperbarui';
             segErrorMsg.style.display = '';
-            // Jangan hapus card yang sedang diedit
         }
     }
 
-    // Tambah segmen baru di akhir
     addSegBtn.addEventListener('click', () => {
         const cur = parseTextareaJSON() || [];
         const lastEnd = cur.length > 0 ? (cur[cur.length - 1].end || 0) : 0;
         cur.push({ start: parseFloat(lastEnd.toFixed(2)), end: parseFloat((lastEnd + 2).toFixed(2)), text: '' });
         writeToTextarea(cur);
-        // Scroll ke bawah
         setTimeout(() => segmentList.lastElementChild && segmentList.lastElementChild.scrollIntoView({ behavior: 'smooth' }), 50);
     });
 
-    // Sort berdasarkan start
     sortSegBtn.addEventListener('click', () => {
         const cur = parseTextareaJSON();
         if (!cur) return;
@@ -1373,7 +1343,7 @@
         writeToTextarea(cur);
     });
 
-    // ==================== [NEW] PREVIEW DENGAN SUARA ====================
+    // ==================== PREVIEW DENGAN SUARA ====================
     let isPreviewing = false;
     let previewAFId  = null;
 
@@ -1391,12 +1361,11 @@
         const layout    = layoutSelect.value;
         const subtitles = getSubtitles();
 
-        // Set ukuran previewCanvas = resolusi penuh (sama seperti render final)
         previewCanvas.width  = config.width;
         previewCanvas.height = config.height;
 
         isPreviewing = true;
-        sourceVideo.muted       = false; // audio aktif
+        sourceVideo.muted       = false;
         sourceVideo.currentTime = 0;
 
         previewBtn.textContent = '⏹ Stop Preview';
@@ -1409,13 +1378,11 @@
             stopPreview();
         });
 
-        // Update seek bar
         sourceVideo.ontimeupdate = () => {
             if (!isPreviewing) return;
             const pct = sourceVideo.duration ? (sourceVideo.currentTime / sourceVideo.duration) * 100 : 0;
             seekBar.value = pct;
             timeDisplay.textContent = fmtTime(sourceVideo.currentTime) + ' / ' + fmtTime(sourceVideo.duration);
-            // Highlight card aktif
             highlightActiveCard(sourceVideo.currentTime);
         };
 
@@ -1423,7 +1390,6 @@
 
         function previewLoop() {
             if (!isPreviewing) return;
-            // Render ke previewCanvas langsung (bukan canvas tersembunyi)
             renderFrame(previewCanvas, sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
             previewAFId = requestAnimationFrame(previewLoop);
         }
@@ -1435,47 +1401,40 @@
         isPreviewing = false;
         if (previewAFId) { cancelAnimationFrame(previewAFId); previewAFId = null; }
         sourceVideo.pause();
-        sourceVideo.muted = true; // reset agar render final tetap bisu
+        sourceVideo.muted = true;
         sourceVideo.ontimeupdate = null;
         sourceVideo.onended = null;
         previewBtn.textContent = '👁 Preview';
         previewBtn.classList.remove('active');
         playPauseBtn.textContent = '▶';
         updateStatus('⏹ Preview dihentikan', 'info');
-        // Kembalikan placeholder
         updatePreviewCanvas();
     }
 
-    // Highlight card yang sedang aktif berdasarkan currentTime
     function highlightActiveCard(currentTime) {
-    const cards = segmentList.querySelectorAll('.seg-card');
-    const data  = parseTextareaJSON() || [];
+        const cards = segmentList.querySelectorAll('.seg-card');
+        const data  = parseTextareaJSON() || [];
 
-    data.forEach((seg, i) => {
-        const card = cards[i];
-        if (!card) return;
+        data.forEach((seg, i) => {
+            const card = cards[i];
+            if (!card) return;
 
-        if (currentTime >= seg.start && currentTime <= seg.end) {
-            card.classList.add('active-seg');
+            if (currentTime >= seg.start && currentTime <= seg.end) {
+                card.classList.add('active-seg');
+                const cardTop    = card.offsetTop;
+                const cardBottom = cardTop + card.offsetHeight;
+                const listTop    = segmentList.scrollTop;
+                const listBottom = listTop + segmentList.clientHeight;
 
-            // [OPSI B] Scroll manual HANYA di dalam segmentList,
-            // tidak memengaruhi scroll halaman utama.
-            const cardTop    = card.offsetTop;
-            const cardBottom = cardTop + card.offsetHeight;
-            const listTop    = segmentList.scrollTop;
-            const listBottom = listTop + segmentList.clientHeight;
-
-            if (cardTop < listTop) {
-                // Card di atas viewport list → scroll ke atas
-                segmentList.scrollTop = cardTop;
-            } else if (cardBottom > listBottom) {
-                // Card di bawah viewport list → scroll ke bawah
-                segmentList.scrollTop = cardBottom - segmentList.clientHeight;
+                if (cardTop < listTop) {
+                    segmentList.scrollTop = cardTop;
+                } else if (cardBottom > listBottom) {
+                    segmentList.scrollTop = cardBottom - segmentList.clientHeight;
+                }
+            } else {
+                card.classList.remove('active-seg');
             }
-        } else {
-            card.classList.remove('active-seg');
-        }
-    });
+        });
     }
 
     function fmtTime(sec) {
@@ -1489,14 +1448,12 @@
         if (isPreviewing) stopPreview(); else startPreview();
     });
 
-    // Seek bar
     seekBar.addEventListener('input', () => {
         if (sourceVideo.duration) {
             sourceVideo.currentTime = (seekBar.value / 100) * sourceVideo.duration;
         }
     });
 
-    // Play/Pause
     playPauseBtn.addEventListener('click', () => {
         if (sourceVideo.paused) {
             sourceVideo.play();
@@ -1514,7 +1471,6 @@
     let recordingStream = null;
     let animationFrameId = null;
 
-    // [BONUS] sourceVideo.onerror di-set sekali di init, bukan di dalam startRender
     sourceVideo.onerror = function() {
         if (isRendering) {
             updateStatus('❌ Error pada video: ' + (sourceVideo.error ? sourceVideo.error.message : ''), 'error');
@@ -1524,7 +1480,7 @@
 
     function startRender() {
         if (isRendering) return;
-        if (isPreviewing) stopPreview(); // hentikan preview jika berjalan
+        if (isPreviewing) stopPreview();
 
         if (!sourceVideo.src || sourceVideo.readyState < 2) {
             updateStatus('❌ Video belum dimuat. Pilih file video terlebih dahulu.', 'error');
@@ -1540,11 +1496,9 @@
         const layout = layoutSelect.value;
         const format = formatSelect.value;
 
-        // [CHANGE 3a] Canvas SELALU = resolusi terpilih, untuk semua layout termasuk textonly
         canvas.width  = config.width;
         canvas.height = config.height;
 
-        // [CHANGE 3d] previewCanvas juga harus sama
         previewCanvas.width  = config.width;
         previewCanvas.height = config.height;
 
@@ -1560,7 +1514,6 @@
 
         recordingStream = canvas.captureStream(30);
 
-        // [BONUS] Bitrate minimum 3 Mbps untuk teks crisp
         const bitrate = Math.max(3000000, Math.min(5000000, config.width * config.height * 0.002));
         const bitsPerSecond = bitrate;
 
@@ -1613,7 +1566,6 @@
             stopRenderOnError();
         });
 
-        // [BONUS] Track lastProgress untuk hindari spam update status
         let lastProgress = -1;
 
         function frameLoop() {
@@ -1627,14 +1579,10 @@
                 return;
             }
 
-            // [CHANGE 2] renderFrame ke canvas tersembunyi
             renderFrame(canvas, sourceVideo, subtitles, sourceVideo.currentTime, config, layout);
 
-            // [CHANGE 3e] Copy ke previewCanvas tanpa scaling ganda
-            // (canvas.width === previewCanvas.width, jadi tidak ada scale ganda)
             previewCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
 
-            // [BONUS] Update progress hanya saat berubah (lastProgress)
             const progress = Math.min(100, Math.round((sourceVideo.currentTime / sourceVideo.duration) * 100));
             if (progress !== lastProgress) {
                 lastProgress = progress;
@@ -1709,11 +1657,71 @@
         }
     });
 
+    // ==================== EXPORT SRT ====================
+    function secondsToSrtTime(seconds) {
+        if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0) seconds = 0;
+        const totalMs = Math.round(seconds * 1000);
+        const hh = Math.floor(totalMs / 3600000);
+        const mm = Math.floor((totalMs % 3600000) / 60000);
+        const ss = Math.floor((totalMs % 60000) / 1000);
+        const ms = totalMs % 1000;
+        const pad = (n, len = 2) => String(n).padStart(len, '0');
+        return `${pad(hh)}:${pad(mm)}:${pad(ss)},${pad(ms, 3)}`;
+    }
+
+    function buildSrtContent(subtitles) {
+        // Sort berdasarkan start agar urutan SRT valid
+        const sorted = [...subtitles].sort((a, b) => a.start - b.start);
+        return sorted.map((sub, i) => {
+            const idx = i + 1;
+            const start = secondsToSrtTime(sub.start);
+            const end = secondsToSrtTime(sub.end);
+            const text = String(sub.text || '').replace(/\r\n/g, '\n').trim();
+            return `${idx}\n${start} --> ${end}\n${text}`;
+        }).join('\n\n') + '\n';
+    }
+
+    exportSrtBtn.addEventListener('click', function() {
+        const subtitles = getSubtitles();
+        if (subtitles.length === 0) {
+            updateStatus('❌ Tidak ada subtitle valid untuk di-export ke SRT', 'error');
+            return;
+        }
+
+        try {
+            const srtContent = buildSrtContent(subtitles);
+            const blob = new Blob([srtContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            let baseName = 'subtitle';
+            if (sourceVideo.src) {
+                try {
+                    if (videoInput.files && videoInput.files[0]) {
+                        baseName = videoInput.files[0].name.replace(/\.[^/.]+$/, '') + '_subtitle';
+                    }
+                } catch(e) { /* fallback default */ }
+            }
+            const fileName = `${baseName}.srt`;
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+            updateStatus(`✅ SRT berhasil di-export: ${fileName} (${subtitles.length} segmen)`, 'success');
+        } catch(e) {
+            updateStatus('❌ Gagal export SRT: ' + e.message, 'error');
+        }
+    });
+
     // ==================== INIT ====================
     updateFormatHint();
     validateSubtitleRealTime();
     updateLayoutPreview();
-    // Render awal card segmen
     const initData = parseTextareaJSON();
     if (initData) renderSegmentCards(initData, -1);
 
