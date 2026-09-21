@@ -550,6 +550,14 @@
             .row-2col { grid-template-columns: 1fr; }
             .render-row { flex-wrap: wrap; }
         }
+        .seg-field input[type="text"]:focus {
+    border-color: #f7c948;
+    background: #0e141c;
+}
+.seg-card.active-seg .seg-field input:focus {
+    border-color: #f7c948;
+    box-shadow: 0 0 0 2px rgba(247,201,72,0.2);
+}
     </style>
 </head>
 <body>
@@ -1174,122 +1182,160 @@
     // ==================== SEGMENT EDITOR ====================
     let _ignoreTextareaInput = false;
 
-    function renderSegmentCards(data, activeIndex) {
-        segmentList.innerHTML = '';
-        if (!Array.isArray(data)) return;
+function renderSegmentCards(data, activeIndex, keepFocusIndex = -1, keepFocusField = null) {
+    segmentList.innerHTML = '';
+    if (!Array.isArray(data)) return;
 
-        data.forEach((seg, i) => {
-            const card = document.createElement('div');
-            card.className = 'seg-card';
-            if (i === activeIndex) card.classList.add('active-seg');
+    data.forEach((seg, i) => {
+        const card = document.createElement('div');
+        card.className = 'seg-card';
+        if (i === activeIndex) card.classList.add('active-seg');
 
-            const isStartGe0 = (seg.start < 0);
-            const isStartGeEnd = (seg.start >= seg.end);
-            if (isStartGe0 || isStartGeEnd) card.classList.add('error-seg');
+        const isStartGe0 = (seg.start < 0);
+        const isStartGeEnd = (seg.start >= seg.end);
+        if (isStartGe0 || isStartGeEnd) card.classList.add('error-seg');
 
-            const header = document.createElement('div');
-            header.className = 'seg-card-header';
-            const idx = document.createElement('span');
-            idx.className = 'seg-idx';
-            idx.textContent = `#${i + 1}`;
-            header.appendChild(idx);
+        const header = document.createElement('div');
+        header.className = 'seg-card-header';
+        const idx = document.createElement('span');
+        idx.className = 'seg-idx';
+        idx.textContent = `#${i + 1}`;
+        header.appendChild(idx);
 
-            const overlapLabel = document.createElement('span');
-            overlapLabel.className = 'seg-overlap-label';
-            overlapLabel.style.display = 'none';
-            header.appendChild(overlapLabel);
+        const overlapLabel = document.createElement('span');
+        overlapLabel.className = 'seg-overlap-label';
+        overlapLabel.style.display = 'none';
+        header.appendChild(overlapLabel);
 
-            const delBtn = document.createElement('button');
-            delBtn.textContent = '🗑️';
-            delBtn.title = 'Hapus segmen';
-            delBtn.addEventListener('click', () => {
-                const cur = parseTextareaJSON();
-                if (!cur) return;
-                cur.splice(i, 1);
-                writeToTextarea(cur);
-            });
-            header.appendChild(delBtn);
-            card.appendChild(header);
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '🗑️';
+        delBtn.title = 'Hapus segmen';
+        delBtn.addEventListener('click', () => {
+            const cur = parseTextareaJSON();
+            if (!cur) return;
+            cur.splice(i, 1);
+            writeToTextarea(cur, true);
+        });
+        header.appendChild(delBtn);
+        card.appendChild(header);
 
-            const startField = document.createElement('div');
-            startField.className = 'seg-field';
-            const startLabel = document.createElement('label'); startLabel.textContent = 'Start (s)';
-            const startInput = document.createElement('input');
-            startInput.type = 'number'; startInput.step = '0.1'; startInput.min = '0';
-            startInput.value = seg.start;
-            const startBtns = document.createElement('div'); startBtns.className = 'seg-time-btns';
-            const setStartBtn = document.createElement('button');
-            setStartBtn.className = 'seg-time-btn'; setStartBtn.textContent = '⏱ Set Start';
-            setStartBtn.addEventListener('click', () => {
-                startInput.value = parseFloat(sourceVideo.currentTime.toFixed(2));
-                startInput.dispatchEvent(new Event('change'));
-            });
-            startBtns.appendChild(setStartBtn);
-            startInput.addEventListener('change', () => {
-                const cur = parseTextareaJSON();
-                if (!cur) return;
-                cur[i].start = parseFloat(startInput.value) || 0;
-                writeToTextarea(cur);
-            });
-            startField.appendChild(startLabel); startField.appendChild(startInput); startField.appendChild(startBtns);
+        // START
+        const startField = document.createElement('div');
+        startField.className = 'seg-field';
+        const startLabel = document.createElement('label'); startLabel.textContent = 'Start (s)';
+        const startInput = document.createElement('input');
+        startInput.type = 'number'; startInput.step = '0.1'; startInput.min = '0';
+        startInput.value = seg.start;
+        startInput.dataset.field = 'start';
+        startInput.dataset.index = i;
 
-            const endField = document.createElement('div');
-            endField.className = 'seg-field';
-            const endLabel = document.createElement('label'); endLabel.textContent = 'End (s)';
-            const endInput = document.createElement('input');
-            endInput.type = 'number'; endInput.step = '0.1'; endInput.min = '0';
-            endInput.value = seg.end;
-            const endBtns = document.createElement('div'); endBtns.className = 'seg-time-btns';
-            const setEndBtn = document.createElement('button');
-            setEndBtn.className = 'seg-time-btn'; setEndBtn.textContent = '⏱ Set End';
-            setEndBtn.addEventListener('click', () => {
-                endInput.value = parseFloat(sourceVideo.currentTime.toFixed(2));
-                endInput.dispatchEvent(new Event('change'));
-            });
-            endBtns.appendChild(setEndBtn);
-            endInput.addEventListener('change', () => {
-                const cur = parseTextareaJSON();
-                if (!cur) return;
-                cur[i].end = parseFloat(endInput.value) || 0;
-                writeToTextarea(cur);
-            });
-            endField.appendChild(endLabel); endField.appendChild(endInput); endField.appendChild(endBtns);
+        const startBtns = document.createElement('div'); startBtns.className = 'seg-time-btns';
+        const setStartBtn = document.createElement('button');
+        setStartBtn.className = 'seg-time-btn'; setStartBtn.textContent = '⏱ Set Start';
+        setStartBtn.addEventListener('click', () => {
+            startInput.value = parseFloat(sourceVideo.currentTime.toFixed(2));
+            startInput.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        startBtns.appendChild(setStartBtn);
 
-            card.appendChild(startField);
-            card.appendChild(endField);
+        startInput.addEventListener('change', () => {
+            const cur = parseTextareaJSON();
+            if (!cur) return;
+            cur[i].start = parseFloat(startInput.value) || 0;
+            writeToTextarea(cur, false, i, 'start');
+        });
+        startField.appendChild(startLabel); startField.appendChild(startInput); startField.appendChild(startBtns);
 
-            const textField = document.createElement('div');
-            textField.className = 'seg-field seg-text-field';
-            const textLabel = document.createElement('label'); textLabel.textContent = 'Teks';
-            const textInput = document.createElement('input');
-            textInput.type = 'text'; textInput.value = seg.text;
-            textInput.addEventListener('input', () => {
-                const cur = parseTextareaJSON();
-                if (!cur) return;
-                cur[i].text = textInput.value;
-                writeToTextarea(cur);
-            });
-            textField.appendChild(textLabel); textField.appendChild(textInput);
-            card.appendChild(textField);
+        // END
+        const endField = document.createElement('div');
+        endField.className = 'seg-field';
+        const endLabel = document.createElement('label'); endLabel.textContent = 'End (s)';
+        const endInput = document.createElement('input');
+        endInput.type = 'number'; endInput.step = '0.1'; endInput.min = '0';
+        endInput.value = seg.end;
+        endInput.dataset.field = 'end';
+        endInput.dataset.index = i;
 
-            card._overlapLabel = overlapLabel;
-            segmentList.appendChild(card);
+        const endBtns = document.createElement('div'); endBtns.className = 'seg-time-btns';
+        const setEndBtn = document.createElement('button');
+        setEndBtn.className = 'seg-time-btn'; setEndBtn.textContent = '⏱ Set End';
+        setEndBtn.addEventListener('click', () => {
+            endInput.value = parseFloat(sourceVideo.currentTime.toFixed(2));
+            endInput.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        endBtns.appendChild(setEndBtn);
+
+        endInput.addEventListener('change', () => {
+            const cur = parseTextareaJSON();
+            if (!cur) return;
+            cur[i].end = parseFloat(endInput.value) || 0;
+            writeToTextarea(cur, false, i, 'end');
+        });
+        endField.appendChild(endLabel); endField.appendChild(endInput); endField.appendChild(endBtns);
+
+        card.appendChild(startField);
+        card.appendChild(endField);
+
+        // TEXT
+        const textField = document.createElement('div');
+        textField.className = 'seg-field seg-text-field';
+        const textLabel = document.createElement('label'); textLabel.textContent = 'Teks';
+        const textInput = document.createElement('input');
+        textInput.type = 'text'; textInput.value = seg.text;
+        textInput.dataset.field = 'text';
+        textInput.dataset.index = i;
+
+        // Ganti 'input' → 'change' (blur) agar tidak re-render setiap ketikan
+        textInput.addEventListener('change', () => {
+            const cur = parseTextareaJSON();
+            if (!cur) return;
+            cur[i].text = textInput.value;
+            writeToTextarea(cur, false, i, 'text');
         });
 
-        const cards = segmentList.querySelectorAll('.seg-card');
-        const result = validateSubtitles(data);
-        result.overlaps.forEach(([a, b]) => {
-            [a, b].forEach(idx => {
-                if (cards[idx] && !cards[idx].classList.contains('error-seg')) {
-                    cards[idx].classList.add('warn-seg');
-                }
-                if (cards[idx] && cards[idx]._overlapLabel) {
-                    cards[idx]._overlapLabel.textContent = '⚠ overlap';
-                    cards[idx]._overlapLabel.style.display = '';
-                }
-            });
+        // Enter untuk commit
+        textInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                textInput.blur();
+            }
         });
+
+        textField.appendChild(textLabel); textField.appendChild(textInput);
+        card.appendChild(textField);
+
+        card._overlapLabel = overlapLabel;
+        segmentList.appendChild(card);
+    });
+
+    // Validasi overlap
+    const cards = segmentList.querySelectorAll('.seg-card');
+    const result = validateSubtitles(data);
+    result.overlaps.forEach(([a, b]) => {
+        [a, b].forEach(idx => {
+            if (cards[idx] && !cards[idx].classList.contains('error-seg')) {
+                cards[idx].classList.add('warn-seg');
+            }
+            if (cards[idx] && cards[idx]._overlapLabel) {
+                cards[idx]._overlapLabel.textContent = '⚠ overlap';
+                cards[idx]._overlapLabel.style.display = '';
+            }
+        });
+    });
+
+    // Kembalikan fokus ke field yang sedang diedit
+    if (keepFocusIndex >= 0 && keepFocusField) {
+        const targetInput = segmentList.querySelector(
+            `input[data-index="${keepFocusIndex}"][data-field="${keepFocusField}"]`
+        );
+        if (targetInput) {
+            targetInput.focus();
+            // letakkan kursor di akhir
+            const val = targetInput.value;
+            targetInput.setSelectionRange(val.length, val.length);
+        }
     }
+}
 
     function parseTextareaJSON() {
         try {
@@ -1302,31 +1348,67 @@
         }
     }
 
-    function writeToTextarea(arr) {
-        _ignoreTextareaInput = true;
-        subtitleTextarea.value = JSON.stringify(arr, null, 2);
-        _ignoreTextareaInput = false;
-        validateSubtitleRealTime();
+function writeToTextarea(arr, skipRender = false, keepFocusIndex = -1, keepFocusField = null) {
+    _ignoreTextareaInput = true;
+    subtitleTextarea.value = JSON.stringify(arr, null, 2);
+    _ignoreTextareaInput = false;
+
+    validateSubtitleRealTime();
+
+    if (skipRender) {
+        // Hanya update textarea, jangan re-render card (untuk delete)
         const cur = parseTextareaJSON();
         if (cur) renderSegmentCards(cur, -1);
-        else {
+    } else {
+        // Render ulang sambil mempertahankan fokus
+        const cur = parseTextareaJSON();
+        if (cur) {
+            renderSegmentCards(cur, -1, keepFocusIndex, keepFocusField);
+        } else {
             segErrorMsg.textContent = '❌ JSON tidak valid — perbaiki di textarea';
             segErrorMsg.style.display = '';
         }
     }
+}
 
-    function onTextareaInput() {
-        if (_ignoreTextareaInput) return;
-        validateSubtitleRealTime();
-        const data = parseTextareaJSON();
-        if (data) {
-            segErrorMsg.style.display = 'none';
+function onTextareaInput() {
+    if (_ignoreTextareaInput) return;
+    validateSubtitleRealTime();
+    const data = parseTextareaJSON();
+    if (data) {
+        segErrorMsg.style.display = 'none';
+        // Debounce: tunggu user selesai mengetik 400ms
+        clearTimeout(window._segDebounce);
+        window._segDebounce = setTimeout(() => {
             renderSegmentCards(data, -1);
-        } else {
-            segErrorMsg.textContent = '❌ JSON tidak valid — card tidak diperbarui';
-            segErrorMsg.style.display = '';
-        }
+        }, 400);
+    } else {
+        segErrorMsg.textContent = '❌ JSON tidak valid — card tidak diperbarui';
+        segErrorMsg.style.display = '';
     }
+}
+
+// Di highlightActiveCard, skip kalau user sedang fokus di input
+function highlightActiveCard(currentTime) {
+    // Skip auto-scroll kalau user sedang fokus di input
+    const activeEl = document.activeElement;
+    if (activeEl && segmentList.contains(activeEl)) return;
+
+    const cards = segmentList.querySelectorAll('.seg-card');
+    const data  = parseTextareaJSON() || [];
+
+    data.forEach((seg, i) => {
+        const card = cards[i];
+        if (!card) return;
+
+        if (currentTime >= seg.start && currentTime <= seg.end) {
+            card.classList.add('active-seg');
+            // ... sisanya sama
+        } else {
+            card.classList.remove('active-seg');
+        }
+    });
+}
 
     addSegBtn.addEventListener('click', () => {
         const cur = parseTextareaJSON() || [];
@@ -1411,31 +1493,6 @@
         updatePreviewCanvas();
     }
 
-    function highlightActiveCard(currentTime) {
-        const cards = segmentList.querySelectorAll('.seg-card');
-        const data  = parseTextareaJSON() || [];
-
-        data.forEach((seg, i) => {
-            const card = cards[i];
-            if (!card) return;
-
-            if (currentTime >= seg.start && currentTime <= seg.end) {
-                card.classList.add('active-seg');
-                const cardTop    = card.offsetTop;
-                const cardBottom = cardTop + card.offsetHeight;
-                const listTop    = segmentList.scrollTop;
-                const listBottom = listTop + segmentList.clientHeight;
-
-                if (cardTop < listTop) {
-                    segmentList.scrollTop = cardTop;
-                } else if (cardBottom > listBottom) {
-                    segmentList.scrollTop = cardBottom - segmentList.clientHeight;
-                }
-            } else {
-                card.classList.remove('active-seg');
-            }
-        });
-    }
 
     function fmtTime(sec) {
         if (!sec || isNaN(sec)) return '0:00';
