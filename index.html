@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -11,6 +12,7 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
         }
+
         body {
             background: #0b0e14;
             color: #eef2f5;
@@ -20,15 +22,17 @@
             min-height: 100vh;
             align-items: flex-start;
         }
+
         .app {
             max-width: 560px;
             width: 100%;
             background: #1a1f27;
             border-radius: 28px;
             padding: 20px 16px 28px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
             border: 1px solid #2e3742;
         }
+
         h1 {
             font-size: 1.6rem;
             font-weight: 500;
@@ -37,11 +41,13 @@
             align-items: center;
             gap: 8px;
         }
+
         h1 small {
             font-size: 0.9rem;
             opacity: 0.7;
             margin-left: auto;
         }
+
         .card {
             background: #252d38;
             border-radius: 20px;
@@ -49,6 +55,7 @@
             margin-top: 14px;
             border: 1px solid #303a48;
         }
+
         label {
             font-weight: 500;
             font-size: 0.9rem;
@@ -56,7 +63,12 @@
             margin-bottom: 6px;
             color: #b6c8e0;
         }
-        input[type="file"], textarea, select, input[type="color"], input[type="number"] {
+
+        input[type="file"],
+        textarea,
+        select,
+        input[type="color"],
+        input[type="number"] {
             width: 100%;
             background: #141a22;
             border: 1px solid #384452;
@@ -66,6 +78,7 @@
             font-size: 0.95rem;
             transition: 0.2s;
         }
+
         textarea {
             resize: vertical;
             min-height: 120px;
@@ -73,11 +86,13 @@
             font-size: 0.85rem;
             line-height: 1.6;
         }
+
         .row-2col {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
+
         .preview-box {
             margin-top: 16px;
             background: #0f141c;
@@ -86,13 +101,16 @@
             border: 1px solid #2f3a48;
             position: relative;
         }
-        video, #previewCanvas {
+
+        video,
+        #previewCanvas {
             width: 100%;
             display: block;
             background: #000;
             max-height: 300px;
             object-fit: contain;
         }
+
         .preview-controls {
             background: #0f141c;
             padding: 8px 12px;
@@ -101,6 +119,7 @@
             gap: 8px;
             border-top: 1px solid #2f3a48;
         }
+
         .preview-controls button {
             background: #1f2a36;
             border: 1px solid #384452;
@@ -110,10 +129,12 @@
             font-size: 0.8rem;
             cursor: pointer;
         }
+
         .preview-controls input[type="range"] {
             flex: 1;
             accent-color: #f7c948;
         }
+
         .action-btn {
             width: 100%;
             background: #f7c948;
@@ -127,16 +148,23 @@
             cursor: pointer;
             box-shadow: 0 6px 0 #a0812b;
         }
+
         .action-btn:active {
             transform: translateY(4px);
             box-shadow: 0 2px 0 #a0812b;
         }
+
         .render-row {
             display: flex;
             gap: 10px;
             margin-top: 20px;
         }
-        .render-row .action-btn { margin-top: 0; flex: 1; }
+
+        .render-row .action-btn {
+            margin-top: 0;
+            flex: 1;
+        }
+
         .preview-btn {
             background: #2a3848;
             border: 1px solid #384452;
@@ -146,7 +174,13 @@
             color: #b6c8e0;
             cursor: pointer;
         }
-        .preview-btn.active { background: #3d1f1f; border-color: #ff6b63; color: #ff8a80; }
+
+        .preview-btn.active {
+            background: #3d1f1f;
+            border-color: #ff6b63;
+            color: #ff8a80;
+        }
+
         .status-badge {
             margin-top: 12px;
             padding: 10px 14px;
@@ -157,6 +191,7 @@
             color: #b0c8e0;
             border-left: 4px solid #f7c948;
         }
+
         .download-link {
             display: block;
             margin-top: 18px;
@@ -169,15 +204,25 @@
             font-weight: 500;
             border: 1px solid #42505e;
         }
-        .download-link.active { background: #2f8e4b; color: white; }
-        .hint { font-size: 0.75rem; opacity: 0.6; margin-top: 4px; }
-        
+
+        .download-link.active {
+            background: #2f8e4b;
+            color: white;
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-top: 4px;
+        }
+
         .subtitle-toolbar {
             display: flex;
             gap: 8px;
             margin-top: 6px;
             flex-wrap: wrap;
         }
+
         .tool-btn {
             background: #1f2a36;
             border: 1px solid #384452;
@@ -191,12 +236,31 @@
             align-items: center;
             gap: 6px;
         }
-        .tool-btn:hover { border-color: #f7c948; color: #fff; }
-        .tool-btn.clear-btn { color: #ff8a80; border-color: #5a2d2d; }
-        .tool-btn.paste-btn { color: #8cd9a0; border-color: #2d5a3a; }
-        .tool-btn.srt-btn { color: #8db4ff; border-color: #2d3d5a; }
 
-        #segmentEditor { margin-top: 12px; }
+        .tool-btn:hover {
+            border-color: #f7c948;
+            color: #fff;
+        }
+
+        .tool-btn.clear-btn {
+            color: #ff8a80;
+            border-color: #5a2d2d;
+        }
+
+        .tool-btn.paste-btn {
+            color: #8cd9a0;
+            border-color: #2d5a3a;
+        }
+
+        .tool-btn.srt-btn {
+            color: #8db4ff;
+            border-color: #2d3d5a;
+        }
+
+        #segmentEditor {
+            margin-top: 12px;
+        }
+
         #segmentList {
             display: flex;
             flex-direction: column;
@@ -205,6 +269,7 @@
             overflow-y: auto;
             padding-right: 2px;
         }
+
         .seg-card {
             background: #141a22;
             border: 1px solid #384452;
@@ -214,772 +279,903 @@
             grid-template-columns: 1fr 1fr;
             gap: 6px;
         }
-        .seg-card-header { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #5a7090; }
-        .seg-card-header button { margin-left: auto; background: none; border: none; color: #ff6b63; cursor: pointer; }
-        .seg-field { display: flex; flex-direction: column; gap: 2px; }
-        .seg-field label { font-size: 0.65rem; color: #5a7090; margin: 0; }
-        .seg-field input { background: #0e141c; border: 1px solid #2e3a48; border-radius: 8px; padding: 5px 8px; color: #eef2f5; font-size: 0.8rem; width: 100%; }
-        .seg-text-field { grid-column: 1 / -1; }
-        .seg-time-btn { background: #1f2a36; border: 1px solid #384452; border-radius: 6px; padding: 2px 6px; color: #b6c8e0; font-size: 0.65rem; cursor: pointer; margin-top: 2px; }
-        
-        .color-picker-group { display: flex; align-items: center; gap: 8px; }
-        .color-picker-group input[type="color"] { width: 40px; height: 35px; padding: 2px; cursor: pointer; background: #141a22; }
 
-        .preset-row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+        .seg-card-header {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #5a7090;
+        }
+
+        .seg-card-header button {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: #ff6b63;
+            cursor: pointer;
+        }
+
+        .seg-field {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .seg-field label {
+            font-size: 0.65rem;
+            color: #5a7090;
+            margin: 0;
+        }
+
+        .seg-field input {
+            background: #0e141c;
+            border: 1px solid #2e3a48;
+            border-radius: 8px;
+            padding: 5px 8px;
+            color: #eef2f5;
+            font-size: 0.8rem;
+            width: 100%;
+        }
+
+        .seg-text-field {
+            grid-column: 1 / -1;
+        }
+
+        .seg-time-btn {
+            background: #1f2a36;
+            border: 1px solid #384452;
+            border-radius: 6px;
+            padding: 2px 6px;
+            color: #b6c8e0;
+            font-size: 0.65rem;
+            cursor: pointer;
+            margin-top: 2px;
+        }
+
+        .color-picker-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-picker-group input[type="color"] {
+            width: 40px;
+            height: 35px;
+            padding: 2px;
+            cursor: pointer;
+            background: #141a22;
+        }
+
+        .preset-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
         .preset-dot {
-            width: 24px; height: 24px; border-radius: 50%;
-            border: 2px solid #384452; cursor: pointer; padding: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #384452;
+            cursor: pointer;
+            padding: 0;
             transition: 0.15s;
         }
-        .preset-dot:hover { transform: scale(1.15); border-color: #f7c948; }
-        .preset-dot.active { border-color: #f7c948; box-shadow: 0 0 0 2px rgba(247,201,72,0.4); }
+
+        .preset-dot:hover {
+            transform: scale(1.15);
+            border-color: #f7c948;
+        }
+
+        .preset-dot.active {
+            border-color: #f7c948;
+            box-shadow: 0 0 0 2px rgba(247, 201, 72, 0.4);
+        }
 
         .toggle-row {
-            display: flex; align-items: center; gap: 10px;
-            background: #141a22; border: 1px solid #384452;
-            border-radius: 14px; padding: 10px 14px; margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #141a22;
+            border: 1px solid #384452;
+            border-radius: 14px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
         }
-        .toggle-row label { margin: 0; flex: 1; font-size: 0.85rem; color: #b6c8e0; cursor: pointer; }
-        .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
-        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .toggle-row label {
+            margin: 0;
+            flex: 1;
+            font-size: 0.85rem;
+            color: #b6c8e0;
+            cursor: pointer;
+        }
+
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
         .slider-sw {
-            position: absolute; inset: 0; background: #2a3542; border-radius: 24px;
-            cursor: pointer; transition: 0.2s; border: 1px solid #384452;
+            position: absolute;
+            inset: 0;
+            background: #2a3542;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #384452;
         }
+
         .slider-sw::before {
-            content: ''; position: absolute; height: 16px; width: 16px;
-            left: 3px; top: 3px; background: #7a90a8; border-radius: 50%; transition: 0.2s;
+            content: '';
+            position: absolute;
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            top: 3px;
+            background: #7a90a8;
+            border-radius: 50%;
+            transition: 0.2s;
         }
-        .switch input:checked + .slider-sw { background: #f7c948; border-color: #f7c948; }
-        .switch input:checked + .slider-sw::before { transform: translateX(20px); background: #0b0e14; }
+
+        .switch input:checked+.slider-sw {
+            background: #f7c948;
+            border-color: #f7c948;
+        }
+
+        .switch input:checked+.slider-sw::before {
+            transform: translateX(20px);
+            background: #0b0e14;
+        }
     </style>
 </head>
+
 <body>
-<div class="app">
-    <h1>✨ CapCut Style <small>Dynamic Pro</small></h1>
+    <div class="app">
+        <h1>✨ CapCut Style <small>Dynamic Pro</small></h1>
 
-    <!-- Upload Video -->
-    <div class="card">
-        <label for="videoInput">📁 Pilih Video (.mp4, .webm)</label>
-        <input type="file" id="videoInput" accept="video/mp4,video/webm">
-    </div>
-
-    <!-- Styling & Custom Text Options -->
-    <div class="card">
-        <label>🎨 Kustomisasi Teks & Ukuran Font</label>
-        <!-- Toggle Background Solid -->
-        <div class="toggle-row">
-            <label for="solidBgToggle">🎬 Background Solid (video disembunyikan, hanya subtitle di atas warna)</label>
-            <div class="switch">
-                <input type="checkbox" id="solidBgToggle" checked>
-                <span class="slider-sw"></span>
-            </div>
+        <!-- Upload Video -->
+        <div class="card">
+            <label for="videoInput">📁 Pilih Video (.mp4, .webm)</label>
+            <input type="file" id="videoInput" accept="video/mp4,video/webm">
         </div>
 
-        <div id="solidBgOptions">
+        <!-- Styling & Custom Text Options -->
+        <div class="card">
+            <label>🎨 Kustomisasi Teks & Ukuran Font</label>
+            <!-- Toggle Background Solid -->
+            <div class="toggle-row">
+                <label for="solidBgToggle">🎬 Background Solid (video disembunyikan, hanya subtitle di atas
+                    warna)</label>
+                <div class="switch">
+                    <input type="checkbox" id="solidBgToggle" checked>
+                    <span class="slider-sw"></span>
+                </div>
+            </div>
+
+            <div id="solidBgOptions">
+                <div class="row-2col" style="margin-bottom: 10px;">
+                    <div>
+                        <label style="font-size:0.75rem;">Warna Background Solid</label>
+                        <div class="color-picker-group">
+                            <input type="color" id="solidBgColor" value="#000000">
+                            <span style="font-size:0.8rem;" id="solidBgColorVal">#000000</span>
+                        </div>
+                        <div class="preset-row" id="solidPresetRow">
+                            <button class="preset-dot active" data-color="#000000" style="background:#000000;"
+                                title="Hitam"></button>
+                            <button class="preset-dot" data-color="#FFFFFF" style="background:#FFFFFF;"
+                                title="Putih"></button>
+                            <button class="preset-dot" data-color="#00FF00" style="background:#00FF00;"
+                                title="Hijau"></button>
+                            <button class="preset-dot" data-color="#0000FF" style="background:#0000FF;"
+                                title="Biru"></button>
+                            <button class="preset-dot" data-color="#1A1F27" style="background:#1A1F27;"
+                                title="Dark Grey"></button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:0.75rem;">Info Ukuran</label>
+                        <div class="hint" id="sizeHint" style="margin-top:0; line-height:1.5;">
+                            Bitrate otomatis: <b>~800 kbps</b><br>
+                            Estimasi file kecil ✅
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row-2col" style="margin-bottom: 10px;">
                 <div>
-                    <label style="font-size:0.75rem;">Warna Background Solid</label>
+                    <label style="font-size:0.75rem;">Warna Teks Utama</label>
                     <div class="color-picker-group">
-                        <input type="color" id="solidBgColor" value="#000000">
-                        <span style="font-size:0.8rem;" id="solidBgColorVal">#000000</span>
-                    </div>
-                    <div class="preset-row" id="solidPresetRow">
-                        <button class="preset-dot active" data-color="#000000" style="background:#000000;" title="Hitam"></button>
-                        <button class="preset-dot" data-color="#FFFFFF" style="background:#FFFFFF;" title="Putih"></button>
-                        <button class="preset-dot" data-color="#00FF00" style="background:#00FF00;" title="Hijau"></button>
-                        <button class="preset-dot" data-color="#0000FF" style="background:#0000FF;" title="Biru"></button>
-                        <button class="preset-dot" data-color="#1A1F27" style="background:#1A1F27;" title="Dark Grey"></button>
+                        <input type="color" id="textColor" value="#FFD966">
+                        <span style="font-size:0.8rem;" id="textColorVal">#FFD966</span>
                     </div>
                 </div>
                 <div>
-                    <label style="font-size:0.75rem;">Info Ukuran</label>
-                    <div class="hint" id="sizeHint" style="margin-top:0; line-height:1.5;">
-                        Bitrate otomatis: <b>~800 kbps</b><br>
-                        Estimasi file kecil ✅
+                    <label style="font-size:0.75rem;">Warna Background Teks</label>
+                    <div class="color-picker-group">
+                        <input type="color" id="bgColor" value="#000000">
+                        <input type="checkbox" id="useBg" checked title="Aktifkan Background"> <span
+                            style="font-size:0.8rem;">Aktif</span>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row-2col" style="margin-bottom: 10px;">
-            <div>
-                <label style="font-size:0.75rem;">Warna Teks Utama</label>
-                <div class="color-picker-group">
-                    <input type="color" id="textColor" value="#FFD966">
-                    <span style="font-size:0.8rem;" id="textColorVal">#FFD966</span>
+            <div class="row-2col" style="margin-bottom: 10px;">
+                <div>
+                    <label style="font-size:0.75rem;">Mode Teks</label>
+                    <select id="animStyle">
+                        <option value="none">Normal (Auto-Wrap Kalimat)</option>
+                        <option value="word" selected>Per Kata (1 Baris Berganti Cepat)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;">Ukuran Font Dasar (px)</label>
+                    <input type="number" id="fontSizeInput" value="36" min="16" max="90" step="2">
                 </div>
             </div>
-            <div>
-                <label style="font-size:0.75rem;">Warna Background Teks</label>
-                <div class="color-picker-group">
-                    <input type="color" id="bgColor" value="#000000">
-                    <input type="checkbox" id="useBg" checked title="Aktifkan Background"> <span style="font-size:0.8rem;">Aktif</span>
+
+            <div class="row-2col">
+                <div>
+                    <label style="font-size:0.75rem;">Layout Posisi Vertikal</label>
+                    <select id="layoutPos">
+                        <option value="bottom" selected>Bawah (Bottom)</option>
+                        <option value="top">Atas (Top)</option>
+                        <option value="center">Tengah (Center)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;">Perataan Teks</label>
+                    <select id="textAlign">
+                        <option value="center" selected>Tengah</option>
+                        <option value="left">Kiri</option>
+                        <option value="right">Kanan</option>
+                    </select>
                 </div>
             </div>
         </div>
-        
-        <div class="row-2col" style="margin-bottom: 10px;">
-            <div>
-                <label style="font-size:0.75rem;">Mode Teks</label>
-                <select id="animStyle">
-                    <option value="none">Normal (Auto-Wrap Kalimat)</option>
-                    <option value="word" selected>Per Kata (1 Baris Berganti Cepat)</option>
-                </select>
-            </div>
-            <div>
-                <label style="font-size:0.75rem;">Ukuran Font Dasar (px)</label>
-                <input type="number" id="fontSizeInput" value="36" min="16" max="90" step="2">
-            </div>
-        </div>
 
-        <div class="row-2col">
-            <div>
-                <label style="font-size:0.75rem;">Layout Posisi Vertikal</label>
-                <select id="layoutPos">
-                    <option value="bottom" selected>Bawah (Bottom)</option>
-                    <option value="top">Atas (Top)</option>
-                    <option value="center">Tengah (Center)</option>
-                </select>
-            </div>
-            <div>
-                <label style="font-size:0.75rem;">Perataan Teks</label>
-                <select id="textAlign">
-                    <option value="center" selected>Tengah</option>
-                    <option value="left">Kiri</option>
-                    <option value="right">Kanan</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data Subtitle JSON & Segment Editor -->
-    <div class="card">
-        <label for="subtitleData">✏️ Data Subtitle (JSON)</label>
-        <textarea id="subtitleData">[
+        <!-- Data Subtitle JSON & Segment Editor -->
+        <div class="card">
+            <label for="subtitleData">✏️ Data Subtitle (JSON)</label>
+            <textarea id="subtitleData">[
   { "start": 0, "end": 2.5, "text": "Halo selamat datang di editor subtitle keren ini" },
   { "start": 2.8, "end": 5.0, "text": "Tanpa outline hitam, teks jadi terlihat lebih bersih" },
   { "start": 5.5, "end": 8.0, "text": "Atur ukuran font sesuai kebutuhan video kamu!" }
 ]</textarea>
-        
-        <div class="subtitle-toolbar">
-            <button class="tool-btn paste-btn" id="pasteBtn">📋 Paste</button>
-            <button class="tool-btn clear-btn" id="clearBtn">🗑️ Clear</button>
-            <button class="tool-btn" id="formatBtn">✨ Format</button>
-            <button class="tool-btn srt-btn" id="exportSrtBtn">💾 Export SRT</button>
-        </div>
 
-        <div id="segmentEditor">
-            <label style="margin-top:10px; font-size:0.8rem;">📝 Editor Segmen Interaktif</label>
-            <div id="segmentList"></div>
-            <div style="display:flex; gap:8px; margin-top:8px;">
-                <button class="tool-btn" id="addSegBtn">+ Tambah Segmen</button>
-                <button class="tool-btn" id="sortSegBtn">⬆ Urutkan Waktu</button>
+            <div class="subtitle-toolbar">
+                <button class="tool-btn paste-btn" id="pasteBtn">📋 Paste</button>
+                <button class="tool-btn clear-btn" id="clearBtn">🗑️ Clear</button>
+                <button class="tool-btn" id="formatBtn">✨ Format</button>
+                <button class="tool-btn srt-btn" id="exportSrtBtn">💾 Export SRT</button>
+            </div>
+
+            <div id="segmentEditor">
+                <label style="margin-top:10px; font-size:0.8rem;">📝 Editor Segmen Interaktif</label>
+                <div id="segmentList"></div>
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                    <button class="tool-btn" id="addSegBtn">+ Tambah Segmen</button>
+                    <button class="tool-btn" id="sortSegBtn">⬆ Urutkan Waktu</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Pilihan Resolusi & Format -->
-    <div class="card">
-        <label>📐 Resolusi & Format Output</label>
-        <div class="row-2col">
-            <select id="resolutionSelect">
-                <option value="480x854">Hemat Data (480x854)</option>
-                <option value="540x960">Standar Ringan (540x960)</option>
-                <option value="720x1280" selected>TikTok / Reels (720x1280)</option>
-                <option value="1080x1920">Full HD Vertical (1080x1920)</option>
-                <option value="1280x720">YouTube Landscape (1280x720)</option>
-            </select>
-            <div>
-                <select id="formatSelect">
-                    <option value="mp4" selected>MP4 (H.264) *</option>
-                    <option value="webm">WebM (Universal)</option>
+        <!-- Pilihan Resolusi & Format -->
+        <div class="card">
+            <label>📐 Resolusi & Format Output</label>
+            <div class="row-2col">
+                <select id="resolutionSelect">
+                    <option value="480x854">Hemat Data (480x854)</option>
+                    <option value="540x960">Standar Ringan (540x960)</option>
+                    <option value="720x1280" selected>TikTok / Reels (720x1280)</option>
+                    <option value="1080x1920">Full HD Vertical (1080x1920)</option>
+                    <option value="1280x720">YouTube Landscape (1280x720)</option>
                 </select>
-                <div class="hint" id="formatHint">* MP4 didukung tergantung browser</div>
+                <div>
+                    <select id="formatSelect">
+                        <option value="mp4" selected>MP4 (H.264) *</option>
+                        <option value="webm">WebM (Universal)</option>
+                    </select>
+                    <div class="hint" id="formatHint">* MP4 didukung tergantung browser</div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Preview Box -->
-    <div class="preview-box">
-        <video id="sourceVideo" muted playsinline></video>
-        <canvas id="previewCanvas"></canvas>
-        <div class="preview-controls" id="previewControls" style="display:none;">
-            <button id="playPauseBtn">▶</button>
-            <input type="range" id="seekBar" min="0" max="100" step="0.1" value="0">
-            <span id="timeDisplay" style="font-size:0.75rem; color:#7a90a8;">0:00</span>
+        <!-- Preview Box -->
+        <div class="preview-box">
+            <video id="sourceVideo" muted playsinline></video>
+            <canvas id="previewCanvas"></canvas>
+            <div class="preview-controls" id="previewControls" style="display:none;">
+                <button id="playPauseBtn">▶</button>
+                <input type="range" id="seekBar" min="0" max="100" step="0.1" value="0">
+                <span id="timeDisplay" style="font-size:0.75rem; color:#7a90a8;">0:00</span>
+            </div>
         </div>
+
+        <!-- Render & Preview Buttons -->
+        <div class="render-row">
+            <button class="action-btn" id="renderBtn">▶ Mulai Render Video</button>
+            <button class="preview-btn" id="previewBtn">👁 Preview</button>
+        </div>
+
+        <div id="statusMessage" class="status-badge">📹 Pilih video & atur subtitle, lalu klik Render.</div>
+        <a href="#" id="downloadLink" class="download-link" download="capcut_subtitle.mp4">⬇️ Hasil video akan muncul di
+            sini</a>
+
+        <canvas id="canvas-preview" style="display:none;"></canvas>
     </div>
 
-    <!-- Render & Preview Buttons -->
-    <div class="render-row">
-        <button class="action-btn" id="renderBtn">▶ Mulai Render Video</button>
-        <button class="preview-btn" id="previewBtn">👁 Preview</button>
-    </div>
+    <script>
+        (function () {
+            'use strict';
 
-    <div id="statusMessage" class="status-badge">📹 Pilih video & atur subtitle, lalu klik Render.</div>
-    <a href="#" id="downloadLink" class="download-link" download="capcut_subtitle.mp4">⬇️ Hasil video akan muncul di sini</a>
+            const videoInput = document.getElementById('videoInput');
+            const subtitleTextarea = document.getElementById('subtitleData');
+            const sourceVideo = document.getElementById('sourceVideo');
+            const renderBtn = document.getElementById('renderBtn');
+            const statusMsg = document.getElementById('statusMessage');
+            const downloadLink = document.getElementById('downloadLink');
+            const resolutionSelect = document.getElementById('resolutionSelect');
+            const formatSelect = document.getElementById('formatSelect');
+            const formatHint = document.getElementById('formatHint');
 
-    <canvas id="canvas-preview" style="display:none;"></canvas>
-</div>
+            const pasteBtn = document.getElementById('pasteBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const formatBtn = document.getElementById('formatBtn');
+            const exportSrtBtn = document.getElementById('exportSrtBtn');
 
-<script>
-(function() {
-    'use strict';
+            const segmentList = document.getElementById('segmentList');
+            const addSegBtn = document.getElementById('addSegBtn');
+            const sortSegBtn = document.getElementById('sortSegBtn');
 
-    const videoInput = document.getElementById('videoInput');
-    const subtitleTextarea = document.getElementById('subtitleData');
-    const sourceVideo = document.getElementById('sourceVideo');
-    const renderBtn = document.getElementById('renderBtn');
-    const statusMsg = document.getElementById('statusMessage');
-    const downloadLink = document.getElementById('downloadLink');
-    const resolutionSelect = document.getElementById('resolutionSelect');
-    const formatSelect = document.getElementById('formatSelect');
-    const formatHint = document.getElementById('formatHint');
-    
-    const pasteBtn = document.getElementById('pasteBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const formatBtn = document.getElementById('formatBtn');
-    const exportSrtBtn = document.getElementById('exportSrtBtn');
+            const solidBgToggle = document.getElementById('solidBgToggle');
+            const solidBgOptions = document.getElementById('solidBgOptions');
+            const solidBgColorInput = document.getElementById('solidBgColor');
+            const solidBgColorVal = document.getElementById('solidBgColorVal');
+            const solidPresetRow = document.getElementById('solidPresetRow');
+            const sizeHint = document.getElementById('sizeHint');
+            const textColorInput = document.getElementById('textColor');
+            const textColorVal = document.getElementById('textColorVal');
+            const bgColorInput = document.getElementById('bgColor');
+            const useBgCheckbox = document.getElementById('useBg');
+            const animStyleSelect = document.getElementById('animStyle');
+            const fontSizeInput = document.getElementById('fontSizeInput');
+            const layoutPosSelect = document.getElementById('layoutPos');
+            const textAlignSelect = document.getElementById('textAlign');
 
-    const segmentList = document.getElementById('segmentList');
-    const addSegBtn = document.getElementById('addSegBtn');
-    const sortSegBtn = document.getElementById('sortSegBtn');
+            const canvas = document.getElementById('canvas-preview');
+            const previewCanvas = document.getElementById('previewCanvas');
+            const previewCtx = previewCanvas.getContext('2d');
 
-    const solidBgToggle = document.getElementById('solidBgToggle');
-    const solidBgOptions = document.getElementById('solidBgOptions');
-    const solidBgColorInput = document.getElementById('solidBgColor');
-    const solidBgColorVal = document.getElementById('solidBgColorVal');
-    const solidPresetRow = document.getElementById('solidPresetRow');
-    const sizeHint = document.getElementById('sizeHint');
-    const textColorInput = document.getElementById('textColor');
-    const textColorVal = document.getElementById('textColorVal');
-    const bgColorInput = document.getElementById('bgColor');
-    const useBgCheckbox = document.getElementById('useBg');
-    const animStyleSelect = document.getElementById('animStyle');
-    const fontSizeInput = document.getElementById('fontSizeInput');
-    const layoutPosSelect = document.getElementById('layoutPos');
-    const textAlignSelect = document.getElementById('textAlign');
+            const previewBtn = document.getElementById('previewBtn');
+            const previewControls = document.getElementById('previewControls');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const seekBar = document.getElementById('seekBar');
+            const timeDisplay = document.getElementById('timeDisplay');
 
-    const canvas = document.getElementById('canvas-preview');
-    const previewCanvas = document.getElementById('previewCanvas');
-    const previewCtx = previewCanvas.getContext('2d');
-    
-    const previewBtn = document.getElementById('previewBtn');
-    const previewControls = document.getElementById('previewControls');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const seekBar = document.getElementById('seekBar');
-    const timeDisplay = document.getElementById('timeDisplay');
+            textColorInput.addEventListener('input', () => textColorVal.textContent = textColorInput.value);
+            // ─── Background Solid: toggle ───
+            function updateSolidUI() {
+                solidBgOptions.style.display = solidBgToggle.checked ? 'block' : 'none';
+                updateSizeHint();
+            }
+            function updateSizeHint() {
+                if (!sizeHint) return;
+                if (solidBgToggle.checked) {
+                    sizeHint.innerHTML = 'Bitrate otomatis: <b>~800 kbps</b><br>Estimasi file kecil ✅';
+                    sizeHint.style.color = '#8cd9a0';
+                } else {
+                    sizeHint.innerHTML = 'Bitrate otomatis: <b>~4000 kbps</b><br>Video tampil penuh';
+                    sizeHint.style.color = '#b6c8e0';
+                }
+            }
+            solidBgToggle.addEventListener('change', updateSolidUI);
+            solidBgColorInput.addEventListener('input', () => {
+                solidBgColorVal.textContent = solidBgColorInput.value.toUpperCase();
+                // hapus active dari preset kalau warna tidak cocok
+                document.querySelectorAll('#solidPresetRow .preset-dot').forEach(d => {
+                    d.classList.toggle('active', d.dataset.color.toLowerCase() === solidBgColorInput.value.toLowerCase());
+                });
+            });
+            solidPresetRow.addEventListener('click', (e) => {
+                const btn = e.target.closest('.preset-dot');
+                if (!btn) return;
+                solidBgColorInput.value = btn.dataset.color;
+                solidBgColorInput.dispatchEvent(new Event('input'));
+            });
+            updateSolidUI();
+            solidBgColorInput.dispatchEvent(new Event('input')); // sinkronkan label awal
 
-    textColorInput.addEventListener('input', () => textColorVal.textContent = textColorInput.value);
-    // ─── Background Solid: toggle ───
-    function updateSolidUI() {
-        solidBgOptions.style.display = solidBgToggle.checked ? 'block' : 'none';
-        updateSizeHint();
-    }
-    function updateSizeHint() {
-        if (!sizeHint) return;
-        if (solidBgToggle.checked) {
-            sizeHint.innerHTML = 'Bitrate otomatis: <b>~800 kbps</b><br>Estimasi file kecil ✅';
-            sizeHint.style.color = '#8cd9a0';
-        } else {
-            sizeHint.innerHTML = 'Bitrate otomatis: <b>~4000 kbps</b><br>Video tampil penuh';
-            sizeHint.style.color = '#b6c8e0';
-        }
-    }
-    solidBgToggle.addEventListener('change', updateSolidUI);
-    solidBgColorInput.addEventListener('input', () => {
-        solidBgColorVal.textContent = solidBgColorInput.value.toUpperCase();
-        // hapus active dari preset kalau warna tidak cocok
-        document.querySelectorAll('#solidPresetRow .preset-dot').forEach(d => {
-            d.classList.toggle('active', d.dataset.color.toLowerCase() === solidBgColorInput.value.toLowerCase());
-        });
-    });
-    solidPresetRow.addEventListener('click', (e) => {
-        const btn = e.target.closest('.preset-dot');
-        if (!btn) return;
-        solidBgColorInput.value = btn.dataset.color;
-        solidBgColorInput.dispatchEvent(new Event('input'));
-    });
-    updateSolidUI();
-    solidBgColorInput.dispatchEvent(new Event('input')); // sinkronkan label awal
-    
-    const RESOLUTIONS = {
-        '480x854':   { width: 480,  height: 854  },
-        '540x960':   { width: 540,  height: 960  },
-        '720x1280':  { width: 720,  height: 1280 },
-        '1080x1920': { width: 1080, height: 1920 },
-        '1280x720':  { width: 1280, height: 720  }
-    };
+            const RESOLUTIONS = {
+                '480x854': { width: 480, height: 854 },
+                '540x960': { width: 540, height: 960 },
+                '720x1280': { width: 720, height: 1280 },
+                '1080x1920': { width: 1080, height: 1920 },
+                '1280x720': { width: 1280, height: 720 }
+            };
 
-    function getSupportedMimeType(format) {
-        const mimeTypes = {
-            'webm': ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'],
-            'mp4':  ['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1','video/mp4']
-        };
-        const types = mimeTypes[format] || mimeTypes['webm'];
-        for (let mime of types) {
-            if (MediaRecorder.isTypeSupported(mime)) return mime;
-        }
-        return null;
-    }
+            function getSupportedMimeType(format) {
+                const mimeTypes = {
+                    'webm': ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'],
+                    'mp4': ['video/mp4;codecs=avc1.42E01E', 'video/mp4;codecs=avc1', 'video/mp4']
+                };
+                const types = mimeTypes[format] || mimeTypes['webm'];
+                for (let mime of types) {
+                    if (MediaRecorder.isTypeSupported(mime)) return mime;
+                }
+                return null;
+            }
 
-    function updateFormatHint() {
-        const format = formatSelect.value;
-        const mime = getSupportedMimeType(format);
-        if (mime) {
-            formatHint.innerHTML = `✅ Format ${format.toUpperCase()} didukung browser`;
-            formatHint.style.color = '#8cd9a0';
-        } else {
-            formatHint.innerHTML = `⚠️ Format ${format.toUpperCase()} tidak didukung, fallback ke WebM`;
-            formatHint.style.color = '#ff6b63';
-        }
-    }
-    formatSelect.addEventListener('change', updateFormatHint);
-    updateFormatHint();
+            function updateFormatHint() {
+                const format = formatSelect.value;
+                const mime = getSupportedMimeType(format);
+                if (mime) {
+                    formatHint.innerHTML = `✅ Format ${format.toUpperCase()} didukung browser`;
+                    formatHint.style.color = '#8cd9a0';
+                } else {
+                    formatHint.innerHTML = `⚠️ Format ${format.toUpperCase()} tidak didukung, fallback ke WebM`;
+                    formatHint.style.color = '#ff6b63';
+                }
+            }
+            formatSelect.addEventListener('change', updateFormatHint);
+            updateFormatHint();
 
-    function getSubtitles() {
-        try {
-            const raw = subtitleTextarea.value.trim();
-            if (!raw) return [];
-            const parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch(e) { return []; }
-    }
+            function getSubtitles() {
+                try {
+                    const raw = subtitleTextarea.value.trim();
+                    if (!raw) return [];
+                    const parsed = JSON.parse(raw);
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch (e) { return []; }
+            }
 
-    let _ignoreInput = false;
+            let _ignoreInput = false;
 
-    function renderSegmentCards(data) {
-        segmentList.innerHTML = '';
-        if (!Array.isArray(data)) return;
+            function renderSegmentCards(data) {
+                segmentList.innerHTML = '';
+                if (!Array.isArray(data)) return;
 
-        data.forEach((seg, i) => {
-            const card = document.createElement('div');
-            card.className = 'seg-card';
+                data.forEach((seg, i) => {
+                    const card = document.createElement('div');
+                    card.className = 'seg-card';
 
-            const header = document.createElement('div');
-            header.className = 'seg-card-header';
-            header.innerHTML = `<span>#${i + 1}</span>`;
-            
-            const delBtn = document.createElement('button');
-            delBtn.textContent = '🗑️ Hapus';
-            delBtn.addEventListener('click', () => {
+                    const header = document.createElement('div');
+                    header.className = 'seg-card-header';
+                    header.innerHTML = `<span>#${i + 1}</span>`;
+
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = '🗑️ Hapus';
+                    delBtn.addEventListener('click', () => {
+                        const cur = getSubtitles();
+                        cur.splice(i, 1);
+                        writeToTextarea(cur);
+                    });
+                    header.appendChild(delBtn);
+                    card.appendChild(header);
+
+                    const startF = document.createElement('div');
+                    startF.className = 'seg-field';
+                    startF.innerHTML = `<label>Start (s)</label>`;
+                    const startIn = document.createElement('input');
+                    startIn.type = 'number'; startIn.step = '0.1'; startIn.value = seg.start;
+                    startIn.addEventListener('change', () => {
+                        const cur = getSubtitles();
+                        cur[i].start = parseFloat(startIn.value) || 0;
+                        writeToTextarea(cur, true);
+                    });
+                    startF.appendChild(startIn);
+
+                    const setStart = document.createElement('button');
+                    setStart.className = 'seg-time-btn';
+                    setStart.textContent = '⏱ Set Current';
+                    setStart.addEventListener('click', () => {
+                        startIn.value = parseFloat(sourceVideo.currentTime.toFixed(2));
+                        startIn.dispatchEvent(new Event('change'));
+                    });
+                    startF.appendChild(setStart);
+                    card.appendChild(startF);
+
+                    const endF = document.createElement('div');
+                    endF.className = 'seg-field';
+                    endF.innerHTML = `<label>End (s)</label>`;
+                    const endIn = document.createElement('input');
+                    endIn.type = 'number'; endIn.step = '0.1'; endIn.value = seg.end;
+                    endIn.addEventListener('change', () => {
+                        const cur = getSubtitles();
+                        cur[i].end = parseFloat(endIn.value) || 0;
+                        writeToTextarea(cur, true);
+                    });
+                    endF.appendChild(endIn);
+
+                    const setEnd = document.createElement('button');
+                    setEnd.className = 'seg-time-btn';
+                    setEnd.textContent = '⏱ Set Current';
+                    setEnd.addEventListener('click', () => {
+                        endIn.value = parseFloat(sourceVideo.currentTime.toFixed(2));
+                        endIn.dispatchEvent(new Event('change'));
+                    });
+                    endF.appendChild(setEnd);
+                    card.appendChild(endF);
+
+                    const textF = document.createElement('div');
+                    textF.className = 'seg-field seg-text-field';
+                    textF.innerHTML = `<label>Teks Subtitle</label>`;
+                    const textIn = document.createElement('input');
+                    textIn.type = 'text'; textIn.value = seg.text;
+                    textIn.addEventListener('change', () => {
+                        const cur = getSubtitles();
+                        cur[i].text = textIn.value;
+                        writeToTextarea(cur, true);
+                    });
+                    textF.appendChild(textIn);
+                    card.appendChild(textF);
+
+                    segmentList.appendChild(card);
+                });
+            }
+
+            function writeToTextarea(arr, skipRebuild = false) {
+                _ignoreInput = true;
+                subtitleTextarea.value = JSON.stringify(arr, null, 2);
+                _ignoreInput = false;
+                if (!skipRebuild) renderSegmentCards(arr);
+            }
+
+            subtitleTextarea.addEventListener('input', () => {
+                if (_ignoreInput) return;
+                const data = getSubtitles();
+                if (data.length > 0) renderSegmentCards(data);
+            });
+
+            addSegBtn.addEventListener('click', () => {
                 const cur = getSubtitles();
-                cur.splice(i, 1);
+                const lastEnd = cur.length > 0 ? (cur[cur.length - 1].end || 0) : 0;
+                cur.push({ start: lastEnd, end: lastEnd + 2, text: 'Teks baru' });
                 writeToTextarea(cur);
             });
-            header.appendChild(delBtn);
-            card.appendChild(header);
 
-            const startF = document.createElement('div');
-            startF.className = 'seg-field';
-            startF.innerHTML = `<label>Start (s)</label>`;
-            const startIn = document.createElement('input');
-            startIn.type = 'number'; startIn.step = '0.1'; startIn.value = seg.start;
-            startIn.addEventListener('change', () => {
+            sortSegBtn.addEventListener('click', () => {
                 const cur = getSubtitles();
-                cur[i].start = parseFloat(startIn.value) || 0;
-                writeToTextarea(cur, true);
+                cur.sort((a, b) => a.start - b.start);
+                writeToTextarea(cur);
             });
-            startF.appendChild(startIn);
-            
-            const setStart = document.createElement('button');
-            setStart.className = 'seg-time-btn';
-            setStart.textContent = '⏱ Set Current';
-            setStart.addEventListener('click', () => {
-                startIn.value = parseFloat(sourceVideo.currentTime.toFixed(2));
-                startIn.dispatchEvent(new Event('change'));
+
+            pasteBtn.addEventListener('click', async () => {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    subtitleTextarea.value = text;
+                    renderSegmentCards(getSubtitles());
+                    statusMsg.textContent = '📋 Berhasil menempel dari clipboard';
+                } catch (e) { statusMsg.textContent = '❌ Gagal membaca clipboard'; }
             });
-            startF.appendChild(setStart);
-            card.appendChild(startF);
 
-            const endF = document.createElement('div');
-            endF.className = 'seg-field';
-            endF.innerHTML = `<label>End (s)</label>`;
-            const endIn = document.createElement('input');
-            endIn.type = 'number'; endIn.step = '0.1'; endIn.value = seg.end;
-            endIn.addEventListener('change', () => {
-                const cur = getSubtitles();
-                cur[i].end = parseFloat(endIn.value) || 0;
-                writeToTextarea(cur, true);
+            clearBtn.addEventListener('click', () => {
+                subtitleTextarea.value = '[]';
+                renderSegmentCards([]);
+                statusMsg.textContent = '🗑️ Subtitle dikosongkan';
             });
-            endF.appendChild(endIn);
 
-            const setEnd = document.createElement('button');
-            setEnd.className = 'seg-time-btn';
-            setEnd.textContent = '⏱ Set Current';
-            setEnd.addEventListener('click', () => {
-                endIn.value = parseFloat(sourceVideo.currentTime.toFixed(2));
-                endIn.dispatchEvent(new Event('change'));
+            formatBtn.addEventListener('click', () => {
+                try {
+                    const parsed = JSON.parse(subtitleTextarea.value);
+                    writeToTextarea(parsed);
+                    statusMsg.textContent = '✨ Format JSON dirapikan';
+                } catch (e) { statusMsg.textContent = '❌ Format JSON tidak valid'; }
             });
-            endF.appendChild(setEnd);
-            card.appendChild(endF);
 
-            const textF = document.createElement('div');
-            textF.className = 'seg-field seg-text-field';
-            textF.innerHTML = `<label>Teks Subtitle</label>`;
-            const textIn = document.createElement('input');
-            textIn.type = 'text'; textIn.value = seg.text;
-            textIn.addEventListener('change', () => {
-                const cur = getSubtitles();
-                cur[i].text = textIn.value;
-                writeToTextarea(cur, true);
-            });
-            textF.appendChild(textIn);
-            card.appendChild(textF);
-
-            segmentList.appendChild(card);
-        });
-    }
-
-    function writeToTextarea(arr, skipRebuild = false) {
-        _ignoreInput = true;
-        subtitleTextarea.value = JSON.stringify(arr, null, 2);
-        _ignoreInput = false;
-        if (!skipRebuild) renderSegmentCards(arr);
-    }
-
-    subtitleTextarea.addEventListener('input', () => {
-        if (_ignoreInput) return;
-        const data = getSubtitles();
-        if (data.length > 0) renderSegmentCards(data);
-    });
-
-    addSegBtn.addEventListener('click', () => {
-        const cur = getSubtitles();
-        const lastEnd = cur.length > 0 ? (cur[cur.length - 1].end || 0) : 0;
-        cur.push({ start: lastEnd, end: lastEnd + 2, text: 'Teks baru' });
-        writeToTextarea(cur);
-    });
-
-    sortSegBtn.addEventListener('click', () => {
-        const cur = getSubtitles();
-        cur.sort((a, b) => a.start - b.start);
-        writeToTextarea(cur);
-    });
-
-    pasteBtn.addEventListener('click', async () => {
-        try {
-            const text = await navigator.clipboard.readText();
-            subtitleTextarea.value = text;
-            renderSegmentCards(getSubtitles());
-            statusMsg.textContent = '📋 Berhasil menempel dari clipboard';
-        } catch(e) { statusMsg.textContent = '❌ Gagal membaca clipboard'; }
-    });
-
-    clearBtn.addEventListener('click', () => {
-        subtitleTextarea.value = '[]';
-        renderSegmentCards([]);
-        statusMsg.textContent = '🗑️ Subtitle dikosongkan';
-    });
-
-    formatBtn.addEventListener('click', () => {
-        try {
-            const parsed = JSON.parse(subtitleTextarea.value);
-            writeToTextarea(parsed);
-            statusMsg.textContent = '✨ Format JSON dirapikan';
-        } catch(e) { statusMsg.textContent = '❌ Format JSON tidak valid'; }
-    });
-
-    exportSrtBtn.addEventListener('click', () => {
-        const subs = getSubtitles();
-        if (subs.length === 0) {
-            statusMsg.textContent = '❌ Tidak ada subtitle untuk di-export';
-            return;
-        }
-        let srt = '';
-        subs.forEach((sub, i) => {
-            const fmtTime = (sec) => {
-                const pad = (n, z=2) => String(n).padStart(z, '0');
-                const h = Math.floor(sec / 3600);
-                const m = Math.floor((sec % 3600) / 60);
-                const s = Math.floor(sec % 60);
-                const ms = Math.floor((sec % 1) * 1000);
-                return `${pad(h)}:${pad(m)}:${pad(s)},${pad(ms, 3)}`;
-            };
-            srt += `${i + 1}\n${fmtTime(sub.start)} --> ${fmtTime(sub.end)}\n${sub.text}\n\n`;
-        });
-        const blob = new Blob([srt], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'subtitle.srt';
-        a.click();
-        statusMsg.textContent = '💾 File SRT berhasil di-export!';
-    });
-
-    function wrapTextCustom(text, context, maxWidth) {
-        if (!text) return [];
-        const words = text.trim().split(' ');
-        const lines = [];
-        let currentLine = '';
-
-        for (let word of words) {
-            let testLine = currentLine ? currentLine + ' ' + word : word;
-            if (context.measureText(testLine).width > maxWidth && currentLine) {
-                lines.push(currentLine);
-                currentLine = word;
-            } else {
-                currentLine = testLine;
-            }
-        }
-        if (currentLine) lines.push(currentLine);
-        return lines;
-    }
-
-    function renderFrame(targetCanvas, videoElement, subtitles, currentTime) {
-        const tCtx = targetCanvas.getContext('2d');
-        const W = targetCanvas.width;
-        const H = targetCanvas.height;
-
-        tCtx.clearRect(0, 0, W, H);
-
-        const solidOn = solidBgToggle.checked;
-        if (solidOn) {
-            tCtx.fillStyle = solidBgColorInput.value;
-            tCtx.fillRect(0, 0, W, H);
-        } else {
-            tCtx.drawImage(videoElement, 0, 0, W, H);
-        }
-
-        let activeSub = null;
-        for (let sub of subtitles) {
-            if (currentTime >= sub.start && currentTime <= sub.end) {
-                activeSub = sub;
-                break;
-            }
-        }
-
-        if (!activeSub) return;
-
-        const textColor = textColorInput.value;
-        const bgColor = bgColorInput.value;
-        const useBg = useBgCheckbox.checked;
-        const animStyle = animStyleSelect.value;
-        const customFontSize = parseFloat(fontSizeInput.value) || 36;
-        const layoutPos = layoutPosSelect.value;
-        const textAlign = textAlignSelect.value;
-
-        const scaleFactor = W / 720;
-        const fontSize = customFontSize * scaleFactor;
-        
-        tCtx.font = `bold ${fontSize}px Arial, sans-serif`;
-        const maxWidth = W * 0.85;
-
-        let startY = H * 0.80;
-        if (layoutPos === 'top') startY = H * 0.20;
-        if (layoutPos === 'center') startY = H * 0.50;
-
-        if (animStyle === 'word') {
-            const words = activeSub.text.trim().split(' ');
-            const duration = activeSub.end - activeSub.start;
-            const wordDuration = duration / words.length;
-            let activeWordIndex = Math.floor((currentTime - activeSub.start) / wordDuration);
-            if (activeWordIndex < 0) activeWordIndex = 0;
-            if (activeWordIndex >= words.length) activeWordIndex = words.length - 1;
-
-            const activeWord = words[activeWordIndex] || '';
-            const metrics = tCtx.measureText(activeWord);
-            const textWidth = metrics.width;
-
-            let x = W / 2;
-            if (textAlign === 'left') x = (W - maxWidth) / 2 + textWidth / 2;
-            if (textAlign === 'right') x = (W + maxWidth) / 2 - textWidth / 2;
-            let y = startY;
-
-            if (useBg) {
-                tCtx.fillStyle = bgColor;
-                tCtx.shadowColor = 'rgba(0,0,0,0.5)';
-                tCtx.shadowBlur = 10;
-                let padX = 16, padY = 8;
-                if (tCtx.roundRect) {
-                    tCtx.beginPath();
-                    tCtx.roundRect(x - textWidth/2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2), 8);
-                    tCtx.fill();
-                } else {
-                    tCtx.fillRect(x - textWidth/2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2));
+            exportSrtBtn.addEventListener('click', () => {
+                const subs = getSubtitles();
+                if (subs.length === 0) {
+                    statusMsg.textContent = '❌ Tidak ada subtitle untuk di-export';
+                    return;
                 }
-                tCtx.shadowBlur = 0;
-            }
+                let srt = '';
+                subs.forEach((sub, i) => {
+                    const fmtTime = (sec) => {
+                        const pad = (n, z = 2) => String(n).padStart(z, '0');
+                        const h = Math.floor(sec / 3600);
+                        const m = Math.floor((sec % 3600) / 60);
+                        const s = Math.floor(sec % 60);
+                        const ms = Math.floor((sec % 1) * 1000);
+                        return `${pad(h)}:${pad(m)}:${pad(s)},${pad(ms, 3)}`;
+                    };
+                    srt += `${i + 1}\n${fmtTime(sub.start)} --> ${fmtTime(sub.end)}\n${sub.text}\n\n`;
+                });
+                const blob = new Blob([srt], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'subtitle.srt';
+                a.click();
+                statusMsg.textContent = '💾 File SRT berhasil di-export!';
+            });
 
-            tCtx.textAlign = textAlign === 'center' ? 'center' : (textAlign === 'left' ? 'left' : 'right');
-            let renderX = textAlign === 'center' ? x : (textAlign === 'left' ? x - textWidth/2 : x + textWidth/2);
-            
-            // Outline dihapus (hanya mengisi fillText tanpa strokeText)
-            tCtx.fillStyle = textColor;
-            tCtx.fillText(activeWord, renderX, y);
+            function wrapTextCustom(text, context, maxWidth) {
+                if (!text) return [];
+                const words = text.trim().split(' ');
+                const lines = [];
+                let currentLine = '';
 
-        } else {
-            const wrappedLines = wrapTextCustom(activeSub.text, tCtx, maxWidth);
-            if (wrappedLines.length === 0) return;
-
-            wrappedLines.forEach((line, lineIndex) => {
-                const metrics = tCtx.measureText(line);
-                const textWidth = metrics.width;
-
-                let x = W / 2;
-                if (textAlign === 'left') x = (W - maxWidth) / 2 + textWidth / 2;
-                if (textAlign === 'right') x = (W + maxWidth) / 2 - textWidth / 2;
-
-                let y = startY + (lineIndex * fontSize * 1.4);
-
-                if (useBg) {
-                    tCtx.fillStyle = bgColor;
-                    tCtx.shadowColor = 'rgba(0,0,0,0.5)';
-                    tCtx.shadowBlur = 10;
-                    let padX = 16, padY = 8;
-                    if (tCtx.roundRect) {
-                        tCtx.beginPath();
-                        tCtx.roundRect(x - textWidth/2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2), 8);
-                        tCtx.fill();
+                for (let word of words) {
+                    let testLine = currentLine ? currentLine + ' ' + word : word;
+                    if (context.measureText(testLine).width > maxWidth && currentLine) {
+                        lines.push(currentLine);
+                        currentLine = word;
                     } else {
-                        tCtx.fillRect(x - textWidth/2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2));
+                        currentLine = testLine;
                     }
-                    tCtx.shadowBlur = 0;
+                }
+                if (currentLine) lines.push(currentLine);
+                return lines;
+            }
+
+            function renderFrame(targetCanvas, videoElement, subtitles, currentTime) {
+                const tCtx = targetCanvas.getContext('2d');
+                const W = targetCanvas.width;
+                const H = targetCanvas.height;
+
+                tCtx.clearRect(0, 0, W, H);
+
+                const solidOn = solidBgToggle.checked;
+                if (solidOn) {
+                    tCtx.fillStyle = solidBgColorInput.value;
+                    tCtx.fillRect(0, 0, W, H);
+                } else {
+                    tCtx.drawImage(videoElement, 0, 0, W, H);
                 }
 
-                tCtx.textAlign = textAlign === 'center' ? 'center' : (textAlign === 'left' ? 'left' : 'right');
-                let renderX = textAlign === 'center' ? x : (textAlign === 'left' ? x - textWidth/2 : x + textWidth/2);
-                
-                // Outline dihapus
-                tCtx.fillStyle = textColor;
-                tCtx.fillText(line, renderX, y);
-            });
-        }
-    }
+                let activeSub = null;
+                for (let sub of subtitles) {
+                    if (currentTime >= sub.start && currentTime <= sub.end) {
+                        activeSub = sub;
+                        break;
+                    }
+                }
 
-    function updatePreviewCanvas() {
-        const res = RESOLUTIONS[resolutionSelect.value];
-        previewCanvas.width = res.width;
-        previewCanvas.height = res.height;
-        previewCtx.fillStyle = '#000';
-        previewCtx.fillRect(0, 0, res.width, res.height);
-        previewCtx.fillStyle = '#666';
-        previewCtx.font = '24px Arial';
-        previewCtx.textAlign = 'center';
-        previewCtx.fillText('Preview Area', res.width / 2, res.height / 2);
-    }
+                if (!activeSub) return;
 
-    let isPreviewing = false;
-    let animId = null;
+                const textColor = textColorInput.value;
+                const bgColor = bgColorInput.value;
+                const useBg = useBgCheckbox.checked;
+                const animStyle = animStyleSelect.value;
+                const customFontSize = parseFloat(fontSizeInput.value) || 36;
+                const layoutPos = layoutPosSelect.value;
+                const textAlign = textAlignSelect.value;
 
-    previewBtn.addEventListener('click', () => {
-        if (isPreviewing) stopPreview(); else startPreview();
-    });
+                const scaleFactor = W / 720;
+                const fontSize = customFontSize * scaleFactor;
 
-    function startPreview() {
-        if (!sourceVideo.src || sourceVideo.readyState < 2) {
-            statusMsg.textContent = '❌ Pilih file video terlebih dahulu!';
-            return;
-        }
-        const res = RESOLUTIONS[resolutionSelect.value];
-        previewCanvas.width = res.width;
-        previewCanvas.height = res.height;
+                tCtx.font = `bold ${fontSize}px Arial, sans-serif`;
+                const maxWidth = W * 0.85;
 
-        isPreviewing = true;
-        previewBtn.textContent = '⏹ Stop Preview';
-        previewBtn.classList.add('active');
-        previewControls.style.display = 'flex';
-        sourceVideo.muted = true;
-        sourceVideo.play();
+                let startY = H * 0.80;
+                if (layoutPos === 'top') startY = H * 0.20;
+                if (layoutPos === 'center') startY = H * 0.50;
 
-        const subs = getSubtitles();
+                if (animStyle === 'word') {
+                    const words = activeSub.text.trim().split(' ');
+                    const duration = activeSub.end - activeSub.start;
+                    const wordDuration = duration / words.length;
+                    let activeWordIndex = Math.floor((currentTime - activeSub.start) / wordDuration);
+                    if (activeWordIndex < 0) activeWordIndex = 0;
+                    if (activeWordIndex >= words.length) activeWordIndex = words.length - 1;
 
-        function loop() {
-            if (!isPreviewing) return;
-            renderFrame(previewCanvas, sourceVideo, subs, sourceVideo.currentTime);
-            seekBar.value = (sourceVideo.currentTime / sourceVideo.duration) * 100 || 0;
-            timeDisplay.textContent = sourceVideo.currentTime.toFixed(1) + 's';
-            animId = requestAnimationFrame(loop);
-        }
-        animId = requestAnimationFrame(loop);
-    }
+                    const activeWord = words[activeWordIndex] || '';
+                    const metrics = tCtx.measureText(activeWord);
+                    const textWidth = metrics.width;
 
-    function stopPreview() {
-        isPreviewing = false;
-        cancelAnimationFrame(animId);
-        sourceVideo.pause();
-        sourceVideo.muted = true;
-        previewBtn.textContent = '👁 Preview';
-        previewBtn.classList.remove('active');
-    }
+                    let x = W / 2;
+                    if (textAlign === 'left') x = (W - maxWidth) / 2 + textWidth / 2;
+                    if (textAlign === 'right') x = (W + maxWidth) / 2 - textWidth / 2;
+                    let y = startY;
 
-    videoInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            sourceVideo.src = URL.createObjectURL(file);
-            sourceVideo.load();
-            statusMsg.textContent = '✅ Video berhasil dimuat!';
-        }
-    });
+                    if (useBg) {
+                        tCtx.fillStyle = bgColor;
+                        tCtx.shadowColor = 'rgba(0,0,0,0.5)';
+                        tCtx.shadowBlur = 10;
+                        let padX = 16, padY = 8;
+                        if (tCtx.roundRect) {
+                            tCtx.beginPath();
+                            tCtx.roundRect(x - textWidth / 2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2), 8);
+                            tCtx.fill();
+                        } else {
+                            tCtx.fillRect(x - textWidth / 2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2));
+                        }
+                        tCtx.shadowBlur = 0;
+                    }
 
-    renderBtn.addEventListener('click', () => {
-        if (!sourceVideo.src || sourceVideo.readyState < 2) {
-            statusMsg.textContent = '❌ Masukkan video yang valid terlebih dahulu.';
-            return;
-        }
-        if (isPreviewing) stopPreview();
+                    tCtx.textAlign = textAlign === 'center' ? 'center' : (textAlign === 'left' ? 'left' : 'right');
+                    let renderX = textAlign === 'center' ? x : (textAlign === 'left' ? x - textWidth / 2 : x + textWidth / 2);
 
-        const res = RESOLUTIONS[resolutionSelect.value];
-        canvas.width = res.width;
-        canvas.height = res.height;
+                    // Outline dihapus (hanya mengisi fillText tanpa strokeText)
+                    tCtx.fillStyle = textColor;
+                    tCtx.fillText(activeWord, renderX, y);
 
-        sourceVideo.currentTime = 0;
-        sourceVideo.muted = true;
+                } else {
+                    const wrappedLines = wrapTextCustom(activeSub.text, tCtx, maxWidth);
+                    if (wrappedLines.length === 0) return;
 
-        const stream = canvas.captureStream(30);
-        let format = formatSelect.value;
-        let mime = getSupportedMimeType(format);
-        if (!mime) mime = getSupportedMimeType('webm');
+                    wrappedLines.forEach((line, lineIndex) => {
+                        const metrics = tCtx.measureText(line);
+                        const textWidth = metrics.width;
 
-        // Bitrate otomatis: rendah kalau background solid ON
-        const solidOn = solidBgToggle.checked;
-        const bitrate = solidOn ? 800000 : 4000000;
+                        let x = W / 2;
+                        if (textAlign === 'left') x = (W - maxWidth) / 2 + textWidth / 2;
+                        if (textAlign === 'right') x = (W + maxWidth) / 2 - textWidth / 2;
 
-        let recorder;
-        try {
-            recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: bitrate });
-        } catch(e) {
-            recorder = new MediaRecorder(stream);
-        }
+                        let y = startY + (lineIndex * fontSize * 1.4);
 
-        let chunks = [];
-        recorder.ondataavailable = e => chunks.push(e.data);
-        recorder.onstop = () => {
-            const blob = new Blob(chunks, { type: mime });
-            const url = URL.createObjectURL(blob);
-            const ext = mime.includes('mp4') ? 'mp4' : 'webm';
-            downloadLink.href = url;
-            downloadLink.download = `capcut_subtitled_video.${ext}`;
-            downloadLink.textContent = `⬇️ Unduh Hasil Video (${ext.toUpperCase()})`;
-            downloadLink.classList.add('active');
-            statusMsg.textContent = `✅ Render selesai! Format ${ext.toUpperCase()}`;
-            renderBtn.disabled = false;
-            renderBtn.textContent = '▶ Mulai Render Video';
-        };
+                        if (useBg) {
+                            tCtx.fillStyle = bgColor;
+                            tCtx.shadowColor = 'rgba(0,0,0,0.5)';
+                            tCtx.shadowBlur = 10;
+                            let padX = 16, padY = 8;
+                            if (tCtx.roundRect) {
+                                tCtx.beginPath();
+                                tCtx.roundRect(x - textWidth / 2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2), 8);
+                                tCtx.fill();
+                            } else {
+                                tCtx.fillRect(x - textWidth / 2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2));
+                            }
+                            tCtx.shadowBlur = 0;
+                        }
 
-        recorder.start();
-        sourceVideo.play();
-        renderBtn.disabled = true;
-        renderBtn.textContent = '⏳ Merender...';
-        statusMsg.textContent = '⏳ Proses render sedang berjalan...';
+                        tCtx.textAlign = textAlign === 'center' ? 'center' : (textAlign === 'left' ? 'left' : 'right');
+                        let renderX = textAlign === 'center' ? x : (textAlign === 'left' ? x - textWidth / 2 : x + textWidth / 2);
 
-        const subs = getSubtitles();
-
-        function renderLoop() {
-            if (sourceVideo.ended || sourceVideo.currentTime >= sourceVideo.duration) {
-                recorder.stop();
-                sourceVideo.pause();
-                return;
+                        // Outline dihapus
+                        tCtx.fillStyle = textColor;
+                        tCtx.fillText(line, renderX, y);
+                    });
+                }
             }
-            renderFrame(canvas, sourceVideo, subs, sourceVideo.currentTime);
-            requestAnimationFrame(renderLoop);
-        }
-        requestAnimationFrame(renderLoop);
-    });
 
-    updatePreviewCanvas();
-    renderSegmentCards(getSubtitles());
-})();
-</script>
+            function updatePreviewCanvas() {
+                const res = RESOLUTIONS[resolutionSelect.value];
+                previewCanvas.width = res.width;
+                previewCanvas.height = res.height;
+                previewCtx.fillStyle = '#000';
+                previewCtx.fillRect(0, 0, res.width, res.height);
+                previewCtx.fillStyle = '#666';
+                previewCtx.font = '24px Arial';
+                previewCtx.textAlign = 'center';
+                previewCtx.fillText('Preview Area', res.width / 2, res.height / 2);
+            }
+
+            let isPreviewing = false;
+            let animId = null;
+
+            previewBtn.addEventListener('click', () => {
+                if (isPreviewing) stopPreview(); else startPreview();
+            });
+
+            function startPreview() {
+                if (!sourceVideo.src || sourceVideo.readyState < 2) {
+                    statusMsg.textContent = '❌ Pilih file video terlebih dahulu!';
+                    return;
+                }
+                const res = RESOLUTIONS[resolutionSelect.value];
+                previewCanvas.width = res.width;
+                previewCanvas.height = res.height;
+
+                isPreviewing = true;
+                previewBtn.textContent = '⏹ Stop Preview';
+                previewBtn.classList.add('active');
+                previewControls.style.display = 'flex';
+                sourceVideo.muted = true;
+                sourceVideo.play();
+
+                const subs = getSubtitles();
+
+                function loop() {
+                    if (!isPreviewing) return;
+                    renderFrame(previewCanvas, sourceVideo, subs, sourceVideo.currentTime);
+                    seekBar.value = (sourceVideo.currentTime / sourceVideo.duration) * 100 || 0;
+                    timeDisplay.textContent = sourceVideo.currentTime.toFixed(1) + 's';
+                    animId = requestAnimationFrame(loop);
+                }
+                animId = requestAnimationFrame(loop);
+            }
+
+            function stopPreview() {
+                isPreviewing = false;
+                cancelAnimationFrame(animId);
+                sourceVideo.pause();
+                sourceVideo.muted = true;
+                previewBtn.textContent = '👁 Preview';
+                previewBtn.classList.remove('active');
+            }
+
+            videoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    sourceVideo.src = URL.createObjectURL(file);
+                    sourceVideo.load();
+                    statusMsg.textContent = '✅ Video berhasil dimuat!';
+                }
+            });
+
+            renderBtn.addEventListener('click', () => {
+                if (!sourceVideo.src || sourceVideo.readyState < 2) {
+                    statusMsg.textContent = '❌ Masukkan video yang valid terlebih dahulu.';
+                    return;
+                }
+                if (isPreviewing) stopPreview();
+
+                const res = RESOLUTIONS[resolutionSelect.value];
+                canvas.width = res.width;
+                canvas.height = res.height;
+
+                sourceVideo.currentTime = 0;
+                sourceVideo.muted = true;
+
+                const stream = canvas.captureStream(30);
+                let format = formatSelect.value;
+                let mime = getSupportedMimeType(format);
+                if (!mime) mime = getSupportedMimeType('webm');
+
+                // Bitrate otomatis: rendah kalau background solid ON
+                const solidOn = solidBgToggle.checked;
+                const bitrate = solidOn ? 800000 : 4000000;
+
+                let recorder;
+                try {
+                    recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: bitrate });
+                } catch (e) {
+                    recorder = new MediaRecorder(stream);
+                }
+
+                let chunks = [];
+                recorder.ondataavailable = e => chunks.push(e.data);
+                recorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: mime });
+                    const url = URL.createObjectURL(blob);
+                    const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+                    downloadLink.href = url;
+                    downloadLink.download = `capcut_subtitled_video.${ext}`;
+                    downloadLink.textContent = `⬇️ Unduh Hasil Video (${ext.toUpperCase()})`;
+                    downloadLink.classList.add('active');
+                    statusMsg.textContent = `✅ Render selesai! Format ${ext.toUpperCase()}`;
+                    renderBtn.disabled = false;
+                    renderBtn.textContent = '▶ Mulai Render Video';
+                };
+
+                recorder.start();
+                sourceVideo.play();
+                renderBtn.disabled = true;
+                renderBtn.textContent = '⏳ Merender...';
+                statusMsg.textContent = '⏳ Proses render sedang berjalan...';
+
+                const subs = getSubtitles();
+
+                function renderLoop() {
+                    if (sourceVideo.ended || sourceVideo.currentTime >= sourceVideo.duration) {
+                        recorder.stop();
+                        sourceVideo.pause();
+                        return;
+                    }
+                    renderFrame(canvas, sourceVideo, subs, sourceVideo.currentTime);
+                    requestAnimationFrame(renderLoop);
+                }
+                requestAnimationFrame(renderLoop);
+            });
+
+            updatePreviewCanvas();
+            renderSegmentCards(getSubtitles());
+        })();
+    </script>
 </body>
+
 </html>
