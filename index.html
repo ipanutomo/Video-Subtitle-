@@ -224,6 +224,34 @@
         
         .color-picker-group { display: flex; align-items: center; gap: 8px; }
         .color-picker-group input[type="color"] { width: 40px; height: 35px; padding: 2px; cursor: pointer; background: #141a22; }
+
+        .preset-row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+        .preset-dot {
+            width: 24px; height: 24px; border-radius: 50%;
+            border: 2px solid #384452; cursor: pointer; padding: 0;
+            transition: 0.15s;
+        }
+        .preset-dot:hover { transform: scale(1.15); border-color: #f7c948; }
+        .preset-dot.active { border-color: #f7c948; box-shadow: 0 0 0 2px rgba(247,201,72,0.4); }
+
+        .toggle-row {
+            display: flex; align-items: center; gap: 10px;
+            background: #141a22; border: 1px solid #384452;
+            border-radius: 14px; padding: 10px 14px; margin-bottom: 10px;
+        }
+        .toggle-row label { margin: 0; flex: 1; font-size: 0.85rem; color: #b6c8e0; cursor: pointer; }
+        .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider-sw {
+            position: absolute; inset: 0; background: #2a3542; border-radius: 24px;
+            cursor: pointer; transition: 0.2s; border: 1px solid #384452;
+        }
+        .slider-sw::before {
+            content: ''; position: absolute; height: 16px; width: 16px;
+            left: 3px; top: 3px; background: #7a90a8; border-radius: 50%; transition: 0.2s;
+        }
+        .switch input:checked + .slider-sw { background: #f7c948; border-color: #f7c948; }
+        .switch input:checked + .slider-sw::before { transform: translateX(20px); background: #0b0e14; }
     </style>
 </head>
 <body>
@@ -239,6 +267,41 @@
     <!-- Styling & Custom Text Options -->
     <div class="card">
         <label>🎨 Kustomisasi Teks & Ukuran Font</label>
+        <!-- Toggle Background Solid -->
+        <div class="toggle-row">
+            <label for="solidBgToggle">🎬 Background Solid (video disembunyikan, hanya subtitle di atas warna)</label>
+            <div class="switch">
+                <input type="checkbox" id="solidBgToggle" checked>
+                <span class="slider-sw"></span>
+            </div>
+        </div>
+
+        <div id="solidBgOptions">
+            <div class="row-2col" style="margin-bottom: 10px;">
+                <div>
+                    <label style="font-size:0.75rem;">Warna Background Solid</label>
+                    <div class="color-picker-group">
+                        <input type="color" id="solidBgColor" value="#000000">
+                        <span style="font-size:0.8rem;" id="solidBgColorVal">#000000</span>
+                    </div>
+                    <div class="preset-row" id="solidPresetRow">
+                        <button class="preset-dot active" data-color="#000000" style="background:#000000;" title="Hitam"></button>
+                        <button class="preset-dot" data-color="#FFFFFF" style="background:#FFFFFF;" title="Putih"></button>
+                        <button class="preset-dot" data-color="#00FF00" style="background:#00FF00;" title="Hijau"></button>
+                        <button class="preset-dot" data-color="#0000FF" style="background:#0000FF;" title="Biru"></button>
+                        <button class="preset-dot" data-color="#1A1F27" style="background:#1A1F27;" title="Dark Grey"></button>
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;">Info Ukuran</label>
+                    <div class="hint" id="sizeHint" style="margin-top:0; line-height:1.5;">
+                        Bitrate otomatis: <b>~800 kbps</b><br>
+                        Estimasi file kecil ✅
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row-2col" style="margin-bottom: 10px;">
             <div>
                 <label style="font-size:0.75rem;">Warna Teks Utama</label>
@@ -255,7 +318,7 @@
                 </div>
             </div>
         </div>
-
+        
         <div class="row-2col" style="margin-bottom: 10px;">
             <div>
                 <label style="font-size:0.75rem;">Mode Teks</label>
@@ -321,6 +384,8 @@
         <label>📐 Resolusi & Format Output</label>
         <div class="row-2col">
             <select id="resolutionSelect">
+                <option value="480x854">Hemat Data (480x854)</option>
+                <option value="540x960">Standar Ringan (540x960)</option>
                 <option value="720x1280" selected>TikTok / Reels (720x1280)</option>
                 <option value="1080x1920">Full HD Vertical (1080x1920)</option>
                 <option value="1280x720">YouTube Landscape (1280x720)</option>
@@ -381,6 +446,12 @@
     const addSegBtn = document.getElementById('addSegBtn');
     const sortSegBtn = document.getElementById('sortSegBtn');
 
+    const solidBgToggle = document.getElementById('solidBgToggle');
+    const solidBgOptions = document.getElementById('solidBgOptions');
+    const solidBgColorInput = document.getElementById('solidBgColor');
+    const solidBgColorVal = document.getElementById('solidBgColorVal');
+    const solidPresetRow = document.getElementById('solidPresetRow');
+    const sizeHint = document.getElementById('sizeHint');
     const textColorInput = document.getElementById('textColor');
     const textColorVal = document.getElementById('textColorVal');
     const bgColorInput = document.getElementById('bgColor');
@@ -401,11 +472,44 @@
     const timeDisplay = document.getElementById('timeDisplay');
 
     textColorInput.addEventListener('input', () => textColorVal.textContent = textColorInput.value);
-
+    // ─── Background Solid: toggle ───
+    function updateSolidUI() {
+        solidBgOptions.style.display = solidBgToggle.checked ? 'block' : 'none';
+        updateSizeHint();
+    }
+    function updateSizeHint() {
+        if (!sizeHint) return;
+        if (solidBgToggle.checked) {
+            sizeHint.innerHTML = 'Bitrate otomatis: <b>~800 kbps</b><br>Estimasi file kecil ✅';
+            sizeHint.style.color = '#8cd9a0';
+        } else {
+            sizeHint.innerHTML = 'Bitrate otomatis: <b>~4000 kbps</b><br>Video tampil penuh';
+            sizeHint.style.color = '#b6c8e0';
+        }
+    }
+    solidBgToggle.addEventListener('change', updateSolidUI);
+    solidBgColorInput.addEventListener('input', () => {
+        solidBgColorVal.textContent = solidBgColorInput.value.toUpperCase();
+        // hapus active dari preset kalau warna tidak cocok
+        document.querySelectorAll('#solidPresetRow .preset-dot').forEach(d => {
+            d.classList.toggle('active', d.dataset.color.toLowerCase() === solidBgColorInput.value.toLowerCase());
+        });
+    });
+    solidPresetRow.addEventListener('click', (e) => {
+        const btn = e.target.closest('.preset-dot');
+        if (!btn) return;
+        solidBgColorInput.value = btn.dataset.color;
+        solidBgColorInput.dispatchEvent(new Event('input'));
+    });
+    updateSolidUI();
+    solidBgColorInput.dispatchEvent(new Event('input')); // sinkronkan label awal
+    
     const RESOLUTIONS = {
+        '480x854':   { width: 480,  height: 854  },
+        '540x960':   { width: 540,  height: 960  },
         '720x1280':  { width: 720,  height: 1280 },
         '1080x1920': { width: 1080, height: 1920 },
-        '1280x720':  { width: 1280, height: 720 }
+        '1280x720':  { width: 1280, height: 720  }
     };
 
     function getSupportedMimeType(format) {
@@ -628,7 +732,14 @@
         const H = targetCanvas.height;
 
         tCtx.clearRect(0, 0, W, H);
-        tCtx.drawImage(videoElement, 0, 0, W, H);
+
+        const solidOn = solidBgToggle.checked;
+        if (solidOn) {
+            tCtx.fillStyle = solidBgColorInput.value;
+            tCtx.fillRect(0, 0, W, H);
+        } else {
+            tCtx.drawImage(videoElement, 0, 0, W, H);
+        }
 
         let activeSub = null;
         for (let sub of subtitles) {
@@ -768,7 +879,7 @@
         previewBtn.textContent = '⏹ Stop Preview';
         previewBtn.classList.add('active');
         previewControls.style.display = 'flex';
-        sourceVideo.muted = false;
+        sourceVideo.muted = true;
         sourceVideo.play();
 
         const subs = getSubtitles();
@@ -820,9 +931,13 @@
         let mime = getSupportedMimeType(format);
         if (!mime) mime = getSupportedMimeType('webm');
 
+        // Bitrate otomatis: rendah kalau background solid ON
+        const solidOn = solidBgToggle.checked;
+        const bitrate = solidOn ? 800000 : 4000000;
+
         let recorder;
         try {
-            recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4000000 });
+            recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: bitrate });
         } catch(e) {
             recorder = new MediaRecorder(stream);
         }
