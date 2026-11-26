@@ -519,6 +519,7 @@
                     <select id="animStyle">
                         <option value="none">Normal (Auto-Wrap Kalimat)</option>
                         <option value="word" selected>Per Kata (1 Baris Berganti Cepat)</option>
+                        <option value="typewriter">Typewriter (Syntax Style - Negoro Angin)</option>
                     </select>
                 </div>
                 <div>
@@ -615,7 +616,7 @@
         <a href="#" id="downloadLink" class="download-link" download="capcut_subtitle.mp4">⬇️ Hasil video akan muncul di
             sini</a>
 
-        <canvas id="canvas-preview" style="display:none;"></canvas>
+        <canvas id="canvas-preview" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;"></canvas>
     </div>
 
     <script>
@@ -932,8 +933,11 @@
                 if (solidOn) {
                     tCtx.fillStyle = solidBgColorInput.value;
                     tCtx.fillRect(0, 0, W, H);
-                } else {
+                } else if (videoElement && videoElement.readyState >= 2) {
                     tCtx.drawImage(videoElement, 0, 0, W, H);
+                } else {
+                    tCtx.fillStyle = '#111';
+                    tCtx.fillRect(0, 0, W, H);
                 }
 
                 let activeSub = null;
@@ -954,91 +958,135 @@
                 const layoutPos = layoutPosSelect.value;
                 const textAlign = textAlignSelect.value;
 
-                const scaleFactor = W / 720;
-                const fontSize = customFontSize * scaleFactor;
+                if (animStyle === 'typewriter') {
+                    // --- Typewriter / Syntax Highlighting (Negoro Angin Style) ---
+                    const scaleF = W / 720;
+                    const fSize = Math.min((customFontSize * 0.7) * scaleF, H * 0.08);
+                    tCtx.font = `bold ${fSize}px "JetBrains Mono", "Fira Code", Consolas, monospace`;
+                    tCtx.textAlign = 'left';
+                    tCtx.textBaseline = 'top';
 
-                tCtx.font = `bold ${fontSize}px Arial, sans-serif`;
-                const maxWidth = W * 0.85;
+                    const maxW = W * 0.8;
+                    const marginX = W * 0.1;
 
-                let startY = H * 0.80;
-                if (layoutPos === 'top') startY = H * 0.20;
-                if (layoutPos === 'center') startY = H * 0.50;
+                    const linesToShow = subtitles.filter(s => currentTime >= s.start);
+                    const lastN = Math.min(5, Math.floor((H * 0.7) / (fSize * 1.4)));
+                    const displayLines = linesToShow.slice(-lastN);
 
-                if (animStyle === 'word') {
-                    const words = activeSub.text.trim().split(' ');
-                    const duration = activeSub.end - activeSub.start;
-                    const wordDuration = duration / words.length;
-                    let activeWordIndex = Math.floor((currentTime - activeSub.start) / wordDuration);
-                    if (activeWordIndex < 0) activeWordIndex = 0;
-                    if (activeWordIndex >= words.length) activeWordIndex = words.length - 1;
+                    // Pre-wrap all lines to calculate total height
+                    const wrappedLines = displayLines.map(line => {
+                        let text = line.text;
+                        if (line === displayLines[displayLines.length - 1]) {
+                            const duration = Math.min(line.end - line.start, text.length * 0.1);
+                            const n = Math.max(0, Math.min(text.length, Math.floor(((currentTime - line.start) / duration) * text.length)));
+                            text = text.slice(0, n);
+                        }
+                        return wrapTextCustom(text, tCtx, maxW);
+                    });
 
-                    const activeWord = words[activeWordIndex] || '';
-                    const metrics = tCtx.measureText(activeWord);
-                    const textWidth = metrics.width;
+                    const totalH = wrappedLines.reduce((sum, lines) => sum + lines.length * fSize * 1.4, 0);
+                    const startY = Math.max(H * 0.15, H * 0.5 - totalH / 2);
 
-                    let x = W / 2;
-                    if (textAlign === 'left') x = (W - maxWidth) / 2 + textWidth / 2;
-                    if (textAlign === 'right') x = (W + maxWidth) / 2 - textWidth / 2;
+                    tCtx.save();
+                    tCtx.beginPath();
+                    tCtx.rect(W * 0.05, H * 0.05, W * 0.9, H * 0.9);
+                    tCtx.clip();
+
                     let y = startY;
+                    wrappedLines.forEach((lines, idx) => {
+                        const isLast = idx === wrappedLines.length - 1;
+                        const age = (wrappedLines.length - 1) - idx;
+                        const opacity = isLast ? 1 : Math.max(0.2, 0.8 - age * 0.2);
+                        tCtx.globalAlpha = opacity;
+
+                        let currentX = marginX;
+                        let lastX = marginX;   // ✅ deklarasi
+                        let lastY = y;         // ✅ deklarasi
+                        lines.forEach((lineText, lineIdx) => {
+                            const parts = lineText.split(/("[^"]*"|[\(\)\{\}\.,])|(\s+)/);
+                            parts.forEach(part => {
+                                if (!part) return;
+                                if (part.startsWith('"')) tCtx.fillStyle = '#b9d36c';
+                                else if (['(', ')', '{', '}', '.', ','].includes(part)) tCtx.fillStyle = '#e8a35a';
+                                else if (/^[a-zA-Z_]+$/.test(part)) tCtx.fillStyle = '#6fd3e8';
+                                else tCtx.fillStyle = textColor;
+
+                                tCtx.fillText(part, currentX, y);
+                                currentX += tCtx.measureText(part).width;
+                            });
+                            lastX = currentX;
+                            lastY = y;
+                            y += fSize * 1.4;
+                            currentX = marginX;
+                        });
+
+                        if (isLast) {
+                            tCtx.fillStyle = '#ff2d2d';
+                            // cursor SELALU tampil (tidak kedip) saat render/preview
+                            // atau kedip lebih lambat: Math.floor(currentTime * 1) % 2 === 0
+                            const cursorX = Math.min(lastX + 2, W * 0.88);
+                            tCtx.fillRect(cursorX, lastY, fSize * 0.6, fSize);
+                        }
+                    });
+
+                    tCtx.restore();
+                    tCtx.globalAlpha = 1.0;
+                    return;
+                }
+
+                // Handle animStyle === 'none' and 'word'
+                if (animStyle === 'none' || animStyle === 'word') {
+                    const scaleF = W / 720;
+                    const fSize = customFontSize * scaleF;
+                    tCtx.font = `bold ${fSize}px "Inter", "Segoe UI", sans-serif`;
+                    tCtx.textAlign = textAlign;
+                    tCtx.fillStyle = textColor;
 
                     if (useBg) {
                         tCtx.fillStyle = bgColor;
-                        tCtx.shadowColor = 'rgba(0,0,0,0.5)';
-                        tCtx.shadowBlur = 10;
-                        let padX = 16, padY = 8;
-                        if (tCtx.roundRect) {
-                            tCtx.beginPath();
-                            tCtx.roundRect(x - textWidth / 2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2), 8);
-                            tCtx.fill();
+                        const textWidth = tCtx.measureText(activeSub.text).width;
+                        const paddingX = 20 * scaleF;
+                        const paddingY = 10 * scaleF;
+                        let bgX, bgY;
+                        if (textAlign === 'center') {
+                            bgX = W / 2 - textWidth / 2 - paddingX;
+                        } else if (textAlign === 'right') {
+                            bgX = W - textWidth - paddingX * 2;
                         } else {
-                            tCtx.fillRect(x - textWidth / 2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2));
+                            bgX = paddingX;
                         }
-                        tCtx.shadowBlur = 0;
+                        if (layoutPos === 'bottom') {
+                            bgY = H - fSize - paddingY * 3;
+                        } else if (layoutPos === 'top') {
+                            bgY = paddingY;
+                        } else {
+                            bgY = H / 2 - fSize / 2;
+                        }
+                        tCtx.fillRect(bgX, bgY, textWidth + paddingX * 2, fSize + paddingY * 2);
+                        tCtx.fillStyle = textColor;
                     }
 
-                    tCtx.textAlign = textAlign === 'center' ? 'center' : (textAlign === 'left' ? 'left' : 'right');
-                    let renderX = textAlign === 'center' ? x : (textAlign === 'left' ? x - textWidth / 2 : x + textWidth / 2);
+                    let drawX, drawY;
+                    if (textAlign === 'center') drawX = W / 2;
+                    else if (textAlign === 'right') drawX = W - 20 * scaleF;
+                    else drawX = 20 * scaleF;
 
-                    // Outline dihapus (hanya mengisi fillText tanpa strokeText)
-                    tCtx.fillStyle = textColor;
-                    tCtx.fillText(activeWord, renderX, y);
+                    if (layoutPos === 'bottom') drawY = H - 30 * scaleF;
+                    else if (layoutPos === 'top') drawY = 40 * scaleF + fSize;
+                    else drawY = H / 2 + fSize / 2;
 
-                } else {
-                    const wrappedLines = wrapTextCustom(activeSub.text, tCtx, maxWidth);
-                    if (wrappedLines.length === 0) return;
-
-                    wrappedLines.forEach((line, lineIndex) => {
-                        const metrics = tCtx.measureText(line);
-                        const textWidth = metrics.width;
-
-                        let x = W / 2;
-                        if (textAlign === 'left') x = (W - maxWidth) / 2 + textWidth / 2;
-                        if (textAlign === 'right') x = (W + maxWidth) / 2 - textWidth / 2;
-
-                        let y = startY + (lineIndex * fontSize * 1.4);
-
-                        if (useBg) {
-                            tCtx.fillStyle = bgColor;
-                            tCtx.shadowColor = 'rgba(0,0,0,0.5)';
-                            tCtx.shadowBlur = 10;
-                            let padX = 16, padY = 8;
-                            if (tCtx.roundRect) {
-                                tCtx.beginPath();
-                                tCtx.roundRect(x - textWidth / 2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2), 8);
-                                tCtx.fill();
-                            } else {
-                                tCtx.fillRect(x - textWidth / 2 - padX, y - fontSize - 2, textWidth + (padX * 2), fontSize + (padY * 2));
-                            }
-                            tCtx.shadowBlur = 0;
-                        }
-
-                        tCtx.textAlign = textAlign === 'center' ? 'center' : (textAlign === 'left' ? 'left' : 'right');
-                        let renderX = textAlign === 'center' ? x : (textAlign === 'left' ? x - textWidth / 2 : x + textWidth / 2);
-
-                        // Outline dihapus
-                        tCtx.fillStyle = textColor;
-                        tCtx.fillText(line, renderX, y);
-                    });
+                    if (animStyle === 'word') {
+                        const words = activeSub.text.split(' ');
+                        const duration = activeSub.end - activeSub.start;
+                        const elapsed = currentTime - activeSub.start;
+                        const wordIndex = Math.min(words.length - 1, Math.floor((elapsed / duration) * words.length));
+                        let displayText = words.slice(0, wordIndex + 1).join(' ');
+                        if (wordIndex < words.length - 1) displayText += ' ' + words[wordIndex + 1].slice(0, 1);
+                        tCtx.fillText(displayText, drawX, drawY);
+                    } else {
+                        tCtx.fillText(activeSub.text, drawX, drawY);
+                    }
+                    return;
                 }
             }
 
@@ -1062,10 +1110,7 @@
             });
 
             function startPreview() {
-                if (!sourceVideo.src || sourceVideo.readyState < 2) {
-                    statusMsg.textContent = '❌ Pilih file video terlebih dahulu!';
-                    return;
-                }
+                const hasVideo = sourceVideo.src && sourceVideo.readyState >= 2;
                 const res = RESOLUTIONS[resolutionSelect.value];
                 previewCanvas.width = res.width;
                 previewCanvas.height = res.height;
@@ -1074,16 +1119,35 @@
                 previewBtn.textContent = '⏹ Stop Preview';
                 previewBtn.classList.add('active');
                 previewControls.style.display = 'flex';
-                sourceVideo.muted = true;
-                sourceVideo.play();
+
+                if (hasVideo) {
+                    sourceVideo.muted = true;
+                    sourceVideo.play();
+                } else {
+                    sourceVideo._fakeDuration = Math.max(getRenderDuration(), 5);
+                    sourceVideo._fakeTime = 0;
+                    sourceVideo._lastTick = performance.now();
+                    statusMsg.textContent = '💡 Preview Mode (Tanpa Video)';
+                }
 
                 const subs = getSubtitles();
 
                 function loop() {
                     if (!isPreviewing) return;
-                    renderFrame(previewCanvas, sourceVideo, subs, sourceVideo.currentTime);
-                    seekBar.value = (sourceVideo.currentTime / sourceVideo.duration) * 100 || 0;
-                    timeDisplay.textContent = sourceVideo.currentTime.toFixed(1) + 's';
+                    let currentTime = 0;
+                    if (hasVideo) {
+                        currentTime = sourceVideo.currentTime;
+                        seekBar.value = (currentTime / sourceVideo.duration) * 100 || 0;
+                    } else {
+                        const now = performance.now();
+                        const delta = (now - sourceVideo._lastTick) / 1000;
+                        sourceVideo._lastTick = now;
+                        sourceVideo._fakeTime = (sourceVideo._fakeTime + delta) % sourceVideo._fakeDuration;
+                        currentTime = sourceVideo._fakeTime;
+                        seekBar.value = (currentTime / sourceVideo._fakeDuration) * 100;
+                    }
+                    renderFrame(previewCanvas, sourceVideo, subs, currentTime);
+                    timeDisplay.textContent = currentTime.toFixed(1) + 's';
                     animId = requestAnimationFrame(loop);
                 }
                 animId = requestAnimationFrame(loop);
@@ -1096,37 +1160,64 @@
                 sourceVideo.muted = true;
                 previewBtn.textContent = '👁 Preview';
                 previewBtn.classList.remove('active');
+                solidBgToggle.disabled = false;
+            }
+
+            function getRenderDuration() {
+                if (sourceVideo.src && sourceVideo.readyState >= 2) {
+                    return sourceVideo.duration;
+                }
+                const subs = getSubtitles();
+                if (subs.length > 0) {
+                    const maxEnd = Math.max(...subs.map(s => s.end));
+                    return Math.max(maxEnd + 0.5, 1);
+                }
+                return 0;
             }
 
             videoInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
+                    if (sourceVideo.src.startsWith('blob:')) URL.revokeObjectURL(sourceVideo.src);
                     sourceVideo.src = URL.createObjectURL(file);
                     sourceVideo.load();
                     statusMsg.textContent = '✅ Video berhasil dimuat!';
                 }
+                solidBgToggle.disabled = false;
             });
 
             renderBtn.addEventListener('click', () => {
-                if (!sourceVideo.src || sourceVideo.readyState < 2) {
-                    statusMsg.textContent = '❌ Masukkan video yang valid terlebih dahulu.';
+                console.log('[render] start', { hasVideo: sourceVideo.src && sourceVideo.readyState >= 2, subs: getSubtitles().length });
+                const duration = getRenderDuration();
+                console.log('[render] duration:', duration);
+                if (duration <= 0) {
+                    statusMsg.textContent = '❌ Tidak ada video atau subtitle untuk dirender.';
                     return;
                 }
                 if (isPreviewing) stopPreview();
+
+                const hasVideo = sourceVideo.src && sourceVideo.readyState >= 2;
 
                 const res = RESOLUTIONS[resolutionSelect.value];
                 canvas.width = res.width;
                 canvas.height = res.height;
 
-                sourceVideo.currentTime = 0;
-                sourceVideo.muted = true;
+                if (hasVideo) {
+                    sourceVideo.currentTime = 0;
+                    sourceVideo.muted = true;
+                }
+
+                // Force solid bg if no video
+                if (!hasVideo) {
+                    solidBgToggle.checked = true;
+                    solidBgToggle.disabled = true;
+                }
 
                 const stream = canvas.captureStream(30);
                 let format = formatSelect.value;
                 let mime = getSupportedMimeType(format);
-                if (!mime) mime = getSupportedMimeType('webm');
+                if (!mime) mime = 'video/webm';
 
-                // Bitrate otomatis: rendah kalau background solid ON
                 const solidOn = solidBgToggle.checked;
                 const bitrate = solidOn ? 800000 : 4000000;
 
@@ -1137,12 +1228,29 @@
                     recorder = new MediaRecorder(stream);
                 }
 
+                // ─── DEBUG: tambahan supaya penyebab kelihatan ───
+                recorder.onerror = (e) => {
+                    console.error('[render] recorder error', e.error || e);
+                    statusMsg.textContent = '❌ Recorder error: ' + (e.error?.name || 'unknown');
+                    renderBtn.disabled = false;
+                };
+                console.log('[render] mime dipakai:', recorder.mimeType);
+                // ────────────────────────────────────────────────
+
                 let chunks = [];
                 recorder.ondataavailable = e => chunks.push(e.data);
                 recorder.onstop = () => {
+                    console.log('[render] onstop', { chunks: chunks.length, mime });
+                    if (chunks.length === 0) {   // ⬅️ tambahan guard (opsional tapi bagus)
+                        statusMsg.textContent = '❌ Render gagal: tidak ada data terekam.';
+                        renderBtn.disabled = false;
+                        renderBtn.textContent = '▶ Mulai Render Video';
+                        return;
+                    }
+                    const ext = mime.includes('mp4') ? 'mp4' : 'webm';   // ✅ tambah ini
                     const blob = new Blob(chunks, { type: mime });
                     const url = URL.createObjectURL(blob);
-                    const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+                    if (downloadLink.href.startsWith('blob:')) URL.revokeObjectURL(downloadLink.href);
                     downloadLink.href = url;
                     downloadLink.download = `capcut_subtitled_video.${ext}`;
                     downloadLink.textContent = `⬇️ Unduh Hasil Video (${ext.toUpperCase()})`;
@@ -1150,26 +1258,81 @@
                     statusMsg.textContent = `✅ Render selesai! Format ${ext.toUpperCase()}`;
                     renderBtn.disabled = false;
                     renderBtn.textContent = '▶ Mulai Render Video';
+                    if (!hasVideo) {
+                        solidBgToggle.disabled = false;
+                    }
                 };
 
-                recorder.start();
-                sourceVideo.play();
-                renderBtn.disabled = true;
-                renderBtn.textContent = '⏳ Merender...';
-                statusMsg.textContent = '⏳ Proses render sedang berjalan...';
-
+                // Render first frame before starting recorder
                 const subs = getSubtitles();
+                renderFrame(canvas, hasVideo ? sourceVideo : null, subs, 0);
+
+                recorder.start();
+                const startTime = performance.now();
 
                 function renderLoop() {
-                    if (sourceVideo.ended || sourceVideo.currentTime >= sourceVideo.duration) {
-                        recorder.stop();
-                        sourceVideo.pause();
-                        return;
+                    let currentTime;
+                    if (hasVideo) {
+                        currentTime = sourceVideo.currentTime;
+                        if (sourceVideo.ended || currentTime >= sourceVideo.duration) {
+                            recorder.stop();
+                            sourceVideo.pause();
+                            return;
+                        }
+                    } else {
+                        currentTime = (performance.now() - startTime) / 1000;
+                        if (currentTime >= duration) {
+                            recorder.stop();
+                            return;
+                        }
                     }
-                    renderFrame(canvas, sourceVideo, subs, sourceVideo.currentTime);
+
+                    // ─── PROGRESS UPDATE ───
+                    const pct = Math.min(100, Math.round((currentTime / duration) * 100));
+                    renderBtn.textContent = `⏳ Merender ${pct}%`;
+                    statusMsg.textContent = `⏳ Render: ${pct}% (${currentTime.toFixed(1)}s / ${duration.toFixed(1)}s)`;
+                    // ───────────────────────
+
+                    renderFrame(canvas, hasVideo ? sourceVideo : null, subs, currentTime);
                     requestAnimationFrame(renderLoop);
                 }
+
+                if (hasVideo) {
+                    sourceVideo.play();
+                }
                 requestAnimationFrame(renderLoop);
+            });
+
+            // Event handlers for preview controls
+            seekBar.addEventListener('input', () => {
+                if (sourceVideo.readyState >= 2) {
+                    const percent = seekBar.value / 100;
+                    sourceVideo.currentTime = percent * sourceVideo.duration;
+                } else if (sourceVideo._fakeDuration) {
+                    const percent = seekBar.value / 100;
+                    sourceVideo._fakeTime = percent * sourceVideo._fakeDuration;
+                    sourceVideo._lastTick = performance.now();
+                }
+            });
+
+            playPauseBtn.addEventListener('click', () => {
+                if (sourceVideo.readyState >= 2) {
+                    if (sourceVideo.paused) {
+                        sourceVideo.play();
+                        playPauseBtn.textContent = '⏸';
+                    } else {
+                        sourceVideo.pause();
+                        playPauseBtn.textContent = '▶';
+                    }
+                } else if (sourceVideo._fakeDuration) {
+                    isPreviewing = !isPreviewing;
+                    playPauseBtn.textContent = isPreviewing ? '⏸' : '▶';
+                    if (isPreviewing) {
+                        startPreview();
+                    } else {
+                        stopPreview();
+                    }
+                }
             });
 
             updatePreviewCanvas();
