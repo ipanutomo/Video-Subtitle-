@@ -533,6 +533,52 @@
                 </div>
             </div>
 
+            <div class="row-2col" style="margin-top:8px;">
+                <div>
+                    <label style="font-size:0.75rem;">🎭 Tema Negoro Angin</label>
+                    <select id="negroTheme">
+                        <option value="classic" selected>Classic (Biru-Kuning)</option>
+                        <option value="matrix">Matrix (Hijau Neon)</option>
+                        <option value="sunset">Sunset (Oranye-Ungu)</option>
+                        <option value="cyberpunk">Cyberpunk (Pink-Cyan)</option>
+                        <option value="monokai">Monokai (Pro Code)</option>
+                        <option value="dracula">Dracula (Ungu Lembut)</option>
+                        <option value="nord">Nord (Biru Dingin)</option>
+                        <option value="tokyo">Tokyo Night (Biru-Pink)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;">⌨️ Kecepatan Ketik</label>
+                    <select id="typingSpeed">
+                        <option value="slow">Lambat (0.15s/char)</option>
+                        <option value="normal" selected>Normal (0.08s/char)</option>
+                        <option value="fast">Cepat (0.04s/char)</option>
+                        <option value="instant">Instan (Langsung penuh)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row-2col" style="margin-top:8px;">
+                <div>
+                    <label style="font-size:0.75rem;">🖱️ Efek Kursor</label>
+                    <select id="cursorStyle">
+                        <option value="block" selected>Block (█)</option>
+                        <option value="line">Line (|)</option>
+                        <option value="underline">Underline (_)</option>
+                        <option value="blink">Block Berkedip</option>
+                        <option value="none">Tanpa Kursor</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;">📐 Gaya Tampilan</label>
+                    <select id="negroLayout">
+                        <option value="code" selected>Kode Editor (dengan header)</option>
+                        <option value="plain">Polos (hanya teks)</option>
+                        <option value="terminal">Terminal (prompt $)</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="row-2col">
                 <div>
                     <label style="font-size:0.75rem;">Layout Posisi Vertikal</label>
@@ -667,6 +713,10 @@
             const fontSizeInput = document.getElementById('fontSizeInput');
             const layoutPosSelect = document.getElementById('layoutPos');
             const textAlignSelect = document.getElementById('textAlign');
+            const negroThemeSelect = document.getElementById('negroTheme');
+            const typingSpeedSelect = document.getElementById('typingSpeed');
+            const cursorStyleSelect = document.getElementById('cursorStyle');
+            const negroLayoutSelect = document.getElementById('negroLayout');
 
             const canvas = document.getElementById('canvas-preview');
             const previewCanvas = document.getElementById('previewCanvas');
@@ -717,6 +767,24 @@
                 '720x1280': { width: 720, height: 1280 },
                 '1080x1920': { width: 1080, height: 1920 },
                 '1280x720': { width: 1280, height: 720 }
+            };
+
+            const NEGRO_THEMES = {
+                classic:   { keyword: '#6fd3e8', string: '#b9d36c', punct: '#e8a35a', text: '#FFD966', bg: '#0d1117', cursor: '#ff2d2d' },
+                matrix:    { keyword: '#00ff41', string: '#7dffb0', punct: '#00cc33', text: '#b8ffcc', bg: '#000d00', cursor: '#00ff41' },
+                sunset:    { keyword: '#ff9a56', string: '#ffd166', punct: '#ff6b9d', text: '#ffe0b2', bg: '#1a0f1a', cursor: '#ff9a56' },
+                cyberpunk: { keyword: '#00fff0', string: '#ff2d95', punct: '#ffe600', text: '#e0f7ff', bg: '#0a0014', cursor: '#ff2d95' },
+                monokai:   { keyword: '#66d9ef', string: '#e6db74', punct: '#f92672', text: '#f8f8f2', bg: '#272822', cursor: '#f92672' },
+                dracula:   { keyword: '#8be9fd', string: '#50fa7b', punct: '#ff79c6', text: '#f8f8f2', bg: '#282a36', cursor: '#ff79c6' },
+                nord:      { keyword: '#88c0d0', string: '#a3be8c', punct: '#b48ead', text: '#eceff4', bg: '#2e3440', cursor: '#bf616a' },
+                tokyo:     { keyword: '#7aa2f7', string: '#9ece6a', punct: '#bb9af7', text: '#c0caf5', bg: '#1a1b26', cursor: '#f7768e' },
+            };
+
+            const TYPING_SPEEDS = {
+                slow: 0.15,
+                normal: 0.08,
+                fast: 0.04,
+                instant: 0
             };
 
             function getSupportedMimeType(format) {
@@ -1063,9 +1131,15 @@
 
                 if (animStyle === 'typewriter') {
                     // --- Typewriter / Syntax Highlighting (Negoro Angin Style) ---
+                    const theme = NEGRO_THEMES[negroThemeSelect.value] || NEGRO_THEMES.classic;
+                    const charDur = TYPING_SPEEDS[typingSpeedSelect.value] ?? TYPING_SPEEDS.normal;
+                    const cursorStyle = cursorStyleSelect.value;
+                    const negroLayout = negroLayoutSelect.value;
+
                     const scaleF = W / 720;
                     const fSize = Math.min((customFontSize * 0.7) * scaleF, H * 0.08);
-                    tCtx.font = `bold ${fSize}px "JetBrains Mono", "Fira Code", Consolas, monospace`;
+                    const monoFont = `bold ${fSize}px "JetBrains Mono", "Fira Code", Consolas, monospace`;
+                    tCtx.font = monoFont;
                     tCtx.textAlign = 'left';
                     tCtx.textBaseline = 'top';
 
@@ -1076,19 +1150,61 @@
                     const lastN = Math.min(5, Math.floor((H * 0.7) / (fSize * 1.4)));
                     const displayLines = linesToShow.slice(-lastN);
 
+                    const prompt = negroLayout === 'terminal' ? '$ ' : '';
+                    const headerH = negroLayout === 'code' ? fSize * 2 : 0;
+
                     // Pre-wrap all lines to calculate total height
                     const wrappedLines = displayLines.map(line => {
                         let text = line.text;
                         if (line === displayLines[displayLines.length - 1]) {
-                            const duration = Math.min(line.end - line.start, text.length * 0.1);
-                            const n = Math.max(0, Math.min(text.length, Math.floor(((currentTime - line.start) / duration) * text.length)));
-                            text = text.slice(0, n);
+                            if (charDur > 0) {
+                                const n = Math.max(0, Math.min(text.length, Math.floor((currentTime - line.start) / charDur)));
+                                text = text.slice(0, n);
+                            }
                         }
-                        return wrapTextCustom(text, tCtx, maxW);
+                        return wrapTextCustom(prompt + text, tCtx, maxW);
                     });
 
-                    const totalH = wrappedLines.reduce((sum, lines) => sum + lines.length * fSize * 1.4, 0);
-                    const startY = Math.max(H * 0.15, H * 0.5 - totalH / 2);
+                    const lineHeight = fSize * 1.4;
+                    const totalH = wrappedLines.reduce((sum, lines) => sum + lines.length * lineHeight, 0);
+                    const startY = Math.max(H * 0.15, H * 0.5 - totalH / 2) + headerH;
+
+                    // Themed background panel for code/terminal layouts
+                    if (negroLayout === 'code' || negroLayout === 'terminal') {
+                        tCtx.save();
+                        tCtx.globalAlpha = 0.85;
+                        tCtx.fillStyle = theme.bg;
+                        tCtx.fillRect(W * 0.05, H * 0.05, W * 0.9, H * 0.9);
+                        tCtx.restore();
+                    }
+
+                    // Code editor header bar with window dots + title
+                    if (negroLayout === 'code') {
+                        const headerY = H * 0.05;
+                        tCtx.save();
+                        tCtx.globalAlpha = 0.95;
+                        tCtx.fillStyle = 'rgba(255,255,255,0.06)';
+                        tCtx.fillRect(W * 0.05, headerY, W * 0.9, headerH);
+
+                        const dotR = fSize * 0.22;
+                        const dotY = headerY + headerH / 2;
+                        ['#ff5f56', '#ffbd2e', '#27c93f'].forEach((c, i) => {
+                            tCtx.fillStyle = c;
+                            tCtx.beginPath();
+                            tCtx.arc(W * 0.08 + i * dotR * 3, dotY, dotR, 0, Math.PI * 2);
+                            tCtx.fill();
+                        });
+
+                        tCtx.fillStyle = theme.text;
+                        tCtx.font = `${fSize * 0.55}px "JetBrains Mono", Consolas, monospace`;
+                        tCtx.textBaseline = 'middle';
+                        tCtx.globalAlpha = 0.7;
+                        tCtx.fillText('subtitle.txt', W * 0.08 + dotR * 10, dotY);
+                        tCtx.restore();
+
+                        tCtx.font = monoFont;
+                        tCtx.textBaseline = 'top';
+                    }
 
                     tCtx.save();
                     tCtx.beginPath();
@@ -1105,28 +1221,39 @@
                         let currentX = marginX;
                         let lastX = marginX;
                         let lastY = y;
-                        lines.forEach((lineText, lineIdx) => {
+                        lines.forEach((lineText) => {
                             const parts = lineText.split(/("[^"]*"|[\(\)\{\}\.,])|(\s+)/);
                             parts.forEach(part => {
                                 if (!part) return;
-                                if (part.startsWith('"')) tCtx.fillStyle = '#b9d36c';
-                                else if (['(', ')', '{', '}', '.', ','].includes(part)) tCtx.fillStyle = '#e8a35a';
-                                else if (/^[a-zA-Z_]+$/.test(part)) tCtx.fillStyle = '#6fd3e8';
-                                else tCtx.fillStyle = textColor;
+                                if (part.startsWith('"')) tCtx.fillStyle = theme.string;
+                                else if (['(', ')', '{', '}', '.', ','].includes(part)) tCtx.fillStyle = theme.punct;
+                                else if (/^[a-zA-Z_]+$/.test(part)) tCtx.fillStyle = theme.keyword;
+                                else tCtx.fillStyle = theme.text;
 
                                 tCtx.fillText(part, currentX, y);
                                 currentX += tCtx.measureText(part).width;
                             });
                             lastX = currentX;
                             lastY = y;
-                            y += fSize * 1.4;
+                            y += lineHeight;
                             currentX = marginX;
                         });
 
-                        if (isLast) {
-                            tCtx.fillStyle = '#ff2d2d';
-                            const cursorX = Math.min(lastX + 2, W * 0.88);
-                            tCtx.fillRect(cursorX, lastY, fSize * 0.6, fSize);
+                        if (isLast && cursorStyle !== 'none') {
+                            const showCursor = cursorStyle === 'blink'
+                                ? (Math.floor(currentTime * 2) % 2 === 0)
+                                : true;
+                            if (showCursor) {
+                                tCtx.fillStyle = theme.cursor;
+                                const cursorX = Math.min(lastX + 2, W * 0.88);
+                                if (cursorStyle === 'line') {
+                                    tCtx.fillRect(cursorX, lastY, Math.max(2, fSize * 0.12), fSize);
+                                } else if (cursorStyle === 'underline') {
+                                    tCtx.fillRect(cursorX, lastY + fSize * 0.9, fSize * 0.6, Math.max(2, fSize * 0.12));
+                                } else {
+                                    tCtx.fillRect(cursorX, lastY, fSize * 0.6, fSize);
+                                }
+                            }
                         }
                     });
 
