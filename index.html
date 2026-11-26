@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Subtitle Generator - CapCut Dynamic Pro</title>
+    <title>Subtitle Generator - CapCut Dynamic Pro + SRT Import</title>
     <style>
         * {
             margin: 0;
@@ -257,6 +257,11 @@
             border-color: #2d3d5a;
         }
 
+        .tool-btn.import-btn {
+            color: #d9b0ff;
+            border-color: #4a2d5a;
+        }
+
         #segmentEditor {
             margin-top: 12px;
         }
@@ -443,7 +448,7 @@
 
 <body>
     <div class="app">
-        <h1>✨ CapCut Style <small>Dynamic Pro</small></h1>
+        <h1>✨ CapCut Style <small>Dynamic Pro + SRT</small></h1>
 
         <!-- Upload Video -->
         <div class="card">
@@ -548,7 +553,7 @@
             </div>
         </div>
 
-        <!-- Data Subtitle JSON & Segment Editor -->
+        <!-- Data Subtitle JSON & Segment Editor + IMPORT SRT -->
         <div class="card">
             <label for="subtitleData">✏️ Data Subtitle (JSON)</label>
             <textarea id="subtitleData">[
@@ -562,7 +567,11 @@
                 <button class="tool-btn clear-btn" id="clearBtn">🗑️ Clear</button>
                 <button class="tool-btn" id="formatBtn">✨ Format</button>
                 <button class="tool-btn srt-btn" id="exportSrtBtn">💾 Export SRT</button>
+                <button class="tool-btn import-btn" id="importSrtBtn">📂 Import SRT</button>
             </div>
+
+            <!-- Hidden file input for SRT import -->
+            <input type="file" id="srtFileInput" accept=".srt,text/plain" style="display:none;">
 
             <div id="segmentEditor">
                 <label style="margin-top:10px; font-size:0.8rem;">📝 Editor Segmen Interaktif</label>
@@ -637,6 +646,8 @@
             const clearBtn = document.getElementById('clearBtn');
             const formatBtn = document.getElementById('formatBtn');
             const exportSrtBtn = document.getElementById('exportSrtBtn');
+            const importSrtBtn = document.getElementById('importSrtBtn');
+            const srtFileInput = document.getElementById('srtFileInput');
 
             const segmentList = document.getElementById('segmentList');
             const addSegBtn = document.getElementById('addSegBtn');
@@ -877,6 +888,7 @@
                 } catch (e) { statusMsg.textContent = '❌ Format JSON tidak valid'; }
             });
 
+            // ─── EXPORT SRT ───
             exportSrtBtn.addEventListener('click', () => {
                 const subs = getSubtitles();
                 if (subs.length === 0) {
@@ -902,6 +914,88 @@
                 a.click();
                 statusMsg.textContent = '💾 File SRT berhasil di-export!';
             });
+
+            // ─── IMPORT SRT ───
+            importSrtBtn.addEventListener('click', () => {
+                srtFileInput.click();
+            });
+
+            srtFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const content = ev.target.result;
+                    const parsed = parseSRT(content);
+                    if (parsed.length === 0) {
+                        statusMsg.textContent = '❌ Gagal mengimpor SRT: format tidak valid atau kosong';
+                        srtFileInput.value = '';
+                        return;
+                    }
+
+                    // Tulis ke textarea dan render segmen
+                    writeToTextarea(parsed);
+                    statusMsg.textContent = `✅ Berhasil mengimpor ${parsed.length} subtitle dari SRT!`;
+                    srtFileInput.value = ''; // reset agar bisa import file yang sama lagi
+                };
+                reader.readAsText(file, 'UTF-8');
+            });
+
+            // Parser SRT sederhana (mendukung format standar)
+            function parseSRT(text) {
+                const subs = [];
+                // Normalisasi line endings dan split per blok
+                const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                // Split berdasarkan baris kosong (satu atau lebih)
+                const blocks = normalized.split(/\n\s*\n/);
+
+                for (let block of blocks) {
+                    block = block.trim();
+                    if (!block) continue;
+
+                    const lines = block.split('\n');
+                    if (lines.length < 2) continue;
+
+                    // Baris pertama mungkin nomor (bisa diabaikan)
+                    let timeLineIndex = 0;
+                    // Jika baris pertama adalah angka, maka timeLineIndex = 1
+                    if (/^\d+$/.test(lines[0].trim())) {
+                        timeLineIndex = 1;
+                    }
+
+                    if (lines.length <= timeLineIndex) continue;
+
+                    const timeLine = lines[timeLineIndex].trim();
+                    // Format: 00:00:01,000 --> 00:00:04,000
+                    const timeMatch = timeLine.match(/(\d{1,2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{1,2}):(\d{2}):(\d{2})[,.](\d{3})/);
+                    if (!timeMatch) continue;
+
+                    const startH = parseInt(timeMatch[1], 10) || 0;
+                    const startM = parseInt(timeMatch[2], 10) || 0;
+                    const startS = parseInt(timeMatch[3], 10) || 0;
+                    const startMs = parseInt(timeMatch[4], 10) || 0;
+                    const endH = parseInt(timeMatch[5], 10) || 0;
+                    const endM = parseInt(timeMatch[6], 10) || 0;
+                    const endS = parseInt(timeMatch[7], 10) || 0;
+                    const endMs = parseInt(timeMatch[8], 10) || 0;
+
+                    const start = startH * 3600 + startM * 60 + startS + startMs / 1000;
+                    const end = endH * 3600 + endM * 60 + endS + endMs / 1000;
+
+                    // Teks subtitle adalah semua baris setelah timeLine
+                    const textLines = lines.slice(timeLineIndex + 1);
+                    const text = textLines.join(' ').trim(); // gabung jadi satu baris
+
+                    if (text) {
+                        subs.push({ start, end, text });
+                    }
+                }
+
+                // Urutkan berdasarkan start time
+                subs.sort((a, b) => a.start - b.start);
+                return subs;
+            }
 
             function wrapTextCustom(text, context, maxWidth) {
                 if (!text) return [];
@@ -941,21 +1035,21 @@
                 }
 
                 let activeSub = null;
-let lastSub = null;
-for (let sub of subtitles) {
-    if (currentTime >= sub.start && currentTime <= sub.end) {
-        activeSub = sub;
-        break;
-    }
-    if (currentTime > sub.end) lastSub = sub;
-}
-if (!activeSub) {
-    if (lastSub && (currentTime - lastSub.end) < 0.5) {
-        activeSub = lastSub;
-    } else {
-        return;
-    }
-}
+                let lastSub = null;
+                for (let sub of subtitles) {
+                    if (currentTime >= sub.start && currentTime <= sub.end) {
+                        activeSub = sub;
+                        break;
+                    }
+                    if (currentTime > sub.end) lastSub = sub;
+                }
+                if (!activeSub) {
+                    if (lastSub && (currentTime - lastSub.end) < 0.5) {
+                        activeSub = lastSub;
+                    } else {
+                        return;
+                    }
+                }
 
                 if (!activeSub) return;
 
@@ -1009,8 +1103,8 @@ if (!activeSub) {
                         tCtx.globalAlpha = opacity;
 
                         let currentX = marginX;
-                        let lastX = marginX;   // ✅ deklarasi
-                        let lastY = y;         // ✅ deklarasi
+                        let lastX = marginX;
+                        let lastY = y;
                         lines.forEach((lineText, lineIdx) => {
                             const parts = lineText.split(/("[^"]*"|[\(\)\{\}\.,])|(\s+)/);
                             parts.forEach(part => {
@@ -1031,8 +1125,6 @@ if (!activeSub) {
 
                         if (isLast) {
                             tCtx.fillStyle = '#ff2d2d';
-                            // cursor SELALU tampil (tidak kedip) saat render/preview
-                            // atau kedip lebih lambat: Math.floor(currentTime * 1) % 2 === 0
                             const cursorX = Math.min(lastX + 2, W * 0.88);
                             tCtx.fillRect(cursorX, lastY, fSize * 0.6, fSize);
                         }
@@ -1250,13 +1342,13 @@ if (!activeSub) {
                 recorder.ondataavailable = e => chunks.push(e.data);
                 recorder.onstop = () => {
                     console.log('[render] onstop', { chunks: chunks.length, mime });
-                    if (chunks.length === 0) {   // ⬅️ tambahan guard (opsional tapi bagus)
+                    if (chunks.length === 0) {
                         statusMsg.textContent = '❌ Render gagal: tidak ada data terekam.';
                         renderBtn.disabled = false;
                         renderBtn.textContent = '▶ Mulai Render Video';
                         return;
                     }
-                    const ext = mime.includes('mp4') ? 'mp4' : 'webm';   // ✅ tambah ini
+                    const ext = mime.includes('mp4') ? 'mp4' : 'webm';
                     const blob = new Blob(chunks, { type: mime });
                     const url = URL.createObjectURL(blob);
                     if (downloadLink.href.startsWith('blob:')) URL.revokeObjectURL(downloadLink.href);
