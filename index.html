@@ -941,12 +941,21 @@
                 }
 
                 let activeSub = null;
-                for (let sub of subtitles) {
-                    if (currentTime >= sub.start && currentTime <= sub.end) {
-                        activeSub = sub;
-                        break;
-                    }
-                }
+let lastSub = null;
+for (let sub of subtitles) {
+    if (currentTime >= sub.start && currentTime <= sub.end) {
+        activeSub = sub;
+        break;
+    }
+    if (currentTime > sub.end) lastSub = sub;
+}
+if (!activeSub) {
+    if (lastSub && (currentTime - lastSub.end) < 0.5) {
+        activeSub = lastSub;
+    } else {
+        return;
+    }
+}
 
                 if (!activeSub) return;
 
